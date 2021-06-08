@@ -9,4 +9,4 @@ curl -O https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.z
 unzip android-ndk-r21e-linux-x86_64.zip -d ndkr21e && \
 rm android-ndk-r21e-linux-x86_64.zip
 
-ENV ANDROID_NDK_HOME=/ndkr21b/android-ndk-r21b PATH="/depot_tools:${PATH}"
+ENV ANDROID_NDK_HOME=/ndkr21b/android-ndk-r21e PATH="/depot_tools:${PATH}"

@@ -26,4 +26,4 @@ jobs:
         with:
           file: tools/v8-build-docker.dockerfile
           push: true
-          tags: docker-test/v8-build:latest
+          tags: medns/v8-build:latest

@@ -26,4 +26,4 @@ jobs:
         with:
           file: tools/v8-build-docker.dockerfile
           push: true
-          tags: ghcr.io/medns/docker-test/v8-build:latest
+          tags: ghcr.io/${{ github.repository_owner }}/v8-build:latest

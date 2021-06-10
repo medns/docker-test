@@ -9,16 +9,15 @@ on:
         required: true
 
 jobs:
-  build:
+  prepare:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/android-release:latest
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    strategy:
-      matrix:
-        arch: [arm, arm64, x86, x64]
+    outputs:
+      cache-key: ${{ steps.random-number-generator.outputs.random-id }}
     steps:
     - name: Fetch v8
       run: |
@@ -36,6 +35,35 @@ jobs:
         mkdir third_party/android_tools
         ln -s $ANDROID_NDK_HOME third_party/android_tools/ndk
         ln -s $ANDROID_NDK_HOME third_party/android_ndk
+    - id: random-id
+      run: echo "::set-output name=random-id::$(echo $RANDOM)"
+    - name: Cache v8
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: /v8
+        key: ${{ steps.random-number-generator.outputs.random-id }}
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/android-release:latest
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      matrix:
+        arch: [arm, arm64, x86, x64]
+    steps:
+    - name: Load v8 cache
+      id: cache
+      uses: actions/cache@v2
+        with:
+          path: /v8
+          key: ${{ needs.prepare.outputs.cache-key }}
+    - name: Check cache exists
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: exit -1
     - name: Generate ${{ matrix.arch }}
       run: |
         gn gen out/$CURRENT_ARCH --args="target_os=\"android\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"

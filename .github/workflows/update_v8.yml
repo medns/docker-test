@@ -36,9 +36,9 @@ jobs:
     steps:
     - name: Fetch v8
       run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        rm -rf /usr/share/dotnet
+        rm -rf /opt/ghc
+        rm -rf "$AGENT_TOOLSDIRECTORY"
         fetch v8
         cd v8
         git checkout ${{ github.event.inputs.v8_version }}

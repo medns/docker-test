@@ -14,7 +14,6 @@ on:
 
 jobs:  
   build:
-    needs: prepare
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/android-release:latest
@@ -80,7 +79,7 @@ jobs:
         name: ${{ matrix.arch }}
         path: ./v8/out/${{ matrix.arch }}/artifact
   pull-request:
-    needs: [build, prepare]
+    needs: build
     runs-on: ubuntu-latest
     env:
       v8-dist: ./android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}

@@ -29,12 +29,12 @@ jobs:
         cd v8
         git checkout ${{ github.event.inputs.v8_version }}
     - name: Sync third_party
-      working_directory: ./v8
+      working-directory: ./v8
       run: |
         echo "target_os = ['android']" >> ../.gclient
         gclient sync -D
     - name: Prepare android_ndk
-      working_directory: ./v8
+      working-directory: ./v8
       run: |
         cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
         rm -rf third_party/android_tools third_party/android_ndk
@@ -71,15 +71,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: exit -1
     - name: Generate ${{ matrix.arch }}
-      working_directory: ./v8
+      working-directory: ./v8
       run: |
         gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
     - name: Compile ${{ matrix.arch }}
-      working_directory: ./v8
+      working-directory: ./v8
       run: |
         ninja -C out/${{ matrix.arch }} v8
     - name: Release artifact
-      working_directory: ./v8/out/${{ matrix.arch }}
+      working-directory: ./v8/out/${{ matrix.arch }}
       run: |
         mkdir -p artifact/${{ matrix.arch }}
         cp *.so artifact/${{ matrix.arch }}
@@ -106,7 +106,7 @@ jobs:
       with:
         path: {{ github.repository }}
     - name: Construct directory structure
-      working_directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
+      working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
       run: |
         rm -rf full
         mkdir full full/libs full/include
@@ -115,13 +115,13 @@ jobs:
         cp -r ./v8/include/* ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/include
     - name: Extract libs
       uses: actions/download-artifact@v2
-      working_directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/libs
+      working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/libs
     - name: Display structure of downloaded files
-      working_directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
+      working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
       run: ls -R
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
-      working_directory: ./{{ github.repository }}
+      working-directory: ./{{ github.repository }}
       with:
         commit-message: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
         branch: backport/v8-${{ github.event.inputs.v8_version }}

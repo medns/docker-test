@@ -14,7 +14,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: ghcr.io/${{ github.repository_owner }}/android-release:latest
       credentials:
@@ -48,15 +48,15 @@ jobs:
         ln -s $ANDROID_NDK_HOME third_party/android_ndk
     - name: Generate random id
       id: random-id
-      run: echo "::set-output name=random-id::$(echo $RANDOM)"
+      run: echo "::set-output name=id::$(echo $RANDOM)"
     - name: Cache v8 source
       uses: actions/cache@v2
       with:
         path: ./v8
-        key: ${{ steps.random-number-generator.outputs.random-id }}
+        key: ${{ steps.random-id.outputs.id }}
   build:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: ghcr.io/${{ github.repository_owner }}/android-release:latest
       credentials:
@@ -96,7 +96,7 @@ jobs:
         path: ./v8/out/${{ matrix.arch }}/artifact
   pull-request:
     needs: [build, prepare]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       v8-dist: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
       v8-source: ./v8

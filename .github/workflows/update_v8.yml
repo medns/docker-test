@@ -113,8 +113,8 @@ jobs:
     - name: Construct directory structure
       working-directory: ${{ env.v8-dist }}
       run: |
-        rm -rf full
-        mkdir -p full full/libs full/include/v8
+        rm -rf official-release
+        mkdir -p official-release official-release/libs official-release/include/v8
     - name: Copy artifact
       run: |
         cp -r ./artifact/v8/include/* {{ env.v8-dist }}/include/v8

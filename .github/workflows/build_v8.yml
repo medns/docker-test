@@ -104,7 +104,7 @@ jobs:
       run: exit -1
     - uses: actions/checkout@v2
       with:
-        path: {{ github.repository }}
+        path: '{{ github.repository }}'
     - name: Construct directory structure
       working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
       run: |

@@ -20,8 +20,6 @@ jobs:
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      cache-key: ${{ steps.generate-cache-id.outputs.id }}
     steps:
     - name: Fetch v8
       run: |
@@ -48,14 +46,11 @@ jobs:
           rm -rf third_party/android_ndk
           ln -s $ANDROID_NDK_HOME third_party/android_ndk
         fi
-    - name: Generate cache id
-      id: generate-cache-id
-      run: echo "::set-output name=id::$(echo $RANDOM)"
-    - name: Cache v8 source
-      uses: actions/cache@v2
+    - name: Upload source
+      uses: actions/upload-artifact@v2
       with:
+        name: source
         path: ./v8
-        key: ${{ steps.generate-cache-id.outputs.id }}
   build:
     needs: prepare
     runs-on: ubuntu-latest
@@ -68,15 +63,10 @@ jobs:
       matrix:
         arch: [arm, arm64, x86, x64]
     steps:
-    - name: Load source
-      id: cache
-      uses: actions/cache@v2
-      with:
-        path: ./v8
-        key: ${{ needs.prepare.outputs.cache-key }}
-    - name: Check source exists
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: exit -1
+    - name: Fetch source
+      uses: actions/download-artifact@v2
+      with: 
+        name: source
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
@@ -88,9 +78,9 @@ jobs:
     - name: Release artifact
       working-directory: ./v8/out/${{ matrix.arch }}
       run: |
-        mkdir -p artifact/${{ matrix.arch }}
-        cp *.so artifact/${{ matrix.arch }}
-        cp -r lib.unstripped artifact//${{ matrix.arch }}
+        mkdir -p artifact/dist/${{ matrix.arch }}
+        cp *.so artifact/dist/${{ matrix.arch }}
+        cp -r lib.unstripped artifact/dist/${{ matrix.arch }}
     - name: Upload ${{ matrix.arch }}
       uses: actions/upload-artifact@v2
       with:
@@ -101,18 +91,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       v8-dist: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
-      v8-source: ./v8
     steps:
-    - name: Load source
-      id: cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.v8-source }}
-        key: ${{ needs.prepare.outputs.cache-key }}
-    - name: Check source exists
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: exit -1
-    - uses: actions/checkout@v2
+    - name: Fetch artifact
+      uses: actions/download-artifact@v2
+      with: 
+        path: ./artifact
+    - name: checkout repo
+      uses: actions/checkout@v2
       with:
         path: ${{ github.repository }}
     - name: Construct directory structure
@@ -120,13 +105,10 @@ jobs:
       run: |
         rm -rf full
         mkdir -p full full/libs full/include/v8
-    - name: Copy include
+    - name: Copy artifact
       run: |
-        cp -r {{ env.v8-source }}/include/* {{ env.v8-dist }}/include/v8
-    - name: Extract libs
-      uses: actions/download-artifact@v2
-      with: 
-        path: ${{ env.v8-dist }}/libs
+        cp -r ./artifact/v8/include/* {{ env.v8-dist }}/include/v8
+        cp -r ./artifact/dist/* {{ env.v8-dist }}/libs/
     - name: Display structure of downloaded files
       working-directory: ${{ env.v8-dist }}
       run: ls -R

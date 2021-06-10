@@ -29,10 +29,12 @@ jobs:
         cd v8
         git checkout ${{ github.event.inputs.v8_version }}
     - name: Sync third_party
+      working_directory: ./v8
       run: |
         echo "target_os = ['android']" >> ../.gclient
         gclient sync -D
     - name: Prepare android_ndk
+      working_directory: ./v8
       run: |
         cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
         rm -rf third_party/android_tools third_party/android_ndk
@@ -45,7 +47,7 @@ jobs:
     - name: Cache v8 source
       uses: actions/cache@v2
       with:
-        path: /v8
+        path: ./v8
         key: ${{ steps.random-number-generator.outputs.random-id }}
   build:
     needs: prepare
@@ -63,20 +65,22 @@ jobs:
       id: cache
       uses: actions/cache@v2
       with:
-        path: /v8
+        path: ./v8
         key: ${{ needs.prepare.outputs.cache-key }}
     - name: Check source exists
       if: steps.cache.outputs.cache-hit != 'true'
       run: exit -1
     - name: Generate ${{ matrix.arch }}
+      working_directory: ./v8
       run: |
         gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
     - name: Compile ${{ matrix.arch }}
+      working_directory: ./v8
       run: |
         ninja -C out/${{ matrix.arch }} v8
     - name: Release artifact
+      working_directory: ./v8/out/${{ matrix.arch }}
       run: |
-        cd out/${{ matrix.arch }}
         mkdir -p artifact/${{ matrix.arch }}
         cp *.so artifact/${{ matrix.arch }}
         cp -r lib.unstriped artifact//${{ matrix.arch }}
@@ -84,35 +88,40 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.arch }}
-        path: /v8/out/${{ matrix.arch }}/artifact
+        path: ./v8/out/${{ matrix.arch }}/artifact
   pull-request:
     needs: [build, prepare]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
     - name: Load source
       id: cache
       uses: actions/cache@v2
       with:
-        path: /v8
+        path: ./v8
         key: ${{ needs.prepare.outputs.cache-key }}
     - name: Check source exists
       if: steps.cache.outputs.cache-hit != 'true'
       run: exit -1
+    - uses: actions/checkout@v2
+      with:
+        path: {{ github.repository }}
     - name: Construct directory structure
+      working_directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
       run: |
-        cd android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
         rm -rf full
-        mkdir full
-        cd full
-        cp -r /v8/include .
-        mkdir libs
-        cd libs
-    - uses: actions/download-artifact@v2
+        mkdir full full/libs full/include
+    - name: Copy include
+      run: |
+        cp -r ./v8/include/* ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/include
+    - name: Extract libs
+      uses: actions/download-artifact@v2
+      working_directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/libs
     - name: Display structure of downloaded files
+      working_directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
       run: ls -R
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
+      working_directory: ./{{ github.repository }}
       with:
         commit-message: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
         branch: backport/v8-${{ github.event.inputs.v8_version }}

@@ -115,14 +115,15 @@ jobs:
         cp -r ./v8/include/* ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/include
     - name: Extract libs
       uses: actions/download-artifact@v2
-      working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/libs
+      with: 
+        path: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/libs
     - name: Display structure of downloaded files
       working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
       run: ls -R
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
-      working-directory: ./{{ github.repository }}
       with:
+        path: ./{{ github.repository }}
         commit-message: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
         branch: backport/v8-${{ github.event.inputs.v8_version }}
         delete-branch: true

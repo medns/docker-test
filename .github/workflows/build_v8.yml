@@ -7,6 +7,10 @@ on:
         description: 'V8 version to build'
         default: '7.7.229'
         required: true
+      release_tag:
+        description: 'Release tag'
+        default: 'latest'
+        required: true
 
 jobs:
   prepare:
@@ -27,7 +31,7 @@ jobs:
     - name: Sync third_party
       run: |
         echo "target_os = ['android']" >> ../.gclient
-        gclient sync
+        gclient sync -D
     - name: Prepare android_ndk
       run: |
         cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
@@ -38,8 +42,7 @@ jobs:
     - name: Generate random id
       id: random-id
       run: echo "::set-output name=random-id::$(echo $RANDOM)"
-    - name: Cache v8
-      id: cache
+    - name: Cache v8 source
       uses: actions/cache@v2
       with:
         path: /v8
@@ -56,18 +59,67 @@ jobs:
       matrix:
         arch: [arm, arm64, x86, x64]
     steps:
-    - name: Load v8 cache
+    - name: Load source
       id: cache
       uses: actions/cache@v2
       with:
         path: /v8
         key: ${{ needs.prepare.outputs.cache-key }}
-    - name: Check cache exists
+    - name: Check source exists
       if: steps.cache.outputs.cache-hit != 'true'
       run: exit -1
     - name: Generate ${{ matrix.arch }}
       run: |
-        gn gen out/$CURRENT_ARCH --args="target_os=\"android\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
+        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
     - name: Compile ${{ matrix.arch }}
       run: |
-        ninja -C out/$CURRENT_ARCH v8
+        ninja -C out/${{ matrix.arch }} v8
+    - name: Release artifact
+      run: |
+        cd out/${{ matrix.arch }}
+        mkdir -p artifact/${{ matrix.arch }}
+        cp *.so artifact/${{ matrix.arch }}
+        cp -r lib.unstriped artifact//${{ matrix.arch }}
+    - name: Upload ${{ matrix.arch }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.arch }}
+        path: /v8/out/${{ matrix.arch }}/artifact
+  pull-request:
+    needs: [build, prepare]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Load source
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: /v8
+        key: ${{ needs.prepare.outputs.cache-key }}
+    - name: Check source exists
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: exit -1
+    - name: Construct directory structure
+      run: |
+        cd android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
+        rm -rf full
+        mkdir full
+        cd full
+        cp -r /v8/include .
+        mkdir libs
+        cd libs
+    - uses: actions/download-artifact@v2
+    - name: Display structure of downloaded files
+      run: ls -R
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
+        branch: backport/v8-${{ github.event.inputs.v8_version }}
+        delete-branch: true
+        title: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
+        body: |
+          Refs: [{{ github.event.inputs.v8_version }}](https://github.com/v8/v8/tree/{{ github.event.inputs.v8_version }})
+        labels: |
+          dependencies
+          android

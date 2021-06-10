@@ -36,7 +36,7 @@ jobs:
     - name: Prepare android_ndk
       working-directory: ./v8
       run: |
-        pwd -L
+        ls -lah third_party/android_ndk/
         cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
         rm -rf third_party/android_tools third_party/android_ndk
         mkdir third_party/android_tools

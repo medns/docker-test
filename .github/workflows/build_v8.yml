@@ -35,7 +35,8 @@ jobs:
         mkdir third_party/android_tools
         ln -s $ANDROID_NDK_HOME third_party/android_tools/ndk
         ln -s $ANDROID_NDK_HOME third_party/android_ndk
-    - id: random-id
+    - name: Random id
+      id: random-id
       run: echo "::set-output name=random-id::$(echo $RANDOM)"
     - name: Cache v8
       id: cache

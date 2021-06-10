@@ -36,11 +36,15 @@ jobs:
     - name: Prepare android_ndk
       working-directory: ./v8
       run: |
-        ls -lah third_party/android_ndk/
-        cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
-        rm -rf third_party/android_tools third_party/android_ndk
-        mkdir third_party/android_tools
-        ln -s $ANDROID_NDK_HOME third_party/android_tools/ndk
+        if [ -d third_party/android_tools ]; then
+          rm -rf third_party/android_tools
+          mkdir third_party/android_tools
+          ln -s $ANDROID_NDK_HOME third_party/android_tools/ndk
+        fi
+        if [ -f third_party/android_ndk/BUILD.gn ]; then
+          cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
+        fi
+        rm -rf third_party/android_ndk
         ln -s $ANDROID_NDK_HOME third_party/android_ndk
     - name: Generate random id
       id: random-id

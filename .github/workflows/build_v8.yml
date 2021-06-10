@@ -129,7 +129,7 @@ jobs:
       with:
         path: ./{{ github.repository }}
         commit-message: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
-        branch: backport/v8-${{ github.event.inputs.v8_version }}
+        branch: deps/update-v8-to-${{ github.event.inputs.v8_version }}
         delete-branch: true
         title: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
         body: |

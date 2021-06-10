@@ -44,8 +44,10 @@ jobs:
         if [ -f third_party/android_ndk/BUILD.gn ]; then
           cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
         fi
-        rm -rf third_party/android_ndk
-        ln -s $ANDROID_NDK_HOME third_party/android_ndk
+        if [ -d third_party/android_tools -o -f third_party/android_ndk/BUILD.gn ]; then
+          rm -rf third_party/android_ndk
+          ln -s $ANDROID_NDK_HOME third_party/android_ndk
+        fi
     - name: Generate cache id
       id: generate-cache-id
       run: echo "::set-output name=id::$(echo $RANDOM)"
@@ -88,7 +90,7 @@ jobs:
       run: |
         mkdir -p artifact/${{ matrix.arch }}
         cp *.so artifact/${{ matrix.arch }}
-        cp -r lib.unstriped artifact//${{ matrix.arch }}
+        cp -r lib.unstripped artifact//${{ matrix.arch }}
     - name: Upload ${{ matrix.arch }}
       uses: actions/upload-artifact@v2
       with:

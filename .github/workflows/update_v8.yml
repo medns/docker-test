@@ -119,10 +119,10 @@ jobs:
       working-directory: ${{ env.v8-dist }}
       run: |
         rm -rf full
-        mkdir -p full full/libs full/v8/include
+        mkdir -p full full/libs full/include/v8
     - name: Copy include
       run: |
-        cp -r {{ env.v8-source }}/include/* {{ env.v8-dist }}/v8/include
+        cp -r {{ env.v8-source }}/include/* {{ env.v8-dist }}/include/v8
     - name: Extract libs
       uses: actions/download-artifact@v2
       with: 

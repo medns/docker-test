@@ -61,7 +61,17 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
-        arch: [arm, arm64, x86, x64]
+        cpu: [arm, arm64, x86, x64]
+        include:
+        - cpu: arm
+          arch: armeabi-v7a
+        - cpu: arm64
+          arch: arm64-v8a
+        - cpu: x86
+          arch: x86
+        - cpu: x64
+          arch: x86_64
+
     steps:
     - name: Fetch source
       uses: actions/download-artifact@v2
@@ -70,7 +80,7 @@ jobs:
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
+        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |

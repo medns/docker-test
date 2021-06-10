@@ -21,7 +21,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     outputs:
-      cache-key: ${{ steps.random-id.outputs.id }}
+      cache-key: ${{ steps.generate-cache-id.outputs.id }}
     steps:
     - name: Fetch v8
       run: |
@@ -46,13 +46,14 @@ jobs:
         fi
         rm -rf third_party/android_ndk
         ln -s $ANDROID_NDK_HOME third_party/android_ndk
-    - id: random-id
+    - name: Generate cache id
+      id: generate-cache-id
       run: echo "::set-output name=id::$(echo $RANDOM)"
     - name: Cache v8 source
       uses: actions/cache@v2
       with:
         path: ./v8
-        key: ${{ steps.random-id.outputs.id }}
+        key: ${{ steps.generate-cache-id.outputs.id }}
   build:
     needs: prepare
     runs-on: ubuntu-latest

@@ -1,12 +1,9 @@
 on:
   workflow_dispatch:
     inputs:
-      name:
-        # Friendly description to be shown in the UI instead of 'name'
-        description: 'Person to greet'
-        # Default value if no value is explicitly provided
-        default: 'World'
-        # Input has to be provided for the workflow to run
+      tag:
+        description: 'TAG'
+        default: 'latest'
         required: true
 jobs:
   push_to_registry:
@@ -26,4 +23,4 @@ jobs:
         with:
           context: docker/android-release
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/android-release:latest
+          tags: ghcr.io/${{ github.repository_owner }}/android-release:${{ github.event.inputs.v8_version }}

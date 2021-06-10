@@ -1,4 +1,4 @@
-name: Build android release image
+name: [android] build release image
 
 on:
   workflow_dispatch:

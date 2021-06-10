@@ -1,0 +1,44 @@
+name: Manual workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      v8_version:
+        description: 'V8 version to build'
+        default: '7.7.229'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/android-release:latest
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      matrix:
+        arch: [arm, arm64, x86, x64]
+    steps:
+    - name: Fetch v8
+      run: |
+        fetch v8
+        cd v8
+        git checkout  ${{ github.event.inputs.v8_version }}
+    - name: Sync third_party
+      run: |
+        echo "target_os = ['android']" >> ../.gclient
+        gclient sync
+    - name: Prepare android_ndk
+      run: |
+        cp third_party/android_ndk/BUILD.gn $ANDROID_NDK_HOME
+        rm -rf third_party/android_tools third_party/android_ndk
+        mkdir third_party/android_tools
+        ln -s $ANDROID_NDK_HOME third_party/android_tools/ndk
+        ln -s $ANDROID_NDK_HOME third_party/android_ndk
+    - name: Generate ${{ matrix.arch }}
+      run: |
+        gn gen out/$CURRENT_ARCH --args="target_os=\"android\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
+    - name: Compile ${{ matrix.arch }}
+      run: |
+        ninja -C out/$CURRENT_ARCH v8

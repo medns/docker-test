@@ -1,4 +1,4 @@
-name: '[third_party] Build v8'
+name: '[android] [third_party] Update v8'
 
 on:
   workflow_dispatch:

@@ -92,33 +92,36 @@ jobs:
   pull-request:
     needs: [build, prepare]
     runs-on: ubuntu-latest
+    env:
+      v8-dist: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
+      v8-source: ./v8
     steps:
     - name: Load source
       id: cache
       uses: actions/cache@v2
       with:
-        path: ./v8
+        path: ${{ env.v8-source }}
         key: ${{ needs.prepare.outputs.cache-key }}
     - name: Check source exists
       if: steps.cache.outputs.cache-hit != 'true'
       run: exit -1
     - uses: actions/checkout@v2
       with:
-        path: '{{ github.repository }}'
+        path: ${{ github.repository }}
     - name: Construct directory structure
-      working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
+      working-directory: ${{ env.v8-dist }}
       run: |
         rm -rf full
         mkdir full full/libs full/include
     - name: Copy include
       run: |
-        cp -r ./v8/include/* ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/include
+        cp -r {{ env.v8-source }}/include/* {{ env.v8-dist }}/include
     - name: Extract libs
       uses: actions/download-artifact@v2
       with: 
-        path: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}/libs
+        path: ${{ env.v8-dist }}/libs
     - name: Display structure of downloaded files
-      working-directory: ./{{ github.repository }}/android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
+      working-directory: ${{ env.v8-dist }}
       run: ls -R
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3

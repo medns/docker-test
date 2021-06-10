@@ -1,4 +1,4 @@
-name: Build v8
+name: '[third_party] Build v8'
 
 on:
   workflow_dispatch:

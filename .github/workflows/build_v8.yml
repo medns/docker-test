@@ -35,7 +35,7 @@ jobs:
         mkdir third_party/android_tools
         ln -s $ANDROID_NDK_HOME third_party/android_tools/ndk
         ln -s $ANDROID_NDK_HOME third_party/android_ndk
-    - name: Random id
+    - name: Generate random id
       id: random-id
       run: echo "::set-output name=random-id::$(echo $RANDOM)"
     - name: Cache v8
@@ -59,9 +59,9 @@ jobs:
     - name: Load v8 cache
       id: cache
       uses: actions/cache@v2
-        with:
-          path: /v8
-          key: ${{ needs.prepare.outputs.cache-key }}
+      with:
+        path: /v8
+        key: ${{ needs.prepare.outputs.cache-key }}
     - name: Check cache exists
       if: steps.cache.outputs.cache-hit != 'true'
       run: exit -1

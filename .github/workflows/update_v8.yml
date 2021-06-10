@@ -140,6 +140,7 @@ jobs:
         title: 'deps: update V8 to {{ github.event.inputs.v8_version }}'
         body: |
           Refs: [{{ github.event.inputs.v8_version }}](https://github.com/v8/v8/tree/{{ github.event.inputs.v8_version }})
+          Release TAG: {{ github.event.inputs.release_tag }}
         labels: |
           dependencies
           android

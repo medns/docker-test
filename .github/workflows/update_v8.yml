@@ -1,4 +1,4 @@
-name: '[android] [third_party] Update v8'
+name: '[android] [third_party] update v8'
 
 on:
   workflow_dispatch:
@@ -113,10 +113,10 @@ jobs:
       working-directory: ${{ env.v8-dist }}
       run: |
         rm -rf full
-        mkdir full full/libs full/include
+        mkdir -p full full/libs full/v8/include
     - name: Copy include
       run: |
-        cp -r {{ env.v8-source }}/include/* {{ env.v8-dist }}/include
+        cp -r {{ env.v8-source }}/include/* {{ env.v8-dist }}/v8/include
     - name: Extract libs
       uses: actions/download-artifact@v2
       with: 

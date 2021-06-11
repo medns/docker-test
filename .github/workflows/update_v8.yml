@@ -14,7 +14,7 @@ on:
 
 jobs:  
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, trusted]
     container:
       image: ghcr.io/${{ github.repository_owner }}/android-release:latest
       credentials:
@@ -80,7 +80,7 @@ jobs:
         path: ./v8/out/${{ matrix.arch }}/artifact
   pull-request:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, trusted]
     env:
       v8-dist: ./android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
     steps:

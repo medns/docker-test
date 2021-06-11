@@ -21,7 +21,6 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     strategy:
-      max-parallel: 1
       matrix:
         cpu: [arm, arm64, x86, x64]
         include:
@@ -36,9 +35,6 @@ jobs:
     steps:
     - name: Fetch v8
       run: |
-        rm -rf /usr/share/dotnet
-        rm -rf /opt/ghc
-        rm -rf "$AGENT_TOOLSDIRECTORY"
         fetch v8
         cd v8
         git checkout ${{ github.event.inputs.v8_version }}

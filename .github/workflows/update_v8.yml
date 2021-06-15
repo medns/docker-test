@@ -78,6 +78,9 @@ jobs:
       with:
         name: ${{ matrix.arch }}
         path: ./v8/out/${{ matrix.arch }}/artifact
+    - name: Clean up
+      uses: colpal/actions-clean@v1
+      if: ${{ always() }}
   pull-request:
     needs: build
     runs-on: [self-hosted, linux, trusted]
@@ -111,3 +114,6 @@ jobs:
         labels: |
           dependencies
           android
+    - name: Clean up
+      uses: colpal/actions-clean@v1
+      if: ${{ always() }}

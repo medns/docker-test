@@ -147,7 +147,7 @@ jobs:
     runs-on: [self-hosted, linux, trusted]
     env:
       WECHAT_WORK_BOT_WEBHOOK: ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}
-    step:
+    steps:
     - name: Wechat Work notification
       uses: chf007/action-wechat-work@1.0.5
       with:

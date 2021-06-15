@@ -35,7 +35,7 @@ jobs:
     steps:
     - name: Clean up before
       run: |
-        rm -rf *
+        sudo rm -rf *
     - name: Fetch v8
       run: |
         fetch v8
@@ -84,7 +84,7 @@ jobs:
     - name: Clean up after
       if: ${{ always() }}
       run: |
-        rm -rf *
+        sudo rm -rf *
   pull-request:
     needs: build
     runs-on: [self-hosted, linux, trusted]
@@ -93,7 +93,7 @@ jobs:
     steps:
     - name: Clean up before
       run: |
-        rm -rf *
+        sudo rm -rf *
     - name: checkout repo
       uses: actions/checkout@v2
     - name: Construct directory structure
@@ -124,4 +124,4 @@ jobs:
     - name: Clean up after
       if: ${{ always() }}
       run: |
-        rm -rf *
+        sudo rm -rf *

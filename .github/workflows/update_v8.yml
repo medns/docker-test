@@ -33,6 +33,8 @@ jobs:
         - cpu: x64
           arch: x86_64
     steps:
+    - name: Clean up before
+      uses: colpal/actions-clean@v1
     - name: Fetch v8
       run: |
         fetch v8
@@ -78,7 +80,7 @@ jobs:
       with:
         name: ${{ matrix.arch }}
         path: ./v8/out/${{ matrix.arch }}/artifact
-    - name: Clean up
+    - name: Clean up after
       uses: colpal/actions-clean@v1
       if: ${{ always() }}
   pull-request:
@@ -87,6 +89,8 @@ jobs:
     env:
       v8-dist: ./android/sdk/src/main/jni/third_party/v8/{{ github.event.inputs.release_tag }}
     steps:
+    - name: Clean up before
+      uses: colpal/actions-clean@v1
     - name: checkout repo
       uses: actions/checkout@v2
     - name: Construct directory structure
@@ -114,6 +118,6 @@ jobs:
         labels: |
           dependencies
           android
-    - name: Clean up
+    - name: Clean up after
       uses: colpal/actions-clean@v1
       if: ${{ always() }}

@@ -145,6 +145,7 @@ jobs:
     if: ${{ always() }}
     needs: [build, pull-request]
     runs-on: [self-hosted, linux, trusted]
+    continue-on-error: true
     env:
       WECHAT_WORK_BOT_WEBHOOK: ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}
     steps:

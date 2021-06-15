@@ -141,3 +141,19 @@ jobs:
         shopt -s dotglob
         rm -rf *
         shopt -u dotglob
+  notification:
+    if: ${{ always() }}
+    needs: [build, pull-request]
+    runs-on: [self-hosted, linux, trusted]
+    env:
+      WECHAT_WORK_BOT_WEBHOOK: ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}
+    step:
+    - name: Wechat Work notification
+      uses: chf007/action-wechat-work@1.0.5
+      with:
+        msgtype: markdown
+        content: "Github [Action] Notification\n
+        > repository: ${{ github.repository }}\n
+        > workflow: ${{ github.workflow }}\n
+        > success: ${{ needs.build.result == 'success'}}\n
+        > run: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"

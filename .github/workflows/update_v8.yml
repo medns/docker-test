@@ -66,7 +66,7 @@ jobs:
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false"
+        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false symbol_level=1"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
@@ -83,6 +83,7 @@ jobs:
       with:
         name: ${{ matrix.arch }}
         path: ./v8/out/${{ matrix.arch }}/artifact
+        if-no-files-found: error
     - name: Clean up after
       if: ${{ always() }}
       run: |
@@ -111,8 +112,15 @@ jobs:
       uses: actions/download-artifact@v2
       with: 
         path: ${{ env.v8-dist }}/official-release
+    - name: Merge all artifact
+      working-directory: ${{ env.v8-dist }}/official-release
+      run: |
+        for d in */ ; do
+          cp -r $d/* ./
+          rm -rf $d
+        done
     - name: Display structure of downloaded files
-      working-directory: ${{ env.v8-dist }}
+      working-directory: ${{ env.v8-dist }}/official-release
       run: ls -R
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3

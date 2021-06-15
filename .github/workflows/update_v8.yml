@@ -35,7 +35,9 @@ jobs:
     steps:
     - name: Clean up before
       run: |
-        sudo rm -rf *
+        shopt -s dotglob
+        rm -rf *
+        shopt -u dotglob
     - name: Fetch v8
       run: |
         fetch v8
@@ -84,7 +86,9 @@ jobs:
     - name: Clean up after
       if: ${{ always() }}
       run: |
-        sudo rm -rf *
+        shopt -s dotglob
+        rm -rf *
+        shopt -u dotglob
   pull-request:
     needs: build
     runs-on: [self-hosted, linux, trusted]
@@ -93,7 +97,9 @@ jobs:
     steps:
     - name: Clean up before
       run: |
-        sudo rm -rf *
+        shopt -s dotglob
+        rm -rf *
+        shopt -u dotglob
     - name: checkout repo
       uses: actions/checkout@v2
     - name: Construct directory structure
@@ -124,4 +130,6 @@ jobs:
     - name: Clean up after
       if: ${{ always() }}
       run: |
-        sudo rm -rf *
+        shopt -s dotglob
+        rm -rf *
+        shopt -u dotglob

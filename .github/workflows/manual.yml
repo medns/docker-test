@@ -29,6 +29,9 @@ jobs:
     # Runs a single command using the runners shell
     - name: checkout repo
       uses: actions/checkout@v2
+    - name: Display structure of downloaded files
+      working-directory: ${{ env.v8-dist }}
+      run: ls -R
     - name: Construct directory structure
       working-directory: ${{ env.v8-dist }}
       run: |

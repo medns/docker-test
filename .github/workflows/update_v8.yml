@@ -78,6 +78,10 @@ jobs:
         cp *.so artifact/libs/${{ matrix.arch }}
         cp -r lib.unstripped artifact/libs/${{ matrix.arch }}
         cp -r ../../include/* artifact/include/v8/
+        cp -r gen/include/* artifact/include/v8/
+        find artifact/include/v8/. ! -name "*.h" -type f -delete
+        mkdir -p artifact/include/v8/libc++
+        cp -r ../../buildtools/third_party/libc++/trunk/include/* artifact/include/v8/libc++/
     - name: Upload ${{ matrix.arch }}
       uses: actions/upload-artifact@v2
       with:
@@ -125,11 +129,8 @@ jobs:
         commit-message: |
                     deps: update V8 to ${{ github.event.inputs.v8_version }}
 
-                    Refs: [${{ github.event.inputs.v8_version }}][1]
-                    Action Run: [${{ github.run_id }}][2]
-
-                    [1]: https://github.com/v8/v8/tree/${{ github.event.inputs.v8_version }}
-                    [2]: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                    Ref-URL: https://github.com/v8/v8/tree/${{ github.event.inputs.v8_version }}
+                    Action-Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         branch: deps/update-v8-to-${{ github.event.inputs.v8_version }}
         delete-branch: true
         title: 'deps: update V8 to ${{ github.event.inputs.v8_version }}'
@@ -164,5 +165,5 @@ jobs:
         content: "Github [Action] Notification\n
         > repository: ${{ github.repository }}\n
         > workflow: ${{ github.workflow }}\n
-        > success: ${{ needs.pull-request.result == 'success'}}\n
+        > result: ${{ needs.pull-request.result == 'success' && 'success' || 'failure'}}\n
         > run: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"

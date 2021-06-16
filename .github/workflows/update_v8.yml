@@ -70,7 +70,7 @@ jobs:
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        ninja -C out/${{ matrix.arch }} v8
+        ninja -C out/${{ matrix.arch }} v8 v8_libplatform
     - name: Release artifact
       working-directory: ./v8/out/${{ matrix.arch }}
       run: |

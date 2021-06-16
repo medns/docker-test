@@ -5,6 +5,8 @@ on:
     types: [completed]
 
 jobs:
-  steps:
-  - run: |
-      echo ${{ fromJSON(github.event.check_suites) }}
+  notification:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo ${{ fromJSON(github.event.check_suites) }}

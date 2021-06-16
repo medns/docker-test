@@ -132,7 +132,6 @@ jobs:
                     [2]: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         branch: deps/update-v8-to-${{ github.event.inputs.v8_version }}
         delete-branch: true
-        signoff: true
         title: 'deps: update V8 to ${{ github.event.inputs.v8_version }}'
         body: |
           Refs: [${{ github.event.inputs.v8_version }}][1]

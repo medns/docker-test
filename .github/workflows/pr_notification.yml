@@ -9,4 +9,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo ${{ fromJSON(github.event.check_run) }}
+        echo ${{ toJSON(github.event.check_run) }}

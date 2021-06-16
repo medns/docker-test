@@ -122,7 +122,14 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
       with:
-        commit-message: 'deps: update V8 to ${{ github.event.inputs.v8_version }}'
+        commit-message: |
+                    deps: update V8 to ${{ github.event.inputs.v8_version }}
+
+                    Refs: [${{ github.event.inputs.v8_version }}][1]
+                    Action Run: [${{ github.run_id }}][2]
+
+                    [1]: https://github.com/v8/v8/tree/${{ github.event.inputs.v8_version }}
+                    [2]: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         branch: deps/update-v8-to-${{ github.event.inputs.v8_version }}
         delete-branch: true
         signoff: true
@@ -130,8 +137,10 @@ jobs:
         body: |
           Refs: [${{ github.event.inputs.v8_version }}][1]
           Release TAG: ${{ github.event.inputs.release_tag }}
+          Action Run: [${{ github.run_id }}][2]
 
           [1]: https://github.com/v8/v8/tree/${{ github.event.inputs.v8_version }}
+          [2]: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         labels: |
           dependencies
           android
@@ -156,5 +165,5 @@ jobs:
         content: "Github [Action] Notification\n
         > repository: ${{ github.repository }}\n
         > workflow: ${{ github.workflow }}\n
-        > success: ${{ needs.build.result == 'success'}}\n
+        > success: ${{ needs.pull-request.result == 'success'}}\n
         > run: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"

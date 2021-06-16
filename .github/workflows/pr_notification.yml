@@ -1,0 +1,10 @@
+name: '[github] pr notification'
+
+on:
+  check_suite:
+    types: [completed]
+
+jobs:
+  steps:
+    - run: |
+        echo ${{ fromJSON(github.event.check_suites) }}

@@ -1,0 +1,10 @@
+name: [github] pr ci example
+
+on:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+
+jobs:
+  steps:
+    - run: |
+        echo 123

@@ -11,6 +11,14 @@ on:
         description: 'Release tag'
         default: 'latest'
         required: true
+      build_args:
+        description: 'Build args'
+        default: 'is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false symbol_level=1 use_custom_libcxx=false'
+        required: true
+      build_target:
+        description: 'Build target'
+        default: 'v8 v8_libplatform'
+        required: true
 
 jobs:  
   build:
@@ -63,14 +71,21 @@ jobs:
           rm -rf third_party/android_ndk
           ln -s $ANDROID_NDK_HOME third_party/android_ndk
         fi
+    - name: Fetch patch
+      uses: actions/checkout@v2
+      with:
+        path: ${{ github.repository }}
+    - name: Apply patch
+      run: |
+        git apply ${{ github.repository }}/.github/workflows/tools/v8_build.patch
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false symbol_level=1"
+        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        ninja -C out/${{ matrix.arch }} v8 v8_libplatform
+        ninja -C out/${{ matrix.arch }} ${{ github.event.inputs.build_target }}
     - name: Release artifact
       working-directory: ./v8/out/${{ matrix.arch }}
       run: |
@@ -80,8 +95,6 @@ jobs:
         cp -r ../../include/* artifact/include/v8/
         cp -r gen/include/* artifact/include/v8/
         find artifact/include/v8/. ! -name "*.h" -type f -delete
-        mkdir -p artifact/include/v8/libc++
-        cp -r ../../buildtools/third_party/libc++/trunk/include/* artifact/include/v8/libc++/
     - name: Upload ${{ matrix.arch }}
       uses: actions/upload-artifact@v2
       with:

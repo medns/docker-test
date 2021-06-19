@@ -76,6 +76,7 @@ jobs:
       with:
         path: ${{ github.repository }}
     - name: Apply patch
+      working-directory: ./v8/build
       run: |
         git apply ${{ github.repository }}/.github/workflows/tools/v8_build.patch
     - name: Generate ${{ matrix.arch }}

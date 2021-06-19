@@ -193,5 +193,5 @@ jobs:
         content: "Github [Action] Notification\n
         > repository: ${{ github.repository }}\n
         > workflow: ${{ github.workflow }}\n
-        > result: ${{ needs.pull-request.result == 'success' && 'success' || 'failure'}}\n
+        > result: ${{ needs.pull-request.result == 'success' && '<font color=\"info\">success</font>' || '<font color=\"warning\">failure</font>'}}\n
         > run: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"

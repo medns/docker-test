@@ -13,7 +13,7 @@ on:
         required: true
       build_args:
         description: 'Build args'
-        default: 'is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false symbol_level=1 use_custom_libcxx=false'
+        default: 'is_component_build=true is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false enable_resource_allowlist_generation=false symbol_level=1 use_custom_libcxx=false clang_use_chrome_plugins=false'
         required: true
       build_target:
         description: 'Build target'

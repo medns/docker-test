@@ -1,5 +1,5 @@
 diff --git a/config/android/BUILD.gn b/config/android/BUILD.gn
-index 233e8b0e7..42a9ddd51 100644
+index 233e8b0e7..d78a09e0b 100644
 --- a/config/android/BUILD.gn
 +++ b/config/android/BUILD.gn
 @@ -105,9 +105,7 @@ config("runtime_library") {
@@ -13,13 +13,22 @@ index 233e8b0e7..42a9ddd51 100644
  
    defines = [
      "__GNU_SOURCE=1",  # Necessary for clone().
-@@ -116,8 +114,15 @@ config("runtime_library") {
-   ldflags = [ "-nostdlib" ]
+@@ -117,7 +115,25 @@ config("runtime_library") {
    lib_dirs = [ android_libcpp_lib_dir ]
  
--  libs = []
+   libs = []
 -  libs += [ "android_support" ]
-+  libs = ["c++_shared", "c++abi"]
++  if (!use_custom_libcxx) {
++    # The libc++ runtime library (must come first).
++    # ASan needs to dynamically link to libc++ even in static builds so
++    # that it can interpose operator new.
++    if (is_component_build || is_asan) {
++        libs += [ "c++_shared" ]
++    } else {
++        libs += [ "c++_static" ]
++    }
++    libs += [ "c++abi" ]
++  }
 +  # On 64-bit platforms, the only symbols provided by libandroid_support.a are
 +  # strto{d,f,l,ul}_l. These symbols are not used by our libc++, and newer NDKs
 +  # don't provide a libandroid_support.a on 64-bit platforms, so we only depend

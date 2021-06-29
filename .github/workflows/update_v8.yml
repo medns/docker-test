@@ -91,7 +91,7 @@ jobs:
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        export LD_LIBRARY_PATH=$(pwd -L)/build/linux/debian_sid_amd64-sysroot/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH 
+        \cp -f build/linux/debian_sid_amd64-sysroot/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /lib64
         ninja -C out/${{ matrix.arch }} ${{ github.event.inputs.build_target }}
     - name: Release artifact
       working-directory: ./v8/out/${{ matrix.arch }}

@@ -128,7 +128,7 @@ jobs:
         shopt -s dotglob
         rm -rf *
         shopt -u dotglob
-    - name: checkout repo
+    - name: Checkout repo
       uses: actions/checkout@v2
     - name: Construct directory structure
       working-directory: ${{ env.v8-dist }}

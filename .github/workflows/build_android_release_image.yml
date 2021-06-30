@@ -17,7 +17,7 @@ on:
       - 'docker/android-release/Dockerfile'
 jobs:
   push_to_registry:
-    name: Push Docker image
+    name: Push docker image
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -28,7 +28,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Get Repo Owner in lowercase
+      - name: Get repo owner(in lowercase)
         id: get_owner
         uses: ASzc/change-string-case-action@v2
         with:

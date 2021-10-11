@@ -131,10 +131,11 @@ jobs:
       with:
         lfs: true
     - name: Construct directory structure
-      working-directory: ${{ env.v8-dist }}
+      working-directory: ${{ env.v8-dist }}/official-release
       run: |
-        rm -rf official-release
-        mkdir official-release
+        shopt -s dotglob
+        rm -- !(CMakeLists.txt)
+        shopt -u dotglob
     - name: Fetch artifact
       uses: actions/download-artifact@v2
       with:

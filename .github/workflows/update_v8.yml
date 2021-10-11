@@ -24,7 +24,7 @@ jobs:
   build:
     runs-on: [self-hosted, linux, trusted]
     container:
-      image: ghcr.io/tencent/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
+      image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}

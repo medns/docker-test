@@ -138,9 +138,11 @@ jobs:
     - name: Construct directory structure
       working-directory: ${{ env.v8-dist }}/official-release
       run: |
+        shopt -s dotglob
         shopt -s extglob
         rm -rf -- !(CMakeLists.txt)
         shopt -u extglob
+        shopt -u dotglob
     - name: Fetch artifact
       uses: actions/download-artifact@v2
       with:

@@ -1,8 +1,7 @@
 FROM centos
 
-WORKDIR /tmp
-
 RUN \
+cd \tmp && \
 yum -y install java-1.8.0-openjdk-devel git git-lfs unzip python3 python2 pkg-config bzip2 glibc-devel.i686 libstdc++-devel.i686 ncurses-compat-libs libatomic.so.1 && \
 yum clean all && \
 ln -fs /usr/bin/python2.7 /usr/bin/python && \
@@ -19,6 +18,8 @@ rm -rf /tmp && mkdir /tmp
 ENV PATH="/opt/gradle-7.3/bin:/opt/depot_tools:${PATH}" JAVA_HOME=/usr/lib/jvm/jre ANDROID_SDK_ROOT=/opt/sdk-root ANDROID_NDK_HOME=/opt/sdk-root/ndk/21.4.7075529/
 
 RUN \
+cd \tmp && \
 git clone https://github.com/Tencent/Hippy --depth 1 -b master && \
 cd Hippy/examples/android-demo && \
-gradle assemblerelease
+gradle assemblerelease && \
+rm -rf /tmp && mkdir /tmp

@@ -189,14 +189,14 @@ jobs:
         commit-message: |
                     chore(v8): update V8 to ${{ github.event.inputs.v8_revision }}@${{ steps.merge_all_artifact.outputs.head_lite }}
 
-                    Ref-URL: [v8/v8@${{ steps.merge_all_artifact.outputs.head_lite }}](https://github.com/v8/v8/tree/${{ steps.merge_all_artifact.outputs.head_full }})
-                    Action-Run: [#${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+                    Ref-URL: v8/v8@${{ steps.merge_all_artifact.outputs.head_full }}
+                    Action-Run: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
         branch: chore/update-v8-to-${{ github.event.inputs.v8_revision }}
         delete-branch: true
         title: 'chore(v8): update V8 to ${{ github.event.inputs.v8_revision }}@${{ steps.merge_all_artifact.outputs.head_lite }}'
         body: |
-          Refs: [v8/v8@@${{ steps.merge_all_artifact.outputs.head_lite }}][1]
-          Branch/Tag: ${{ github.event.inputs.v8_revision }})
+          Refs: [v8/v8@${{ steps.merge_all_artifact.outputs.head_lite }}][1]
+          Branch/Tag: ${{ github.event.inputs.v8_revision }}
           Release TAG: ${{ github.event.inputs.release_tag }}
           Action Run: [#${{ github.run_id }}][2]
 

@@ -166,7 +166,8 @@ jobs:
           cp -r $d/* ./
           rm -rf $d
         done
-        echo "::set-output name=head_full::${current_head} name=head_lite::${current_head:0:7}"
+        echo "::set-output name=head_full::${current_head}"
+        echo "::set-output name=head_lite::${current_head:0:8}"
     - name: Generate Readme
       uses: DamianReeves/write-file-action@v1.0
       with:
@@ -177,7 +178,7 @@ jobs:
               _Do NOT modify this release manually._
 
               Refs: [v8/v8@${{ steps.merge_all_artifact.outputs.head_lite }}][1]
-              Branch/Tag: ${{ github.event.inputs.v8_revision }})
+              Branch/Tag: ${{ github.event.inputs.v8_revision }}
 
               [1]: https://github.com/v8/v8/tree/${{ steps.merge_all_artifact.outputs.head_full }}
               [2]: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

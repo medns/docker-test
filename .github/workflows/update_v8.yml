@@ -103,7 +103,7 @@ jobs:
         cp -r ../../include/* artifact/include/v8/
         cp -r gen/include/* artifact/include/v8/
         find artifact/include/v8/. ! -name "*.h" -type f -delete
-        git rev-parse HEAD >> ./HEAD
+        git rev-parse HEAD >> artifact/HEAD
     - name: Upload ${{ matrix.arch }}
       uses: actions/upload-artifact@v2
       with:

@@ -46,6 +46,7 @@ jobs:
           host-tag: x86_64-linux-android
     steps:
     - name: Clean up before
+      shell: bash
       run: |
         shopt -s dotglob
         rm -rf *
@@ -110,6 +111,7 @@ jobs:
         if-no-files-found: error
     - name: Clean up after
       if: ${{ always() }}
+      shell: bash
       run: |
         shopt -s dotglob
         rm -rf *
@@ -126,6 +128,7 @@ jobs:
       v8-dist: ./android/sdk/src/main/jni/third_party/v8/${{ github.event.inputs.release_tag }}
     steps:
     - name: Clean up before
+      shell: bash
       run: |
         shopt -s dotglob
         rm -rf *
@@ -136,6 +139,7 @@ jobs:
         lfs: true
     - name: Construct directory structure
       working-directory: ${{ env.v8-dist }}/official-release
+      shell: bash
       run: |
         shopt -s dotglob
         shopt -s extglob
@@ -206,6 +210,7 @@ jobs:
           android
     - name: Clean up after
       if: ${{ always() }}
+      shell: bash
       run: |
         shopt -s dotglob
         rm -rf *

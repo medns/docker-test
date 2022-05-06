@@ -84,17 +84,14 @@ jobs:
       working-directory: ./v8/build
       continue-on-error: true
       run: |
-        git apply --reject ../../${{ github.repository }}/.github/workflows/tools/v8_build.patch
+        git apply ../../${{ github.repository }}/.github/workflows/tools/v8_build.patch
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        ANDROID_NDK_API_LEVEL=`cat ${ANDROID_NDK_HOME}\source.properties | sed -n '2p' | awk '{print $3}' | cut -d '.' -f 1`
-        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" android_ndk_root=\"${ANDROID_NDK_HOME}\" android32_ndk_api_level=${ANDROID_NDK_API_LEVEL} android64_ndk_api_level=${ANDROID_NDK_API_LEVEL} ${{ github.event.inputs.build_args }}"
+        gn gen out/${{ matrix.arch }} --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" android_ndk_root=\"${ANDROID_NDK_HOME}\" android32_ndk_api_level=21 android64_ndk_api_level=21 ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        \cp -f build/linux/debian_sid_amd64-sysroot/usr/lib/x86_64-linux-gnu/libstdc++.so.6 /lib64
-        \cp -f build/linux/debian_sid_i386-sysroot/usr/lib/i386-linux-gnu/libstdc++.so.6 /lib
         ninja -C out/${{ matrix.arch }} ${{ github.event.inputs.build_target }}
     - name: Release artifact
       working-directory: ./v8/out/${{ matrix.arch }}
@@ -179,6 +176,7 @@ jobs:
               _Do NOT modify this release manually._
 
               Refs: [v8/v8@${{ steps.merge_all_artifact.outputs.head_lite }}][1]
+
               Branch/Tag: ${{ github.event.inputs.v8_revision }}
 
               [1]: https://github.com/v8/v8/tree/${{ steps.merge_all_artifact.outputs.head_full }}

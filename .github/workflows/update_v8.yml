@@ -153,6 +153,7 @@ jobs:
     - name: Merge all artifact
       id: merge_all_artifact
       working-directory: ${{ env.v8-dist }}/official-release
+      shell: bash
       run: |
         for d in */ ; do
           current_head=`cat $d/HEAD`

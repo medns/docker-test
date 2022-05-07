@@ -148,11 +148,13 @@ using JitCodeEventHandler = void (*)(const JitCodeEvent* event);
  */
 enum GCType {
   kGCTypeScavenge = 1 << 0,
-  kGCTypeMarkSweepCompact = 1 << 1,
-  kGCTypeIncrementalMarking = 1 << 2,
-  kGCTypeProcessWeakCallbacks = 1 << 3,
-  kGCTypeAll = kGCTypeScavenge | kGCTypeMarkSweepCompact |
-               kGCTypeIncrementalMarking | kGCTypeProcessWeakCallbacks
+  kGCTypeMinorMarkCompact = 1 << 1,
+  kGCTypeMarkSweepCompact = 1 << 2,
+  kGCTypeIncrementalMarking = 1 << 3,
+  kGCTypeProcessWeakCallbacks = 1 << 4,
+  kGCTypeAll = kGCTypeScavenge | kGCTypeMinorMarkCompact |
+               kGCTypeMarkSweepCompact | kGCTypeIncrementalMarking |
+               kGCTypeProcessWeakCallbacks
 };
 
 /**
@@ -209,32 +211,6 @@ using CreateHistogramCallback = void* (*)(const char* name, int min, int max,
                                           size_t buckets);
 
 using AddHistogramSampleCallback = void (*)(void* histogram, int sample);
-
-/**
- * HostImportModuleDynamicallyCallback is called when we require the
- * embedder to load a module. This is used as part of the dynamic
- * import syntax.
- *
- * The referrer contains metadata about the script/module that calls
- * import.
- *
- * The specifier is the name of the module that should be imported.
- *
- * The embedder must compile, instantiate, evaluate the Module, and
- * obtain its namespace object.
- *
- * The Promise returned from this function is forwarded to userland
- * JavaScript. The embedder must resolve this promise with the module
- * namespace object. In case of an exception, the embedder must reject
- * this promise with the exception. If the promise creation itself
- * fails (e.g. due to stack overflow), the embedder must propagate
- * that exception by returning an empty MaybeLocal.
- */
-using HostImportModuleDynamicallyCallback V8_DEPRECATED(
-    "Use HostImportModuleDynamicallyWithImportAssertionsCallback instead") =
-    MaybeLocal<Promise> (*)(Local<Context> context,
-                            Local<ScriptOrModule> referrer,
-                            Local<String> specifier);
 
 // --- Exceptions ---
 
@@ -334,12 +310,15 @@ using WasmSimdEnabledCallback = bool (*)(Local<Context> context);
 // --- Callback for checking if WebAssembly exceptions are enabled ---
 using WasmExceptionsEnabledCallback = bool (*)(Local<Context> context);
 
+// --- Callback for checking if WebAssembly dynamic tiering is enabled ---
+using WasmDynamicTieringEnabledCallback = bool (*)(Local<Context> context);
+
 // --- Callback for checking if the SharedArrayBuffer constructor is enabled ---
 using SharedArrayBufferConstructorEnabledCallback =
     bool (*)(Local<Context> context);
 
 /**
- * HostImportModuleDynamicallyWithImportAssertionsCallback is called when we
+ * HostImportModuleDynamicallyCallback is called when we
  * require the embedder to load a module. This is used as part of the dynamic
  * import syntax.
  *
@@ -369,6 +348,10 @@ using HostImportModuleDynamicallyWithImportAssertionsCallback =
                             Local<ScriptOrModule> referrer,
                             Local<String> specifier,
                             Local<FixedArray> import_assertions);
+using HostImportModuleDynamicallyCallback = MaybeLocal<Promise> (*)(
+    Local<Context> context, Local<Data> host_defined_options,
+    Local<Value> resource_name, Local<String> specifier,
+    Local<FixedArray> import_assertions);
 
 /**
  * HostInitializeImportMetaObjectCallback is called the first time import.meta
@@ -383,6 +366,20 @@ using HostImportModuleDynamicallyWithImportAssertionsCallback =
 using HostInitializeImportMetaObjectCallback = void (*)(Local<Context> context,
                                                         Local<Module> module,
                                                         Local<Object> meta);
+
+/**
+ * HostCreateShadowRealmContextCallback is called each time a ShadowRealm is
+ * being constructed in the initiator_context.
+ *
+ * The method combines Context creation and implementation defined abstract
+ * operation HostInitializeShadowRealm into one.
+ *
+ * The embedder should use v8::Context::New or v8::Context:NewFromSnapshot to
+ * create a new context. If the creation fails, the embedder must propagate
+ * that exception by returning an empty MaybeLocal.
+ */
+using HostCreateShadowRealmContextCallback =
+    MaybeLocal<Context> (*)(Local<Context> initiator_context);
 
 /**
  * PrepareStackTraceCallback is called when the stack property of an error is

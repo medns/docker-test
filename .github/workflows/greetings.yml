@@ -1,6 +1,13 @@
 name: Greetings
 
-on: [ workflow_dispatch ]
+on: 
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - 'android'
+      - 'core'
 
 jobs:
   greeting:

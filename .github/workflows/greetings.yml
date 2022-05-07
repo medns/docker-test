@@ -6,8 +6,8 @@ on:
       - master
       - main
     paths:
-      - 'android'
-      - 'core'
+      - 'android/**'
+      - 'core/**'
 
 jobs:
   greeting:

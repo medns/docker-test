@@ -1,0 +1,17 @@
+android:
+  - android/*
+ios:
+  - ios/*
+core/layout:
+  - core/*
+  - layout/*
+demo:
+  - demo/*
+frontend:
+  - packages/*
+  - static/*
+documentation:
+  - docs/*
+  - **.md
+dependencies:
+  - **/third_party/**

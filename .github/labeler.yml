@@ -14,4 +14,4 @@ documentation:
   - 'docs/*'
   - '**/*.js'
 dependencies:
-  - '**/third_party/**
+  - '**/third_party/**'

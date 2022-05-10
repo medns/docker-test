@@ -12,6 +12,6 @@ frontend:
   - static/*
 documentation:
   - docs/*
-  - **.md
+  - **/*.js
 dependencies:
   - **/third_party/**

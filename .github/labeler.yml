@@ -1,17 +1,17 @@
 android:
-  - android/*
+  - 'android/*'
 ios:
-  - ios/*
+  - 'ios/*'
 core/layout:
-  - core/*
-  - layout/*
+  - 'core/*'
+  - 'layout/*'
 demo:
-  - demo/*
+  - 'demo/*'
 frontend:
-  - packages/*
-  - static/*
+  - 'packages/*'
+  - 'static/*'
 documentation:
-  - docs/*
-  - **/*.js
+  - 'docs/*'
+  - '**/*.js'
 dependencies:
-  - **/third_party/**
+  - '**/third_party/**

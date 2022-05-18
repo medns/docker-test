@@ -96,33 +96,7 @@ jobs:
         cp -r ../../include/* artifact/include/v8/
         cp -r gen/include/* artifact/include/v8/
         find artifact/include/v8/. ! -name "*.h" -type f -delete
-    - name: Generate CMakeList(7.7.229 version)
-      if: github.event.inputs.v8_revision == '7.7.229'
-      uses: DamianReeves/write-file-action@v1.0
-      with:
-        path: ./v8/out/artifact/CMakeList.txt
-        contents: |
-              cmake_minimum_required(VERSION 3.4.1)
-
-              project(v8)
-
-              set(V8_LIBRARY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib PARENT_SCOPE)
-              set(V8_LIBRARY_NAME libv8_monolith.a PARENT_SCOPE)
-
-              set(V8_DEFINITIONS)
-              list(APPEND V8_DEFINITIONS "-DV8_IMMINENT_DEPRECATION_WARNINGS;")
-              list(APPEND V8_DEFINITIONS "-DV8_DEPRECATION_WARNINGS;")
-              set(V8_DEFINITIONS ${V8_DEFINITIONS} PARENT_SCOPE)
-
-              set(V8_INCLUDE_DIRECTORIES)
-              string(APPEND V8_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include;")
-              string(APPEND V8_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include/v8;")
-              set(V8_INCLUDE_DIRECTORIES ${V8_INCLUDE_DIRECTORIES} PARENT_SCOPE)
-
-              set(V8_LINKING_MODE static PARENT_SCOPE)
-        write-mode: overwrite
     - name: Generate CMakeList(common version)
-      if: github.event.inputs.v8_revision != '7.7.229'
       uses: DamianReeves/write-file-action@v1.0
       with:
         path: ./v8/out/artifact/CMakeList.txt
@@ -137,9 +111,11 @@ jobs:
               set(V8_DEFINITIONS)
               list(APPEND V8_DEFINITIONS "-DV8_IMMINENT_DEPRECATION_WARNINGS;")
               list(APPEND V8_DEFINITIONS "-DV8_DEPRECATION_WARNINGS;")
-              if ((${ANDROID_ABI} STREQUAL "arm64-v8a") OR (${ANDROID_ABI} STREQUAL "x86_64"))
-                list(APPEND V8_DEFINITIONS "-DV8_COMPRESS_POINTERS;")
-              endif()
+              ${{ github.event.inputs.v8_revision != '7.7.229' && '\
+              if ((${ANDROID_ABI} STREQUAL "arm64-v8a") OR (${ANDROID_ABI} STREQUAL "x86_64"))\
+                list(APPEND V8_DEFINITIONS "-DV8_COMPRESS_POINTERS;")\
+              endif()\
+              ' || ''}}
               set(V8_DEFINITIONS ${V8_DEFINITIONS} PARENT_SCOPE)
 
               set(V8_INCLUDE_DIRECTORIES)
@@ -186,7 +162,7 @@ jobs:
         shopt -u dotglob
   notification:
     if: ${{ always() }}
-    needs: [build]
+    needs: [prebuilt]
     runs-on: [self-hosted, linux, trusted]
     continue-on-error: true
     env:

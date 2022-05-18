@@ -1,4 +1,4 @@
-name: '[android] [third_party] update v8'
+name: '[third_party] prebuilt android v8'
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ on:
         required: true
 
 jobs:
-  build:
+  prebuilt:
     runs-on: [self-hosted, linux, trusted]
     container:
       image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})

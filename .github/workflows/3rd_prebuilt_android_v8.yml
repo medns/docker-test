@@ -93,7 +93,7 @@ jobs:
       run: |
         mkdir -p artifact/include/v8 artifact/lib
         cp obj/libv8_monolith.a artifact/lib
-        cp -r ../../include/* artifact/include/v8/
+        cp -r ../include/* artifact/include/v8/
         cp -r gen/include/* artifact/include/v8/
         find artifact/include/v8/. ! -name "*.h" -type f -delete
     - name: Generate CMakeList

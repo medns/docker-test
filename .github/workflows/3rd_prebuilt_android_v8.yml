@@ -96,7 +96,7 @@ jobs:
         cp -r ../../include/* artifact/include/v8/
         cp -r gen/include/* artifact/include/v8/
         find artifact/include/v8/. ! -name "*.h" -type f -delete
-    - name: Generate CMakeList(common version)
+    - name: Generate CMakeList
       uses: DamianReeves/write-file-action@v1.0
       with:
         path: ./v8/out/artifact/CMakeList.txt

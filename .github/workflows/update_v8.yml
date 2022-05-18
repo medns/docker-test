@@ -30,7 +30,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
-        cpu: [arm, arm64, x86, x64]
+        cpu: [arm, arm64, x86, x86_64]
         include:
         - cpu: arm
           arch: armeabi-v7a

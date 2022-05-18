@@ -184,6 +184,7 @@ jobs:
         secret_id: ${{ secrets.COS_SECRET_ID }}
         secret_key: ${{ secrets.COS_SECRET_KEY }}
         bucket: ${{ secrets.COS_BUCKET }}
+        region: ap-guangzhou
     - name: Clean up after
       if: ${{ always() }}
       shell: bash

@@ -1,4 +1,4 @@
-name: '[third_party] prebuilt android v8'
+name: '[3rd] prebuilt android v8'
 
 on:
   workflow_dispatch:

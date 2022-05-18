@@ -7,10 +7,6 @@ on:
         description: 'V8 TAG(Branch) to build'
         default: '9.7-lkgr'
         required: true
-      package_path:
-        description: 'Package path'
-        default: '/hippy/third_party/v8'
-        required: true
       build_args:
         description: 'Build args'
         default: 'is_component_build=false is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false symbol_level=0 use_custom_libcxx=false clang_use_chrome_plugins=false use_thin_lto=false v8_enable_webassembly=false v8_monolithic=true'
@@ -18,6 +14,14 @@ on:
       build_target:
         description: 'Build target'
         default: 'v8_monolith'
+        required: true
+      package_domain:
+        description: 'Package domain'
+        default: 'hippy'
+        required: true
+      package_path:
+        description: 'Package path'
+        default: 'third_party/v8'
         required: true
 
 jobs:
@@ -30,20 +34,16 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
-        cpu: [arm, arm64, x86, x86_64]
+        cpu: [arm, arm64, x86, x64]
         include:
         - cpu: arm
-          arch: armeabi-v7a
-          host-tag: arm-linux-androideabi
+          arch: arm
         - cpu: arm64
-          arch: arm64-v8a
-          host-tag: aarch64-linux-android
+          arch: arm64
         - cpu: x86
           arch: x86
-          host-tag: i686-linux-android
-        - cpu: x86_64
+        - cpu: x64
           arch: x86_64
-          host-tag: x86_64-linux-android
     steps:
     - name: Clean up before
       shell: bash
@@ -62,6 +62,7 @@ jobs:
         echo "target_os = ['android']" >> ../.gclient
         gclient sync -D
     - name: Prepare android_ndk
+      if: github.event.inputs.v8_revision == '7.7.229'
       working-directory: ./v8
       run: |
         if [ -d third_party/android_tools ]; then
@@ -78,12 +79,13 @@ jobs:
         fi
     - name: Fetch patch
       uses: actions/checkout@v2
+      if: github.event.inputs.v8_revision == '7.7.229'
       with:
         path: ${{ github.repository }}
         lfs: true
     - name: Apply patch
+      if: github.event.inputs.v8_revision == '7.7.229'
       working-directory: ./v8/build
-      continue-on-error: true
       run: |
         git apply ../../${{ github.repository }}/.github/workflows/tools/v8_build.patch
     - name: Generate ${{ matrix.arch }}
@@ -97,11 +99,64 @@ jobs:
     - name: Prepare package
       working-directory: ./v8/out/${{ matrix.arch }}
       run: |
-        mkdir -p artifact/include/v8 artifact/libs/${{ matrix.arch }}
-        cp obj/libv8_monolith.a artifact/libs/${{ matrix.arch }}
+        mkdir -p artifact/include/v8 artifact/lib
+        cp obj/libv8_monolith.a artifact/lib
         cp -r ../../include/* artifact/include/v8/
         cp -r gen/include/* artifact/include/v8/
         find artifact/include/v8/. ! -name "*.h" -type f -delete
+    - name: Generate CMakeList(7.7.229 version)
+      if: github.event.inputs.v8_revision == '7.7.229'
+      uses: DamianReeves/write-file-action@v1.0
+      with:
+        path: ./v8/out/${{ matrix.arch }}/artifact/CMakeList.txt
+        contents: |
+              cmake_minimum_required(VERSION 3.4.1)
+
+              project(v8)
+
+              set(V8_LIBRARY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib PARENT_SCOPE)
+              set(V8_LIBRARY_NAME libv8_monolith.a PARENT_SCOPE)
+
+              set(V8_DEFINITIONS)
+              list(APPEND V8_DEFINITIONS "-DV8_IMMINENT_DEPRECATION_WARNINGS;")
+              list(APPEND V8_DEFINITIONS "-DV8_DEPRECATION_WARNINGS;")
+              set(V8_DEFINITIONS ${V8_DEFINITIONS} PARENT_SCOPE)
+
+              set(V8_INCLUDE_DIRECTORIES)
+              string(APPEND V8_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include;")
+              string(APPEND V8_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include/v8;")
+              set(V8_INCLUDE_DIRECTORIES ${V8_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+
+              set(V8_LINKING_MODE static PARENT_SCOPE)
+        write-mode: overwrite
+    - name: Generate CMakeList(common version)
+      if: github.event.inputs.v8_revision != '7.7.229'
+      uses: DamianReeves/write-file-action@v1.0
+      with:
+        path: ./v8/out/${{ matrix.arch }}/artifact/CMakeList.txt
+        contents: |
+              cmake_minimum_required(VERSION 3.4.1)
+
+              project(v8)
+
+              set(V8_LIBRARY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib PARENT_SCOPE)
+              set(V8_LIBRARY_NAME libv8_monolith.a PARENT_SCOPE)
+
+              set(V8_DEFINITIONS)
+              list(APPEND V8_DEFINITIONS "-DV8_IMMINENT_DEPRECATION_WARNINGS;")
+              list(APPEND V8_DEFINITIONS "-DV8_DEPRECATION_WARNINGS;")
+              if ((${ANDROID_ABI} STREQUAL "arm64-v8a") OR (${ANDROID_ABI} STREQUAL "x86_64"))
+                list(APPEND V8_DEFINITIONS "-DV8_COMPRESS_POINTERS;")
+              endif()
+              set(V8_DEFINITIONS ${V8_DEFINITIONS} PARENT_SCOPE)
+
+              set(V8_INCLUDE_DIRECTORIES)
+              string(APPEND V8_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include;")
+              string(APPEND V8_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include/v8;")
+              set(V8_INCLUDE_DIRECTORIES ${V8_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+
+              set(V8_LINKING_MODE static PARENT_SCOPE)
+        write-mode: overwrite
     - name: Generate Readme
       uses: DamianReeves/write-file-action@v1.0
       with:
@@ -125,7 +180,7 @@ jobs:
     - name: Publish package
       uses: zkqiang/tencent-cos-action@v0.1.0
       with:
-        args: upload -r ./v8/out/${{ matrix.arch }}/android-${{ matrix.cpu }}.tgz ${{ github.event.inputs.package_path }}/${{ github.event.inputs.v8_revision }}/
+        args: upload -r ./v8/out/${{ matrix.arch }}/android-${{ matrix.cpu }}.tgz /${{ github.event.inputs.package_domain }}/${{ github.event.inputs.package_path }}/${{ github.event.inputs.v8_revision }}/
         secret_id: ${{ secrets.COS_SECRET_ID }}
         secret_key: ${{ secrets.COS_SECRET_KEY }}
         bucket: ${{ secrets.COS_BUCKET }}

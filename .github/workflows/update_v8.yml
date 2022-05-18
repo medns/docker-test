@@ -123,10 +123,9 @@ jobs:
       run: |
         tar -zcvf android-${{ matrix.cpu }}.tgz -C artifact .
     - name: Publish package
-      working-directory: ./v8/out/${{ matrix.arch }}
       uses: zkqiang/tencent-cos-action@v0.1.0
       with:
-        args: upload -r ./android-${{ matrix.cpu }}.tgz ${{ package_path }}/${{ v8_revision }}/
+        args: upload -r ./v8/out/${{ matrix.arch }}/android-${{ matrix.cpu }}.tgz ${{ package_path }}/${{ v8_revision }}/
         secret_id: ${{ secrets.COS_SECRET_ID }}
         secret_key: ${{ secrets.COS_SECRET_KEY }}
         bucket: ${{ secrets.COS_BUCKET }}

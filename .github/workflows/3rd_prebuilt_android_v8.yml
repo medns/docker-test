@@ -1,23 +1,35 @@
-name: '[3rd] prebuilt android v8'
+name: '[3rd] prebuilt v8'
 
 on:
   workflow_dispatch:
     inputs:
       v8_revision:
         description: 'V8 TAG(Branch) to build'
+        type: string
         default: '9.7-lkgr'
         required: true
       build_args:
         description: 'Build args'
-        default: 'is_component_build=false is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false symbol_level=0 use_custom_libcxx=false clang_use_chrome_plugins=false use_thin_lto=false v8_enable_webassembly=false v8_monolithic=true'
+        type: string
+        default: 'is_component_build=false is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false symbol_level=0 v8_enable_webassembly=false v8_monolithic=true'
         required: true
       package_tag:
         description: 'Package TAG'
+        type: string
         default: '9.7-lkgr'
         required: true
+      is_build_for_android:
+        description: 'Build for Android platform'
+        type: boolean
+        default: true
+      is_build_for_windows:
+        description: 'Build for Windows platform'
+        type: boolean
+        default: false
 
 jobs:
-  prebuilt:
+  android_prebuilt:
+    if: github.event.inputs.is_build_for_android == 'true'
     runs-on: [self-hosted, linux, trusted]
     container:
       image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
@@ -83,7 +95,7 @@ jobs:
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        gn gen out --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" android_ndk_root=\"${ANDROID_NDK_HOME}\" android32_ndk_api_level=21 android64_ndk_api_level=21 ${{ github.event.inputs.build_args }}"
+        gn gen out --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" android_ndk_root=\"${ANDROID_NDK_HOME}\" android32_ndk_api_level=21 android64_ndk_api_level=21 clang_use_chrome_plugins=false use_thin_lto=false use_custom_libcxx=false ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
@@ -158,9 +170,39 @@ jobs:
         shopt -s dotglob
         rm -rf *
         shopt -u dotglob
+  windows_prebuilt:
+    if: github.event.inputs.is_build_for_windows == 'true'
+    runs-on: windows-latest
+    steps:
+    - name: Setup GN
+      shell: ps
+      run: |
+        Invoke-WebRequest https://storage.googleapis.com/chrome-infra/depot_tools.zip
+        Expand-Archive depot_tools.zip -DestinationPath C:\depot_tools
+        $Path = [System.Environment]::GetEnvironmentVariable('Path', [System.EnvironmentVariableTarget]::User)
+        $Path += ";C:\depot_tools"
+        [System.Environment]::SetEnvironmentVariable('Path', $Path, [System.EnvironmentVariableTarget]::User)
+    - name: Fetch v8
+      run: |
+        fetch v8
+        cd v8
+        git checkout ${{ github.event.inputs.v8_revision }}
+    - name: Sync third_party
+      working-directory: ./v8
+      run: |
+        gclient sync -D
+    - name: Generate x86
+      working-directory: ./v8
+      run: |
+        gn gen out --args="target_cpu=\"x86\" v8_target_cpu=\"x86\" is_clang=false ${{ github.event.inputs.build_args }}"
+    - name: Compile x86
+      working-directory: ./v8
+      run: |
+        ninja -C out v8_monolith
+  
   notification:
     if: ${{ always() }}
-    needs: [prebuilt]
+    needs: [android_prebuilt, windows_prebuilt]
     runs-on: [self-hosted, linux, trusted]
     continue-on-error: true
     env:

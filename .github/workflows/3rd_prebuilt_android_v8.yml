@@ -253,14 +253,14 @@ jobs:
     #   working-directory: ./v8/out
     #   run: |
     #     Compress-Archive -Path artifact\* -DestinationPath windows-x86.zip
-    # - name: Publish package
-    #   uses: zkqiang/tencent-cos-action@v0.1.0
-    #   with:
-    #     args: upload -r ./v8/out/windows-x86.zip /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
-    #     secret_id: ${{ secrets.TC_SECRET_ID }}
-    #     secret_key: ${{ secrets.TC_SECRET_KEY }}
-    #     bucket: ${{ secrets.COS_BUCKET }}
-    #     region: na-siliconvalley
+    - name: Publish package
+      uses: zkqiang/tencent-cos-action@v0.1.0
+      with:
+        args: upload -r ./README.md /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
+        secret_id: ${{ secrets.TC_SECRET_ID }}
+        secret_key: ${{ secrets.TC_SECRET_KEY }}
+        bucket: ${{ secrets.COS_BUCKET }}
+        region: na-siliconvalley
   
   notification:
     if: ${{ always() }}

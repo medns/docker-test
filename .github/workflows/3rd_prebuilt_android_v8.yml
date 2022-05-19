@@ -176,7 +176,7 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        arch: [arm64, x86, x64]
+        arch: [x86]
     steps:
     - name: Setup GN
       run: |
@@ -256,7 +256,8 @@ jobs:
     - name: Release package
       working-directory: ./v8/out
       run: |
-        Compress-Archive -Path artifact\* -DestinationPath windows-${{ matrix.arch }}.zip
+        New-Item -type directory -Path packages
+        Compress-Archive -Path artifact\* -DestinationPath packages\windows-${{ matrix.arch }}.zip
     - name: Publish package
       uses: TencentCloud/cos-action@v1
       with:
@@ -264,7 +265,7 @@ jobs:
         secret_key: ${{ secrets.TC_SECRET_KEY }}
         cos_bucket: ${{ secrets.COS_BUCKET }}
         cos_region: ${{ secrets.COS_REGION }}
-        local_path: ./v8/out/windows-${{ matrix.arch }}.zip
+        local_path: v8/out/packages
         remote_path: hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
 
   notification:

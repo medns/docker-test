@@ -256,17 +256,13 @@ jobs:
     - name: Release package
       working-directory: ./v8/out
       run: |
-        New-Item -type directory -Path packages
-        Compress-Archive -Path artifact\* -DestinationPath packages\windows-${{ matrix.arch }}.zip
+        Compress-Archive -Path artifact\* -DestinationPath windows-${{ matrix.arch }}.zip
     - name: Publish package
-      uses: TencentCloud/cos-action@v1
-      with:
-        secret_id: ${{ secrets.TC_SECRET_ID }}
-        secret_key: ${{ secrets.TC_SECRET_KEY }}
-        cos_bucket: ${{ secrets.COS_BUCKET }}
-        cos_region: ${{ secrets.COS_REGION }}
-        local_path: v8/out/packages
-        remote_path: hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
+      working-directory: ./v8/out
+      run: |
+        pip install coscmd
+        coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
+        coscmd upload -r windows-${{ matrix.arch }}.zip /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
 
   notification:
     if: ${{ always() }}

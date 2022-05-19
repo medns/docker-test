@@ -254,13 +254,15 @@ jobs:
     #   run: |
     #     Compress-Archive -Path artifact\* -DestinationPath windows-x86.zip
     - name: Publish package
-      uses: zkqiang/tencent-cos-action@v0.1.0
+      uses: TencentCloud/cos-action@v1
       with:
-        args: upload -r ./README.md /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
         secret_id: ${{ secrets.TC_SECRET_ID }}
         secret_key: ${{ secrets.TC_SECRET_KEY }}
-        bucket: ${{ secrets.COS_BUCKET }}
-        region: na-siliconvalley
+        cos_bucket: ${{ secrets.COS_BUCKET }}
+        cos_region: ${{ secrets.COS_REGION }}
+        local_path: ./README.md 
+        remote_path: /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
+        accelerate: true
   
   notification:
     if: ${{ always() }}

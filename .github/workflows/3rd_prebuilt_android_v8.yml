@@ -175,7 +175,6 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Setup GN
-      shell: ps
       run: |
         Invoke-WebRequest https://storage.googleapis.com/chrome-infra/depot_tools.zip
         Expand-Archive depot_tools.zip -DestinationPath C:\depot_tools

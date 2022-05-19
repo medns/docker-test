@@ -172,7 +172,7 @@ jobs:
         shopt -u dotglob
   windows_prebuilt:
     if: github.event.inputs.is_build_for_windows == 'true'
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
     - name: Setup GN
       run: |

@@ -179,19 +179,12 @@ jobs:
         Invoke-WebRequest -OutFile depot_tools.zip https://storage.googleapis.com/chrome-infra/depot_tools.zip
         Expand-Archive depot_tools.zip -DestinationPath C:\depot_tools
         rm depot_tools.zip
-        $Path = [System.Environment]::GetEnvironmentVariable('Path', [System.EnvironmentVariableTarget]::User)
-        $Path += ";C:\depot_tools"
-        [System.Environment]::SetEnvironmentVariable('Path', $Path, [System.EnvironmentVariableTarget]::User)
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User) 
     - name: Fetch v8
       run: |
         $env:Path += ";C:\depot_tools"
         fetch v8
         cd v8
         git checkout ${{ github.event.inputs.v8_revision }}
-    - name: Sync third_party
-      working-directory: ./v8
-      run: |
         gclient sync -D
     - name: Generate x86
       working-directory: ./v8

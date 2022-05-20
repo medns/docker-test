@@ -269,7 +269,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        arch: [x64]
+        arch: [x64, amd64]
     steps:
     - name: Setup GN
       run: |
@@ -346,13 +346,11 @@ jobs:
       run: |
         tar -zcvf macos-${{ matrix.arch }}.tgz -C artifact .
     - name: Publish package
-      uses: zkqiang/tencent-cos-action@v0.1.0
-      with:
-        args: upload -r ./v8/out/macos-${{ matrix.arch }}.tgz /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
-        secret_id: ${{ secrets.TC_SECRET_ID }}
-        secret_key: ${{ secrets.TC_SECRET_KEY }}
-        bucket: ${{ secrets.COS_BUCKET }}
-        region: ${{ secrets.COS_BUCKET }}
+      working-directory: ./v8/out
+      run: |
+        pip install coscmd
+        coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
+        coscmd upload -r macos-${{ matrix.arch }}.tgz /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
 
   notification:
     if: ${{ always() }}

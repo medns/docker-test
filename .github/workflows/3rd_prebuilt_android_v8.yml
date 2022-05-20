@@ -277,6 +277,7 @@ jobs:
         export PATH=/usr/local/opt/depot_tools:$PATH
     - name: Checkout v8
       run: |
+        export PATH=/usr/local/opt/depot_tools:$PATH
         fetch v8
         cd v8
         git checkout ${{ github.event.inputs.v8_revision }}

@@ -164,7 +164,7 @@ jobs:
         secret_id: ${{ secrets.TC_SECRET_ID }}
         secret_key: ${{ secrets.TC_SECRET_KEY }}
         bucket: ${{ secrets.COS_BUCKET }}
-        region: ${{ secrets.COS_BUCKET }}
+        region: ${{ secrets.COS_REGION }}
     - name: Clean up after
       if: ${{ always() }}
       shell: bash

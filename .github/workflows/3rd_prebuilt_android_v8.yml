@@ -274,7 +274,7 @@ jobs:
     - name: Publish package
       run: |
         pip3 install coscmd
-        coscmd
+        coscmd -h
     # - name: Setup GN
     #   run: |
     #     git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /usr/local/opt/depot_tools

@@ -285,10 +285,12 @@ jobs:
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
+        export PATH=/usr/local/opt/depot_tools:$PATH
         gn gen out --args="target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
+        export PATH=/usr/local/opt/depot_tools:$PATH
         ninja -C out v8_monolith
 
   notification:

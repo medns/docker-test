@@ -26,6 +26,10 @@ on:
         description: 'Build for Windows platform'
         type: boolean
         default: false
+      is_build_for_macos:
+        description: 'Build for MacOS platform'
+        type: boolean
+        default: false
 
 jobs:
   android_prebuilt:
@@ -123,9 +127,7 @@ jobs:
               set(V8_DEFINITIONS)
               list(APPEND V8_DEFINITIONS "-DV8_IMMINENT_DEPRECATION_WARNINGS;")
               list(APPEND V8_DEFINITIONS "-DV8_DEPRECATION_WARNINGS;")
-              ${{ github.event.inputs.v8_revision != '7.7.229' && 'if ((${ANDROID_ABI} STREQUAL "arm64-v8a") OR (${ANDROID_ABI} STREQUAL "x86_64"))
-                list(APPEND V8_DEFINITIONS "-DV8_COMPRESS_POINTERS;")
-              endif()' || ''}}
+              ${{ (github.event.inputs.v8_revision != '7.7.229' && (matrix.cpu == 'x64' || matrix.cpu == 'arm64')) && 'list(APPEND V8_DEFINITIONS "-DV8_COMPRESS_POINTERS;")' || ''}}
               set(V8_DEFINITIONS ${V8_DEFINITIONS} PARENT_SCOPE)
 
               set(V8_INCLUDE_DIRECTORIES)
@@ -225,9 +227,7 @@ jobs:
               set(V8_DEFINITIONS)
               list(APPEND V8_DEFINITIONS "-DV8_IMMINENT_DEPRECATION_WARNINGS;")
               list(APPEND V8_DEFINITIONS "-DV8_DEPRECATION_WARNINGS;")
-              if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "64")
-                list(APPEND V8_DEFINITIONS "-DV8_COMPRESS_POINTERS;")
-              endif()
+              ${{ (matrix.cpu == 'x64' || matrix.cpu == 'arm64') && 'list(APPEND V8_DEFINITIONS "-DV8_COMPRESS_POINTERS;")' || ''}}
               set(V8_DEFINITIONS ${V8_DEFINITIONS} PARENT_SCOPE)
 
               set(V8_INCLUDE_DIRECTORIES)
@@ -263,6 +263,32 @@ jobs:
         pip install coscmd
         coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
         coscmd upload -r windows-${{ matrix.arch }}.zip /hippy/third_party/v8/${{ github.event.inputs.package_tag }}/
+
+  macos_prebuilt:
+    if: github.event.inputs.is_build_for_macos == 'true'
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x64]
+    steps:
+    - name: Setup GN
+      run: |
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /usr/local/depot_tools
+        export PATH=/usr/local/depot_tools:$PATH
+    - name: Checkout v8
+      run: |
+        fetch v8
+        cd v8
+        git checkout ${{ github.event.inputs.v8_revision }}
+        gclient sync -D
+    - name: Generate ${{ matrix.arch }}
+      working-directory: ./v8
+      run: |
+        gn gen out --args="target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" ${{ github.event.inputs.build_args }}"
+    - name: Compile ${{ matrix.arch }}
+      working-directory: ./v8
+      run: |
+        ninja -C out v8_monolith
 
   notification:
     if: ${{ always() }}

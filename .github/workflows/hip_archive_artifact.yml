@@ -1,4 +1,4 @@
-name: '[hip] archive artifacts'
+name: '[hip] archive artifact'
 
 on:
   workflow_dispatch:
@@ -61,7 +61,7 @@ jobs:
       shell: bash
       run: |
         pip install -U cos-python-sdk-v5
-    - name: Publish artifacts
+    - name: Publish artifact
       shell: python
       run: |
         from qcloud_cos import CosConfig

@@ -88,9 +88,6 @@ jobs:
               Bucket="${{ secrets.COS_BUCKET }}",
               Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
               Body=artifact_file
-#              EnableMD5=True,
-#              ContentMD5=metadata["x-cos-meta-artifact-md5"],
-#              Metadata=metadata
           )
           print("ETag: " + response["ETag"])
     

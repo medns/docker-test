@@ -18,7 +18,6 @@ on:
       git_revision:
         description: 'Git <tag>|<branch>, only Git available'
         type: string
-        required: true
       hip_domain:
         description: 'HIP <domain>'
         type: choice
@@ -70,8 +69,8 @@ jobs:
         metadata["source-url"] = "${{ github.event.inputs.source_url }}"
         metadata["artifact-publisher"] = "${{ github.event.sender.login }}"
         metadata["artifact-md5"] = hashlib.md5(open(os.path.basename('${{ github.event.inputs.hip_artifact_path }}'),'rb').read()).hexdigest()
-        ${{ github.event.inputs.source_type == 'Git' && "metadata["git-revision"] = "${{ github.event.inputs.git_revision }}"" || "" }}
-        ${{ github.event.inputs.source_type == 'Git' && "metadata["git-head"] = "${{ steps.git-clone.git-head }}"" || "" }}
+        ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-revision"] = "${{ github.event.inputs.git_revision }}' || '' }}
+        ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-head"] = "${{ steps.git-clone.git-head }}' || '' }}
        
         metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
 

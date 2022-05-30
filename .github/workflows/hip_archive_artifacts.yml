@@ -23,6 +23,7 @@ on:
         type: choice
         options:
         - hippy
+        - test
         default: 'hippy'
         required: true
       hip_artifact_path:
@@ -81,7 +82,7 @@ jobs:
           metadata["artifact-md5"] = hashlib.md5(artifact_file.read()).hexdigest()
         if "${{ github.event.inputs.source_type }}" == "Git":
           metadata["git-revision"] = "${{ github.event.inputs.git_revision }}"
-          metadata["git-head"] = "${{ steps.git-clone.git-head }}"
+          metadata["git-head"] = "${{ steps.git-clone.outputs.git-head }}"
 
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)

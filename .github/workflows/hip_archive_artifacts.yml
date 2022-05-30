@@ -53,13 +53,20 @@ jobs:
       shell: bash
       run: |
         curl -o $(basename ${{ github.event.inputs.hip_artifact_path }}) ${{ github.event.inputs.source_url }}
-    - name: Generate Metadata
-      id: generate-metadata
+    - name: Install Requirement 
+      shell: bash
+      run: |
+        pip install -U cos-python-sdk-v5
+    - name: Publish artifacts
       shell: python
       run: |
+        from qcloud_cos import CosConfig
+        from qcloud_cos import CosS3Client
         import json
         import hashlib
         import os
+
+        artifact = os.path.basename("${{ github.event.inputs.hip_artifact_path }}")
 
         metadata = {}
         metadata["ci-name"] = "Github Action"
@@ -67,19 +74,21 @@ jobs:
         metadata["source-type"] = "${{ github.event.inputs.source_type }}"
         metadata["source-url"] = "${{ github.event.inputs.source_url }}"
         metadata["artifact-publisher"] = "${{ github.event.sender.login }}"
-        metadata["artifact-md5"] = hashlib.md5(open(os.path.basename('${{ github.event.inputs.hip_artifact_path }}'),'rb').read()).hexdigest()
+        metadata["artifact-md5"] = hashlib.md5(open(artifact),'rb').read()).hexdigest()
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-revision"] = "${{ github.event.inputs.git_revision }}' || '' }}
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-head"] = "${{ steps.git-clone.git-head }}' || '' }}
        
         metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
 
-        print("::set-output name=artifact-metadata::" + json.dumps(metadata))
-    - name: Publish artifacts
-      uses: zkqiang/tencent-cos-action@v0.1.0
-      with:
-        args: upload ./$(basename ${{ github.event.inputs.hip_artifact_path }}) /${{ github.event.inputs.hip_domain }}/test -H $metadata
-        secret_id: ${{ secrets.TC_SECRET_ID }}
-        secret_key: ${{ secrets.TC_SECRET_KEY }}
-        bucket: ${{ secrets.COS_BUCKET }}
-        region: ${{ secrets.COS_REGION }}
+        config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
+        client = CosS3Client(config)
+        response = client.upload_file(
+            Bucket="${{ secrets.COS_BUCKET }}",
+            Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
+            LocalFilePath=artifact,
+            EnableMD5=True,
+            ContentMD5=metadata["artifact-md5"]
+            Metadata=metadata
+        )
+        print("ETag: " + response["ETag"])
     

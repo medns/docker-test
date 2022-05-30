@@ -78,8 +78,8 @@ jobs:
         metadata["artifact-publisher"] = "${{ github.event.sender.login }}"
         with open(artifact, "rb") as artifact_file:
           metadata["artifact-md5"] = hashlib.md5(artifact_file.read()).hexdigest()
-        ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-revision"] = "${{ github.event.inputs.git_revision }}' || '' }}
-        ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-head"] = "${{ steps.git-clone.git-head }}' || '' }}
+        ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-revision"] = "${{ github.event.inputs.git_revision }}"' || '' }}
+        ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-head"] = "${{ steps.git-clone.git-head }}"' || '' }}
 
         metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
 

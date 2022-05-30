@@ -79,14 +79,15 @@ jobs:
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-revision"] = "${{ github.event.inputs.git_revision }}' || '' }}
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-head"] = "${{ steps.git-clone.git-head }}' || '' }}
 
+        metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
+
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
         response = client.upload_file(
             Bucket="${{ secrets.COS_BUCKET }}",
             Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
             LocalFilePath=artifact,
-            EnableMD5=True,
-            ContentMD5=metadata["artifact-md5"],
+            EnableMD5=False,
             Metadata=metadata
         )
         print("ETag: " + response["ETag"])

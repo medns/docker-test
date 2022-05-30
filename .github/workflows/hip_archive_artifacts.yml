@@ -78,7 +78,7 @@ jobs:
         print("::set-output name=artifact-metadata::" + metadata.dumps())
     - name: Test
       shell: bash
-      rnu: |
+      run: |
         echo "${{ steps.generate-metadata.outputs.artifact-metadata }}"
     # - name: Publish artifacts
     #   uses: zkqiang/tencent-cos-action@v0.1.0

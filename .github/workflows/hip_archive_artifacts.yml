@@ -77,7 +77,7 @@ jobs:
     - name: Publish artifacts
       uses: zkqiang/tencent-cos-action@v0.1.0
       with:
-        args: upload ./$(basename ${{ github.event.inputs.hip_artifact_path }}) /${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}
+        args: upload ./$(basename ${{ github.event.inputs.hip_artifact_path }}) /${{ github.event.inputs.hip_domain }}/test -H $metadata
         secret_id: ${{ secrets.TC_SECRET_ID }}
         secret_key: ${{ secrets.TC_SECRET_KEY }}
         bucket: ${{ secrets.COS_BUCKET }}

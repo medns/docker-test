@@ -16,7 +16,7 @@ on:
         type: string
         required: true
       git_revision:
-        description: 'Git <tag>|<branch>, only Git available'
+        description: 'Git <tag>|<branch>|<commit>, only Git available'
         type: string
       hip_domain:
         description: 'HIP <domain>'
@@ -44,10 +44,12 @@ jobs:
           echo 'In `Git` source type, <hip_artifact_path> must be end with |.tgz|'
           exit -1
         fi
-        git clone --depth 1 -b ${{ github.event.inputs.git_revision }} ${{ github.event.inputs.source_url }} artifact
-        tar -zcvf $name -C artifact .
-        cd artifact
+        git clone ${{ github.event.inputs.source_url }} artifact
+        pushd artifact
+        git checkout ${{ github.event.inputs.git_revision }}
         echo "::set-output name=git-head::$(git rev-parse HEAD)"
+        popd
+        tar -zcvf $name -C artifact .
     - name: URL fetch
       if: github.event.inputs.source_type == 'URL'
       shell: bash

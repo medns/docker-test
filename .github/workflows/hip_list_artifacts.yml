@@ -18,11 +18,11 @@ on:
         required: true
 
 jobs:
-  archive_objects:
+  list_objects:
     runs-on: ubuntu-latest
     steps:
     - name: Publish artifact
-      shell: python
+      shell: bash
       run: |
         pip install coscmd
         coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}

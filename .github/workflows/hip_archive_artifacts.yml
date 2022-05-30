@@ -84,7 +84,7 @@ jobs:
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
         with open(artifact, 'rb') as artifact_file:
-          response = client.upload_file(
+          response = client.put_object(
               Bucket="${{ secrets.COS_BUCKET }}",
               Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
               Body=artifact_file,

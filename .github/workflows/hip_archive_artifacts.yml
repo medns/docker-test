@@ -52,7 +52,7 @@ jobs:
       if: github.event.inputs.source_type == 'URL'
       shell: bash
       run: |
-        curl -o $(basename ${{ github.event.inputs.hip_artifact_path }}) ${{ github.event.inputs.source_url }}
+        wget ${{ github.event.inputs.source_url }} -O $(basename ${{ github.event.inputs.hip_artifact_path }})
     - name: Install Requirement 
       shell: bash
       run: |
@@ -78,16 +78,18 @@ jobs:
           metadata["artifact-md5"] = hashlib.md5(artifact_file.read()).hexdigest()
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-revision"] = "${{ github.event.inputs.git_revision }}' || '' }}
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-head"] = "${{ steps.git-clone.git-head }}' || '' }}
-        metadata["a"] = "b"
+
         metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
 
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
-        with open(artifact, "rb") as artifact_file:
-          response = client.put_object(
-              Bucket="${{ secrets.COS_BUCKET }}",
-              Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
-              Body=artifact_file
-          )
-          print("ETag: " + response["ETag"])
+        response = client.upload_file(
+            Bucket="${{ secrets.COS_BUCKET }}",
+            Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
+            LocalFilePath=artifact,
+            EnableMD5=True,
+            ContentMD5=metadata["x-cos-meta-artifact-md5"],
+            Metadata=metadata
+        )
+        print("ETag: " + response["ETag"])
     

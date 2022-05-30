@@ -74,7 +74,7 @@ jobs:
        
         metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
 
-        print("::set-output name=artifact-metadata::" + metadata.dumps())
+        print("::set-output name=artifact-metadata::" + jsons.dumps(metadata))
     - name: Test
       shell: bash
       run: |

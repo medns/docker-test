@@ -1,0 +1,91 @@
+name: '[hip] archive artifacts'
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_type:
+        description: 'Type of source'
+        type: choice
+        options:
+        - Git
+        - URL
+        default: 'Git'
+        required: true
+      source_url:
+        description: 'URL or Git <repository>'
+        type: string
+        required: true
+      git_revision:
+        description: 'Git <tag>|<branch>, only Git available'
+        type: string
+        required: true
+      hip_domain:
+        description: 'HIP <domain>'
+        type: choice
+        options:
+        - hippy
+        default: 'hippy'
+        required: true
+      hip_artifact_path:
+        description: 'HIP artifact <path>(without domain)'
+        type: string
+        required: true
+
+jobs:
+  archive_objects:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Git clone
+      if: github.event.inputs.source_type == 'Git'
+      id: git-clone
+      shell: bash
+      run: |
+        name=$(basename ${{ github.event.inputs.hip_artifact_path }})
+        if [[ $name != *.tgz ]]; then
+          echo 'In `Git` source type, <hip_artifact_path> must be end with |.tgz|'
+          exit -1
+        fi
+        git clone --depth 1 -b ${{ github.event.inputs.git_revision }} ${{ github.event.inputs.source_url }} artifact
+        tar -zcvf $name -C artifact .
+        cd artifact
+        echo "::set-output name=git-head::$(git rev-parse HEAD)"
+    - name: URL fetch
+      if: github.event.inputs.source_type == 'URL'
+      shell: bash
+      run: |
+        curl -o $(basename ${{ github.event.inputs.hip_artifact_path }}) ${{ github.event.inputs.source_url }}
+    - name: Generate Metadata
+      id: generate-metadata
+      shell: python
+      run: |
+        import json
+        import hashlib
+        import os
+
+        metadata = {}
+        metadata["ci-name"] = "Github Action"
+        metadata["ci-id"] = "${{ github.run_id }}"
+        metadata["ci-url"] = "${{ github.run_url }}"
+        metadata["source-type"] = "${{ github.event.inputs.source_type }}"
+        metadata["source-url"] = "${{ github.event.inputs.source_url }}"
+        metadata["artifact-publisher"] = "${{ github.event.sender.login }}"
+        metadata["artifact-md5"] = hashlib.md5(open(os.path.basename('${{ github.event.inputs.hip_artifact_path }}'),'rb').read()).hexdigest()
+        ${{ github.event.inputs.source_type == 'Git' && "metadata["git-revision"] = "${{ github.event.inputs.git_revision }}"" || "" }}
+        ${{ github.event.inputs.source_type == 'Git' && "metadata["git-head"] = "${{ steps.git-clone.git-head }}"" || "" }}
+       
+        metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
+
+        print("::set-output name=artifact-metadata::" + metadata.dumps())
+    - name: Test
+      shell: bash
+      rnu: |
+        echo "${{ steps.generate-metadata.outputs.artifact-metadata }}"
+    # - name: Publish artifacts
+    #   uses: zkqiang/tencent-cos-action@v0.1.0
+    #   with:
+    #     args: upload -r ./$(basename ${{ github.event.inputs.hip_artifact_path }}) /${{ github.event.inputs.hip_domain }}/${{ steps.git_clone.outputs.hip_artifact_path }} -H $metadata
+    #     secret_id: ${{ secrets.TC_SECRET_ID }}
+    #     secret_key: ${{ secrets.TC_SECRET_KEY }}
+    #     bucket: ${{ secrets.COS_BUCKET }}
+    #     region: ${{ secrets.COS_REGION }}
+    

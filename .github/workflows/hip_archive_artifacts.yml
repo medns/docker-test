@@ -64,7 +64,6 @@ jobs:
         metadata = {}
         metadata["ci-name"] = "Github Action"
         metadata["ci-id"] = "${{ github.run_id }}"
-        metadata["ci-url"] = "${{ github.run_url }}"
         metadata["source-type"] = "${{ github.event.inputs.source_type }}"
         metadata["source-url"] = "${{ github.event.inputs.source_url }}"
         metadata["artifact-publisher"] = "${{ github.event.sender.login }}"
@@ -75,16 +74,12 @@ jobs:
         metadata = {"x-cos-meta-" + k: v for k, v in metadata.items()}
 
         print("::set-output name=artifact-metadata::" + json.dumps(metadata))
-    - name: Test
-      shell: bash
-      run: |
-        echo "${{ steps.generate-metadata.outputs.artifact-metadata }}"
-    # - name: Publish artifacts
-    #   uses: zkqiang/tencent-cos-action@v0.1.0
-    #   with:
-    #     args: upload -r ./$(basename ${{ github.event.inputs.hip_artifact_path }}) /${{ github.event.inputs.hip_domain }}/${{ steps.git_clone.outputs.hip_artifact_path }} -H $metadata
-    #     secret_id: ${{ secrets.TC_SECRET_ID }}
-    #     secret_key: ${{ secrets.TC_SECRET_KEY }}
-    #     bucket: ${{ secrets.COS_BUCKET }}
-    #     region: ${{ secrets.COS_REGION }}
+    - name: Publish artifacts
+      uses: zkqiang/tencent-cos-action@v0.1.0
+      with:
+        args: upload -r ./$(basename ${{ github.event.inputs.hip_artifact_path }}) /${{ github.event.inputs.hip_domain }}/${{ steps.events.inputs.hip_artifact_path }} -H '$metadata'
+        secret_id: ${{ secrets.TC_SECRET_ID }}
+        secret_key: ${{ secrets.TC_SECRET_KEY }}
+        bucket: ${{ secrets.COS_BUCKET }}
+        region: ${{ secrets.COS_REGION }}
     

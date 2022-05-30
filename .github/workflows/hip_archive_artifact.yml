@@ -32,7 +32,7 @@ on:
         required: true
 
 jobs:
-  archive_objects:
+  archive_artifact:
     runs-on: ubuntu-latest
     steps:
     - name: Git clone
@@ -57,7 +57,7 @@ jobs:
       shell: bash
       run: |
         wget ${{ github.event.inputs.source_url }} -O $(basename ${{ github.event.inputs.hip_artifact_path }})
-    - name: Install Requirement 
+    - name: Install Requirement
       shell: bash
       run: |
         pip install -U cos-python-sdk-v5

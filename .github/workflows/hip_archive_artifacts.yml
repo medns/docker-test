@@ -87,7 +87,7 @@ jobs:
             Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
             LocalFilePath=artifact,
             EnableMD5=True,
-            ContentMD5=metadata["artifact-md5"]
+            ContentMD5=metadata["artifact-md5"],
             Metadata=metadata
         )
         print("ETag: " + response["ETag"])

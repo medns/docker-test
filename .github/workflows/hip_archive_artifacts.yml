@@ -74,7 +74,7 @@ jobs:
         metadata["source-type"] = "${{ github.event.inputs.source_type }}"
         metadata["source-url"] = "${{ github.event.inputs.source_url }}"
         metadata["artifact-publisher"] = "${{ github.event.sender.login }}"
-        metadata["artifact-md5"] = hashlib.md5(open(artifact),'rb').read()).hexdigest()
+        metadata["artifact-md5"] = hashlib.md5(open(artifact),"rb").read().hexdigest()
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-revision"] = "${{ github.event.inputs.git_revision }}' || '' }}
         ${{ github.event.inputs.source_type == 'Git' && 'metadata["git-head"] = "${{ steps.git-clone.git-head }}' || '' }}
        

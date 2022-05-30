@@ -28,5 +28,5 @@ jobs:
         coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
     - name: Publish artifact
       run: |
-        coscmd list ${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }} -a >> $GITHUB_STEP_SUMMARY
+        coscmd list ${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }} -ar >> $GITHUB_STEP_SUMMARY
     

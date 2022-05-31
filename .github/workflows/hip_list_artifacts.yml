@@ -32,7 +32,7 @@ jobs:
         fi
     - name: Install Requirement
       run: |
-        if [ ${{steps.prepare-path.outputs.is-directory}} == "1" ]; then
+        if [ "${{steps.prepare-path.outputs.is-directory}}" == "1" ]; then
           pip install coscmd
           coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
         elif

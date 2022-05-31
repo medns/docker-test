@@ -22,10 +22,6 @@ jobs:
       run:
         shell: bash
     steps:
-    - name: Install Requirement
-      run: |
-        pip install coscmd
-        coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
     - name: Prepare Path
       id: prepare-path
       run: |
@@ -34,11 +30,29 @@ jobs:
         if [[ $path == */ ]] || [[ $path == *\\ ]]; then
           echo "::set-output name=is-directory::1"
         fi
+    - name: Install Requirement
+      run: |
+        if [ ${{steps.prepare-path.outputs.is-directory}} == "1" ]; then
+          pip install coscmd
+          coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
+        elif
+          pip install -U cos-python-sdk-v5
+        fi
     - name: List artifact
       if: ${{ steps.prepare-path.outputs.is-directory == '1' }}
       run: |
         coscmd list ${{ steps.prepare-path.outputs.path }} -ar >> $GITHUB_STEP_SUMMARY 2>&1
     - name: Info artifact
       if: ${{ steps.prepare-path.outputs.is-directory != '1' }}
+      shell: python
       run: |
-        coscmd info ${{ steps.prepare-path.outputs.path }} >> $GITHUB_STEP_SUMMARY 2>&1
+        from qcloud_cos import CosConfig
+        from qcloud_cos import CosS3Client
+
+        config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
+        client = CosS3Client(config)
+        response = client.head_object(
+            Bucket="${{ secrets.COS_BUCKET }}",
+            Key="${{ steps.prepare-path.outputs.path }}"
+        )
+        print(response)

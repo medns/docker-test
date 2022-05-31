@@ -26,7 +26,19 @@ jobs:
       run: |
         pip install coscmd
         coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
-    - name: Publish artifact
+    - name: Prepare Path
+      id: prepare-path
       run: |
-        coscmd list ${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }} -ar >> $GITHUB_STEP_SUMMARY
-    
+        path=${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }}
+        echo "::set-output name=path::$path"
+        if [[ $path == */ ]] || [[ $path == *\\ ]]; then
+          echo "::set-output name=is-directory::1"
+        fi
+    - name: List artifact
+      if: {{ steps.prepare-path.outputs.is-directory == '1' }}
+      run: |
+        coscmd list ${{ steps.prepare-path.outputs.path }} -ar >> $GITHUB_STEP_SUMMARY
+    - name: Info artifact
+      if: {{ steps.prepare-path.outputs.is-directory != '1' }}
+      run: |
+        coscmd info ${{ steps.prepare-path.outputs.path }} >> $GITHUB_STEP_SUMMARY

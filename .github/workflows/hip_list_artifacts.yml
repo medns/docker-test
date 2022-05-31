@@ -35,10 +35,10 @@ jobs:
           echo "::set-output name=is-directory::1"
         fi
     - name: List artifact
-      if: {{ steps.prepare-path.outputs.is-directory == '1' }}
+      if: ${{ steps.prepare-path.outputs.is-directory == '1' }}
       run: |
         coscmd list ${{ steps.prepare-path.outputs.path }} -ar >> $GITHUB_STEP_SUMMARY
     - name: Info artifact
-      if: {{ steps.prepare-path.outputs.is-directory != '1' }}
+      if: ${{ steps.prepare-path.outputs.is-directory != '1' }}
       run: |
         coscmd info ${{ steps.prepare-path.outputs.path }} >> $GITHUB_STEP_SUMMARY

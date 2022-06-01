@@ -22,28 +22,10 @@ jobs:
       run:
         shell: bash
     steps:
-    - name: Prepare Path
-      id: prepare-path
-      run: |
-        path=${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }}
-        echo "::set-output name=path::$path"
-        if [[ $path == */ ]] || [[ $path == *\\ ]]; then
-          echo "::set-output name=is-directory::1"
-        fi
     - name: Install Requirement
       run: |
-        if [ "${{steps.prepare-path.outputs.is-directory}}" == "1" ]; then
-          pip install coscmd
-          coscmd config -a ${{ secrets.TC_SECRET_ID }} -s ${{ secrets.TC_SECRET_KEY }} -b ${{ secrets.COS_BUCKET }} -r ${{ secrets.COS_REGION }}
-        else
-          pip install -U cos-python-sdk-v5
-        fi
-    - name: List artifact
-      if: ${{ steps.prepare-path.outputs.is-directory == '1' }}
-      run: |
-        coscmd list ${{ steps.prepare-path.outputs.path }} -ar >> $GITHUB_STEP_SUMMARY 2>&1
+        pip install -U cos-python-sdk-v5
     - name: Info artifact
-      if: ${{ steps.prepare-path.outputs.is-directory != '1' }}
       shell: python
       run: |
         from qcloud_cos import CosConfig, CosS3Client
@@ -52,14 +34,23 @@ jobs:
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
 
-        response = client.get_object_tagging(
-            Bucket="${{ secrets.COS_BUCKET }}",
-            Key="${{ steps.prepare-path.outputs.path }}"
-        )
+        path = "${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }}"
 
-        with open(getenv("GITHUB_STEP_SUMMARY"), 'w', encoding='utf-8') as file:
-          file.write("File Path: %s\n" % "${{ steps.prepare-path.outputs.path }}")
-          file.write("| TAG Key | TAG Value |\n")
-          file.write("|------|------|\n")
-          for tag in response["TagSet"]["Tag"]:
-            file.write("| %s | %s |\n" % (tag["Key"], tag["Value"]))
+        if path.endswith("/") || path.endswith("\\"):
+          response = client.get_object_tagging(
+              Bucket="${{ secrets.COS_BUCKET }}",
+              Key=path
+          )
+
+          with open(getenv("GITHUB_STEP_SUMMARY"), 'w', encoding='utf-8') as file:
+            file.write("File Path: %s\n" % path)
+            file.write("| TAG Key | TAG Value |\n")
+            file.write("|------|------|\n")
+            for tag in response["TagSet"]["Tag"]:
+              file.write("| %s | %s |\n" % (tag["Key"], tag["Value"]))
+        else:
+          response = client.list_objects(
+              Bucket="${{ secrets.COS_BUCKET }}",
+              Prefix=path
+          )
+          print(response['Contents'])

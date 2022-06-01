@@ -46,7 +46,7 @@ jobs:
       if: ${{ steps.prepare-path.outputs.is-directory != '1' }}
       shell: python
       run: |
-        from qcloud_cos import CosConfig, CosS3Client,
+        from qcloud_cos import CosConfig, CosS3Client
 
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)

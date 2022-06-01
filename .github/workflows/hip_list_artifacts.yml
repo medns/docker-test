@@ -58,6 +58,7 @@ jobs:
         )
 
         with open(getenv("GITHUB_STEP_SUMMARY"), 'w', encoding='utf-8') as file:
+          file.write("File Path: %s\n" % "${{ steps.prepare-path.outputs.path }}")
           file.write("| TAG Key | TAG Value |\n")
           file.write("|------|------|\n")
           for tag in response["TagSet"]["Tag"]:

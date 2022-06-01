@@ -48,8 +48,7 @@ jobs:
       run: |
         from qcloud_cos import CosConfig, CosS3Client, CosS3Auth
 
-        def get_object_tagging(self, Bucket, Key, **kwargs):
-          headers = mapped(kwargs)
+        def get_object_tagging(self, Bucket, Key, headers = {}):
           params = {
             'tagging': None
           }

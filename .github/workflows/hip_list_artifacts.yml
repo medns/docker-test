@@ -50,7 +50,7 @@ jobs:
 
         def get_object_tagging(self, Bucket, Key, headers = {}):
           params = {
-            'tagging': None
+            'tagging': ''
           }
           if 'versionId' in headers:
               params['versionId'] = headers['versionId']

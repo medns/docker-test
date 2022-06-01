@@ -63,7 +63,7 @@ jobs:
               auth=CosS3Auth(self._conf, Key, params=params),
               headers=headers,
               params=params)
-          return dict(**rt.headers)
+          return dict(**rt.content)
         
         CosS3Client.get_object_tagging = get_object_tagging
 

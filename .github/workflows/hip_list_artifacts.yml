@@ -47,6 +47,7 @@ jobs:
       shell: python
       run: |
         from qcloud_cos import CosConfig, CosS3Client, CosS3Auth
+        from qcloud_cos.cos_comm import xml_to_dict
 
         def get_object_tagging(self, Bucket, Key, headers = {}):
           params = {
@@ -63,7 +64,7 @@ jobs:
               auth=CosS3Auth(self._conf, Key, params=params),
               headers=headers,
               params=params)
-          return dict(**rt.content)
+          return xml_to_dict(**rt.content)
         
         CosS3Client.get_object_tagging = get_object_tagging
 

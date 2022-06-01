@@ -1,4 +1,4 @@
-name: '[hip] list artifacts'
+name: '[hip] info artifacts'
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
         type: string
 
 jobs:
-  list_artifacts:
+  info_artifacts:
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -37,6 +37,12 @@ jobs:
         path = "${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }}"
 
         if path.endswith("/") or path.endswith("\\"):
+          response = client.list_objects(
+              Bucket="${{ secrets.COS_BUCKET }}",
+              Prefix=path
+          )
+          print(response['Contents'])
+        else:
           response = client.get_object_tagging(
               Bucket="${{ secrets.COS_BUCKET }}",
               Key=path
@@ -48,9 +54,3 @@ jobs:
             file.write("|------|------|\n")
             for tag in response["TagSet"]["Tag"]:
               file.write("| %s | %s |\n" % (tag["Key"], tag["Value"]))
-        else:
-          response = client.list_objects(
-              Bucket="${{ secrets.COS_BUCKET }}",
-              Prefix=path
-          )
-          print(response['Contents'])

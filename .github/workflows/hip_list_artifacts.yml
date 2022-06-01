@@ -36,7 +36,7 @@ jobs:
 
         path = "${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_path }}"
 
-        if path.endswith("/") || path.endswith("\\"):
+        if path.endswith("/") or path.endswith("\\"):
           response = client.get_object_tagging(
               Bucket="${{ secrets.COS_BUCKET }}",
               Key=path

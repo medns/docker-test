@@ -47,6 +47,7 @@ jobs:
       shell: python
       run: |
         from qcloud_cos import CosConfig, CosS3Client
+        from os import getenv
 
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
@@ -55,4 +56,9 @@ jobs:
             Bucket="${{ secrets.COS_BUCKET }}",
             Key="${{ steps.prepare-path.outputs.path }}"
         )
-        print(response)
+
+        with open(getenv("GITHUB_STEP_SUMMARY"), 'w', encoding='utf-8') as file:
+          file.write("| TAG Key | TAG Value |\n")
+          file.write("|------|------|\n")
+          for tag in response["TagSet"]["Tag"]:
+            file.write("| %s | %s |" % (tag["Key"], tag["Value"]))

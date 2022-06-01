@@ -41,7 +41,13 @@ jobs:
               Bucket="${{ secrets.COS_BUCKET }}",
               Prefix=path
           )
-          print(response['Contents'])
+
+          with open(getenv("GITHUB_STEP_SUMMARY"), 'w', encoding='utf-8') as file:
+            file.write("Root Path: %s\n" % path)
+            file.write("| File | Size |\n")
+            file.write("|------|------|\n")
+            for object in response:
+              file.write("| %s | %s |\n" % (object["Key"], object["Size"]))
         else:
           response = client.get_object_tagging(
               Bucket="${{ secrets.COS_BUCKET }}",

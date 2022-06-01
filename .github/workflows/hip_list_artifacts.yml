@@ -46,7 +46,7 @@ jobs:
             file.write("Root Path: %s\n" % path)
             file.write("| File | Size |\n")
             file.write("|------|------|\n")
-            for object in response:
+            for object in response["Contents"]:
               file.write("| %s | %s |\n" % (object["Key"], object["Size"]))
         else:
           response = client.get_object_tagging(

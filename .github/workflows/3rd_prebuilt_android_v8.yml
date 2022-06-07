@@ -87,15 +87,18 @@ jobs:
         fi
     - name: Fetch patch
       uses: actions/checkout@v2
-      if: github.event.inputs.v8_revision == '7.7.229'
       with:
         path: ${{ github.repository }}
-        lfs: true
     - name: Apply patch
-      if: github.event.inputs.v8_revision == '7.7.229'
-      working-directory: ./v8/build
+      working-directory: ./v8
+      continue-on-error: true
       run: |
-        git apply ../../${{ github.repository }}/.github/workflows/tools/v8_build.patch
+        if [[ "${{ github.event.inputs.v8_revision }}" == "7.7.229" ]]; then
+          cd build
+          git apply ../../${{ github.repository }}/.github/workflows/tools/v8_7_7_229_build.patch
+        else
+          git apply ../${{ github.repository }}/.github/workflows/tools/v8_remove_requests_revision.patch
+        fi
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |

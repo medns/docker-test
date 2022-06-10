@@ -6,13 +6,8 @@ jobs:
   greeting:
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        touch 123
-    - name: Publish package
-      uses: zkqiang/tencent-cos-action@v0.1.0
-      with:
-        args: upload -r ./123 /hippy/test/ -H {'x-cos-meta-example':'a=def'}
-        secret_id: ${{ secrets.TC_SECRET_ID }}
-        secret_key: ${{ secrets.TC_SECRET_KEY }}
-        bucket: ${{ secrets.COS_BUCKET }}
-        region: ${{ secrets.COS_REGION }}
+    - shell: python
+      run: |
+        import sys
+        print(sys.version)
+        

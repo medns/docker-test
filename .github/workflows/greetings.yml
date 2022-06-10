@@ -12,7 +12,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - run: |
-        pip3 install -U cos-python-sdk-v5
+        pip install -U cos-python-sdk-v5
     - shell: python
       run: |
         from qcloud_cos import CosConfig

@@ -172,13 +172,21 @@ jobs:
         echo "::set-output name=head_full::$(git rev-parse HEAD)"
         cd out
         tar -zcvf android-${{ matrix.arch }}.tgz -C artifact .
-    - name: Make tagging
-      id: make_tagging
+    - name: Install Requirement
+      shell: bash
+      run: |
+        pip install -U cos-python-sdk-v5
+    - name: Publish package
       shell: python
       run: |
+        from qcloud_cos import CosConfig
+        from qcloud_cos import CosS3Client
         import hashlib
         import os
-        import json
+        try:
+            from urllib.parse import urlencode
+        except ImportError:
+            from urllib import urlencode
 
         artifact = "./v8/out/android-${{ matrix.arch }}.tgz"
 
@@ -192,17 +200,17 @@ jobs:
         metadata["v8-revision"] = "${{ github.event.inputs.v8_revision }}"
         metadata["v8-head"] = "${{ steps.release_package.outputs.head_full }}"
 
-        metadata = {"x-cos-tagging-" + k: v for k, v in metadata.items()}
-        
-        print("::set-output name=tagging::%s" % json.dumps(metadata).replace("\"", "\\\\\\\"").replace(" ", ""))
-    - name: Publish package
-      uses: zkqiang/tencent-cos-action@v0.1.0
-      with:
-        args: upload -r ./v8/out/android-${{ matrix.arch }}.tgz /hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/ -H "\'${{ steps.make_tagging.outputs.tagging }}\'"
-        secret_id: ${{ secrets.TC_SECRET_ID }}
-        secret_key: ${{ secrets.TC_SECRET_KEY }}
-        bucket: ${{ secrets.COS_BUCKET }}
-        region: ${{ secrets.COS_REGION }}
+        config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
+        client = CosS3Client(config)
+        response = client.upload_file(
+            Bucket="${{ secrets.COS_BUCKET }}",
+            Key="hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/android-${{ matrix.arch }}.tgz",
+            LocalFilePath=artifact,
+            EnableMD5=True,
+            ContentMD5=metadata["v8-md5"],
+            Metadata={"x-cos-tagging": urlencode(metadata)}
+        )
+        print("ETag: " + response["ETag"])
     - name: Clean up after
       if: ${{ always() }}
       shell: bash

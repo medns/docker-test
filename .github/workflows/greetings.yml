@@ -5,6 +5,11 @@ on: [workflow_dispatch]
 jobs:
   greeting:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - run: |
         git clone --depth=1 https://github.com/tencentyun/cos-python-sdk-v5.git

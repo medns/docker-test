@@ -18,6 +18,10 @@ on:
         type: string
         default: '9.7-lkgr'
         required: true
+      hip_v8_root:
+        description: 'HIP V8 root path'
+        type: string
+        require: true
       is_build_for_android:
         description: 'Build for Android platform'
         type: boolean
@@ -190,7 +194,7 @@ jobs:
         client = CosS3Client(config)
         response = client.upload_file(
             Bucket="${{ secrets.COS_BUCKET }}",
-            Key="hippy/third_party/v8/${{ github.event.inputs.package_tag }}/android-${{ matrix.arch }}.tgz",
+            Key="hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/android-${{ matrix.arch }}.tgz",
             LocalFilePath=artifact,
             EnableMD5=True,
             ContentMD5=metadata["v8-md5"],
@@ -318,7 +322,7 @@ jobs:
         client = CosS3Client(config)
         response = client.upload_file(
             Bucket="${{ secrets.COS_BUCKET }}",
-            Key="hippy/third_party/v8/${{ github.event.inputs.package_tag }}/windows-${{ matrix.arch }}.zip",
+            Key="hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/windows-${{ matrix.arch }}.zip",
             LocalFilePath=artifact,
             EnableMD5=True,
             ContentMD5=metadata["v8-md5"],
@@ -436,7 +440,7 @@ jobs:
         client = CosS3Client(config)
         response = client.upload_file(
             Bucket="${{ secrets.COS_BUCKET }}",
-            Key="hippy/third_party/v8/${{ github.event.inputs.package_tag }}/macos-${{ matrix.arch }}.tgz",
+            Key="hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/macos-${{ matrix.arch }}.tgz",
             LocalFilePath=artifact,
             EnableMD5=True,
             ContentMD5=metadata["v8-md5"],

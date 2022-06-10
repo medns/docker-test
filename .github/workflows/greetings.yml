@@ -5,9 +5,6 @@ on:
     branches:
       - master
       - main
-    paths:
-      - 'android/**'
-      - 'core/**'
 
 jobs:
   greeting:
@@ -20,3 +17,7 @@ jobs:
     steps:
     - run: |
         echo "hello"
+    - uses: docker://python
+      shell: bash
+      run: |
+        pip install -U cos-python-sdk-v5

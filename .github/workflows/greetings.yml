@@ -6,8 +6,12 @@ jobs:
   greeting:
     runs-on: ubuntu-latest
     steps:
+    - run: |
+        git clone https://github.com/tencentyun/cos-python-sdk-v5.git
+        cd cos-python-sdk-v5
+        python setup.py install
     - shell: python
       run: |
-        import sys
-        print(sys.version)
+        from qcloud_cos import CosConfig
+        print(CosConfig)
         

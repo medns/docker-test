@@ -158,25 +158,27 @@ jobs:
                   INTERFACE "-DV8_DEPRECATION_WARNINGS"
                   ${{ (github.event.inputs.v8_revision != '7.7.229' && (matrix.cpu == 'x64' || matrix.cpu == 'arm64')) && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
 
+              add_library(${PROJECT_NAME}_library STATIC IMPORTED)
+              set_property(TARGET ${PROJECT_NAME}_library PROPERTY
+                  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libv8_monolith.a")
               target_link_libraries(${PROJECT_NAME}
-                  INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/lib/libv8_monolith.a")
+                  INTERFACE ${PROJECT_NAME}_library)
+
         write-mode: overwrite
     - name: Release package
-      working-directory: ./v8/out
+      id: release_package
+      working-directory: ./v8
       run: |
+        echo "::set-output name=head_full::$(git rev-parse HEAD)"
+        cd out
         tar -zcvf android-${{ matrix.arch }}.tgz -C artifact .
-    - name: Install Requirement
-      shell: bash
-      run: |
-        pip install -U cos-python-sdk-v5
-    - name: Publish package
+    - name: Make tagging
+      id: make_tagging
       shell: python
       run: |
-        from qcloud_cos import CosConfig
-        from qcloud_cos import CosS3Client
-        from urllib.parse import urlencode
         import hashlib
         import os
+        import json
 
         artifact = "./v8/out/android-${{ matrix.arch }}.tgz"
 
@@ -188,19 +190,19 @@ jobs:
         with open(artifact, "rb") as artifact_file:
           metadata["v8-md5"] = hashlib.md5(artifact_file.read()).hexdigest()
         metadata["v8-revision"] = "${{ github.event.inputs.v8_revision }}"
-        metadata["v8-head"] = "${{ steps.merge_all_artifact.outputs.head_full }}"
+        metadata["v8-head"] = "${{ steps.release_package.outputs.head_full }}"
 
-        config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
-        client = CosS3Client(config)
-        response = client.upload_file(
-            Bucket="${{ secrets.COS_BUCKET }}",
-            Key="hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/android-${{ matrix.arch }}.tgz",
-            LocalFilePath=artifact,
-            EnableMD5=True,
-            ContentMD5=metadata["v8-md5"],
-            Metadata={"x-cos-tagging": urlencode(metadata)}
-        )
-        print("ETag: " + response["ETag"])
+        metadata = {"x-cos-tagging-" + k: v for k, v in metadata.items()}
+        
+        print("::set-output name=tagging::%s" % json.dumps(metadata))
+    - name: Publish package
+      uses: zkqiang/tencent-cos-action@v0.1.0
+      with:
+        args: upload -r ./v8/out/android-${{ matrix.arch }}.tgz /hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/ -H '${{ steps.make_tagging.outputs.tagging }}'
+        secret_id: ${{ secrets.TC_SECRET_ID }}
+        secret_key: ${{ secrets.TC_SECRET_KEY }}
+        bucket: ${{ secrets.COS_BUCKET }}
+        region: ${{ secrets.COS_REGION }}
     - name: Clean up after
       if: ${{ always() }}
       shell: bash
@@ -286,12 +288,19 @@ jobs:
                   INTERFACE "-DV8_DEPRECATION_WARNINGS"
                   ${{ (matrix.cpu == 'x64' || matrix.cpu == 'arm64') && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
 
+              add_library(${PROJECT_NAME}_library STATIC IMPORTED)
+              set_property(TARGET ${PROJECT_NAME}_library PROPERTY
+                  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/v8_monolith.lib")
               target_link_libraries(${PROJECT_NAME}
-                  INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/lib/v8_monolith.lib")
+                  INTERFACE ${PROJECT_NAME}_library)
+
         write-mode: overwrite
     - name: Release package
-      working-directory: ./v8/out
+      id: release_package
+      working-directory: ./v8
       run: |
+        Write-Output "::set-output name=head_full::$(git rev-parse HEAD)"
+        cd out
         Compress-Archive -Path artifact\* -DestinationPath windows-${{ matrix.arch }}.zip
     - name: Install Requirement
       shell: bash
@@ -316,7 +325,7 @@ jobs:
         with open(artifact, "rb") as artifact_file:
           metadata["v8-md5"] = hashlib.md5(artifact_file.read()).hexdigest()
         metadata["v8-revision"] = "${{ github.event.inputs.v8_revision }}"
-        metadata["v8-head"] = "${{ steps.merge_all_artifact.outputs.head_full }}"
+        metadata["v8-head"] = "${{ steps.release_package.outputs.head_full }}"
 
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
@@ -404,12 +413,19 @@ jobs:
                   INTERFACE "-DV8_DEPRECATION_WARNINGS"
                   ${{ (matrix.cpu == 'x64' || matrix.cpu == 'arm64') && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
 
+              add_library(${PROJECT_NAME}_library STATIC IMPORTED)
+              set_property(TARGET ${PROJECT_NAME}_library PROPERTY
+                  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libv8_monolith.a")
               target_link_libraries(${PROJECT_NAME}
-                  INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/lib/libv8_monolith.a")
+                  INTERFACE ${PROJECT_NAME}_library)
+
         write-mode: overwrite
     - name: Release package
-      working-directory: ./v8/out
+      id: release_package
+      working-directory: ./v8
       run: |
+        echo "::set-output name=head_full::$(git rev-parse HEAD)"
+        cd out
         tar -zcvf macos-${{ matrix.arch }}.tgz -C artifact .
     - name: Install Requirement
       shell: bash
@@ -420,9 +436,12 @@ jobs:
       run: |
         from qcloud_cos import CosConfig
         from qcloud_cos import CosS3Client
-        from urllib.parse import urlencode
         import hashlib
         import os
+        try:
+            from urllib.parse import urlencode
+        except ImportError:
+            from urlparse import urlencode
 
         artifact = "./v8/out/macos-${{ matrix.arch }}.tgz"
 
@@ -434,7 +453,7 @@ jobs:
         with open(artifact, "rb") as artifact_file:
           metadata["v8-md5"] = hashlib.md5(artifact_file.read()).hexdigest()
         metadata["v8-revision"] = "${{ github.event.inputs.v8_revision }}"
-        metadata["v8-head"] = "${{ steps.merge_all_artifact.outputs.head_full }}"
+        metadata["v8-head"] = "${{ steps.release_package.outputs.head_full }}"
 
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)

@@ -6,7 +6,7 @@ on:
       v8_revision:
         description: 'V8 TAG(Branch) to build'
         type: string
-        default: '9.7-lkgr'
+        default: '9.8-lkgr'
         required: true
       build_args:
         description: 'Build args'
@@ -16,7 +16,7 @@ on:
       package_tag:
         description: 'Package TAG'
         type: string
-        default: '9.7-lkgr'
+        default: '9.8-lkgr'
         required: true
       hip_v8_root:
         description: 'HIP V8 root path'

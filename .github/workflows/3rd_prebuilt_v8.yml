@@ -167,8 +167,8 @@ jobs:
         tar -zcvf android-${{ matrix.arch }}.tgz -C artifact .
     - name: Install Requirement
       shell: bash
-        run: |
-          pip install -U cos-python-sdk-v5
+      run: |
+        pip install -U cos-python-sdk-v5
     - name: Publish package
       shell: python
       run: |
@@ -295,8 +295,8 @@ jobs:
         Compress-Archive -Path artifact\* -DestinationPath windows-${{ matrix.arch }}.zip
     - name: Install Requirement
       shell: bash
-        run: |
-          pip install -U cos-python-sdk-v5
+      run: |
+        pip install -U cos-python-sdk-v5
     - name: Publish package
       shell: python
       run: |
@@ -413,8 +413,8 @@ jobs:
         tar -zcvf macos-${{ matrix.arch }}.tgz -C artifact .
     - name: Install Requirement
       shell: bash
-        run: |
-          pip install -U cos-python-sdk-v5
+      run: |
+        pip install -U cos-python-sdk-v5
     - name: Publish package
       shell: python
       run: |

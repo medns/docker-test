@@ -194,11 +194,11 @@ jobs:
 
         metadata = {"x-cos-tagging-" + k: v for k, v in metadata.items()}
         
-        print("::set-output name=tagging::%s" % json.dumps(metadata).replace("\"", "\\\""))
+        print("::set-output name=tagging::%s" % json.dumps(metadata).replace("\"", "\\\"").replace(" ", ""))
     - name: Publish package
       uses: zkqiang/tencent-cos-action@v0.1.0
       with:
-        args: upload -r ./v8/out/android-${{ matrix.arch }}.tgz /hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/ -H "'${{ steps.make_tagging.outputs.tagging }}'"
+        args: upload -r ./v8/out/android-${{ matrix.arch }}.tgz /hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/ -H "\'${{ steps.make_tagging.outputs.tagging }}\'"
         secret_id: ${{ secrets.TC_SECRET_ID }}
         secret_key: ${{ secrets.TC_SECRET_KEY }}
         bucket: ${{ secrets.COS_BUCKET }}

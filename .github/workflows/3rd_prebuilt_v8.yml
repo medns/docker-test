@@ -194,7 +194,7 @@ jobs:
 
         metadata = {"x-cos-tagging-" + k: v for k, v in metadata.items()}
         
-        print("::set-output name=tagging::%s" % json.dumps(metadata).replace("\"", "\\\\\\\"").replace(" ", ""))
+        print("::set-output name=tagging::%s" % json.dumps(metadata).replace("\"", "\\\\\"").replace(" ", ""))
     - name: Publish package
       uses: zkqiang/tencent-cos-action@v0.1.0
       with:

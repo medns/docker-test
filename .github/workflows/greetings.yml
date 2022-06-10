@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        git clone https://github.com/tencentyun/cos-python-sdk-v5.git
+        git clone --depth=1 https://github.com/tencentyun/cos-python-sdk-v5.git
         cd cos-python-sdk-v5
-        python setup.py install
+        python3 setup.py install
     - shell: python
       run: |
         from qcloud_cos import CosConfig

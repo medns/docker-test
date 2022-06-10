@@ -5,18 +5,13 @@ on: [workflow_dispatch]
 jobs:
   greeting:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - run: |
         touch 123
     - name: Publish package
       uses: zkqiang/tencent-cos-action@v0.1.0
       with:
-        args: upload -r ./123 /hippy/test/ -H "\'{\"x-cos-tagging-ci-url\":\"https://github.com/medns/docker-test/actions/runs/2473958676\",\"x-cos-tagging-v8-revision\":\"9.8-lkgr\",\"x-cos-tagging-v8-md5\":\"e8b1cc343751f2bf5789cac061ddf9f7\",\"x-cos-tagging-ci-name\":\"GithubAction\",\"x-cos-tagging-v8-head\":\"4fc3a00787f5b613de2dbc95229c424e27917295\",\"x-cos-tagging-v8-builder\":\"medns\",\"x-cos-tagging-ci-id\":\"2473958676\"}\'"
+        args: upload -r ./123 /hippy/test/ -H "\'{\\\"x-cos-tagging-ci-url\\\":\\\"https://github.com/medns\\\"}\'"
         secret_id: ${{ secrets.TC_SECRET_ID }}
         secret_key: ${{ secrets.TC_SECRET_KEY }}
         bucket: ${{ secrets.COS_BUCKET }}

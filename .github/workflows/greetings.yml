@@ -12,9 +12,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - run: |
-        git clone --depth=1 https://github.com/tencentyun/cos-python-sdk-v5.git
-        cd cos-python-sdk-v5
-        python3 setup.py install
+        pip3 install -U cos-python-sdk-v5
     - shell: python
       run: |
         from qcloud_cos import CosConfig

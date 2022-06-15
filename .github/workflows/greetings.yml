@@ -16,4 +16,5 @@ jobs:
         cat test
     - run: |
         echo 123 > test
+        sleep 10
         

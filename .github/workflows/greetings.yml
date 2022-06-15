@@ -11,7 +11,8 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - run: |
+    - continue-on-error: true
+      run: |
         cat test
     - run: |
         echo 123 > test

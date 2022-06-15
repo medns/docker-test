@@ -4,7 +4,7 @@ on: [workflow_dispatch]
 
 jobs:
   greeting:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, trusted, test]
     container:
       image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
       credentials:
@@ -12,9 +12,5 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - run: |
-        pip install -U cos-python-sdk-v5
-    - shell: python
-      run: |
-        from qcloud_cos import CosConfig
-        print(CosConfig)
+        sleep 60
         

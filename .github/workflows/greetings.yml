@@ -12,5 +12,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - run: |
-        sleep 60
+        cat test
+    - run: |
+        echo 123 > test
         

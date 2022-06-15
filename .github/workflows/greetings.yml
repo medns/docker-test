@@ -4,7 +4,7 @@ on: [workflow_dispatch]
 
 jobs:
   greeting:
-    runs-on: [self-hosted, linux, trusted, test]
+    runs-on: [test]
     container:
       image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
       credentials:

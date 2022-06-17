@@ -1,20 +1,11 @@
 name: Greetings
 
-on: [workflow_dispatch]
+on: [workflow_dispatch, pull_request]
 
 jobs:
   greeting:
-    runs-on: [test]
-    container:
-      image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
     steps:
-    - continue-on-error: true
       run: |
-        cat test
-    - run: |
-        echo 123 > test
-        sleep 10
+        echo 123
         

@@ -20,7 +20,6 @@ jobs:
           const { owner, repo } = context.repo;
           const { pull_request } = context.payload;
           const { checks, actions, pulls, issues } = github.rest;
-          console.log(owner, repo);
 
           const { data: files } = await pulls.listFiles({
             owner,
@@ -39,6 +38,7 @@ jobs:
 
           let isCollaborator = true;
           for (const run of check_runs) {
+            console.log(check_runs);
             if (run.app.slug === 'github-actions') {
               // Get the corresponding Actions job.
               // The Actions job ID is the same as the Checks run ID

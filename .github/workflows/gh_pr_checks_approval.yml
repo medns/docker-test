@@ -53,10 +53,10 @@ jobs:
 
           let body = '👋 Thanks for your contributing!\n\n';
           if (includeRiskFiles) {
-            body += `🤖: "Sorry, due to risky changes, I can\'t approve workflow${workflow_runs.length > 1 ? "s" : ""} to run."\n`;
+            body += `🤖: "Sorry, due to risky changes, I can\'t approve${workflow_runs.length === 1 ? " the " : " "}workflow${workflow_runs.length > 1 ? "s" : ""} to run."\n`;
             body += '🤖: "Don\'t worry about it, our collaborators will handle it asap."';
           } else {
-            body += `🤖: "After a quick scan, I have approved workflow${workflow_runs.length > 1 ? "s" : ""} to run."`;
+            body += `🤖: "After a quick scan, I have approved${workflow_runs.length === 1 ? " the " : " "}workflow${workflow_runs.length > 1 ? "s" : ""} to run."`;
           }
           await issues.createComment({
             owner,

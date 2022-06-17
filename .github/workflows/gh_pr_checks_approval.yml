@@ -36,11 +36,12 @@ jobs:
             ref: pull_request.head.sha,
           }));
 
-          console.log(await actions.listWorkflowRunsForRepo({
+          const { data: workflow_runs } = await actions.listWorkflowRunsForRepo({
             owner,
             repo,
             event: 'pull_request'
-          }));
+          });
+          console.log(workflow_runs.fliter(workflow_run => workflow_run.head_sha === pull_request.head.sha));
 
           let isCollaborator = true;
           for (const run of check_runs) {

@@ -10,6 +10,7 @@ jobs:
   pull_request_checks_approval:
     permissions:
       actions: write
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - name: Checks approval

@@ -30,7 +30,7 @@ jobs:
           const includeRiskFiles = files.every(f => !f.filename.startsWith('.github/workflows'));
 
           // Obtain the check runs for the head SHA1 of this pull request.
-          const { data: check_runs } = (await checks.listForRef({
+          const { data: { check_runs } } = (await checks.listForRef({
             owner,
             repo,
             ref: pull_request.head.sha,

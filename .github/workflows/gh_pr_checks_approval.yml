@@ -41,13 +41,11 @@ jobs:
           const includeRiskFiles = files.some(f => f.filename.startsWith('.github/workflows'));
 
           if (!includeRiskFiles) {
-            for (const workflow_run of workflow_runs) {
-              await actions.approveWorkflowRun({
-                owner,
-                repo,
-                run_id: workflow_run.id,
-              });
-            }
+            await Promise.all(workflow_runs.map(workflow_run => actions.approveWorkflowRun({
+              owner,
+              repo,
+              run_id: workflow_run.id,
+            })));
           }
 
           let body = '👋 Thanks for your contributing!\n\n';

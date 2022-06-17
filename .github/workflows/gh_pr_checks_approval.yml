@@ -9,8 +9,7 @@ on:
 jobs:
   pull_request_checks_approval:
     permissions:
-      contents: read
-      pull-requests: write
+      actions: write
     runs-on: ubuntu-latest
     steps:
     - name: Checks approval

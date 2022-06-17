@@ -20,6 +20,7 @@ jobs:
           const { owner, repo } = context.repo;
           const { pull_request } = context.payload;
           const { checks, actions, pulls, issues } = github.rest;
+          console.log(owner, repo);
 
           const { data: files } = await pulls.listFiles({
             owner,
@@ -28,6 +29,7 @@ jobs:
           });
 
           const includeRiskFiles = files.every(f => !f.filename.startsWith('.github/workflows'));
+          console.log(includeRiskFiles)
 
           // Obtain the check runs for the head SHA1 of this pull request.
           const { data: { check_runs } } = (await checks.listForRef({
@@ -37,8 +39,10 @@ jobs:
           }));
 
           let isCollaborator = true;
+          console.log(check_runs);
           for (const run of check_runs) {
             if (run.app.slug === 'github-actions') {
+              console.log(1222);
               // Get the corresponding Actions job.
               // The Actions job ID is the same as the Checks run ID
               // (not to be confused with the Actions run ID).
@@ -54,8 +58,9 @@ jobs:
                 repo,
                 run_id: job.run_id,
               }));
-
+              console.log(actions_run);
               if (actions_run.event === 'pull_request' && actions_run.status === 'action_required') {
+                console.log(123);
                 isCollaborator = false;
                 if (!includeRiskFiles) {
                   await actions.approveWorkflowRun({

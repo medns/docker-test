@@ -1,0 +1,86 @@
+name: '[gh] pull request checks approval'
+
+on:
+  pull_request_target:
+    branches:
+      - master
+      - main
+
+jobs:
+  pull_request_checks_approval:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checks approval
+      uses: actions/github-script@v6.1.0
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const { pull_request } = context.payload;
+          const { checks, actions, pulls, issues } = github.rest;
+
+          const { data: files } = await pulls.listFiles({
+            owner,
+            repo,
+            pull_number: pull_request.number,
+          });
+
+          const includeRiskFiles = files.every(f => !f.filename.startsWith('.github/workflows'));
+
+          // Obtain the check runs for the head SHA1 of this pull request.
+          const { data: check_runs } = (await checks.listForRef({
+            owner,
+            repo,
+            ref: pull_request.head.sha,
+          }));
+
+          let isCollaborator = true;
+          for (const run of check_runs) {
+            if (run.app.slug === 'github-actions') {
+              // Get the corresponding Actions job.
+              // The Actions job ID is the same as the Checks run ID
+              // (not to be confused with the Actions run ID).
+              const { data: job } = (await actions.getJobForWorkflowRun({
+                owner,
+                repo,
+                job_id: run.id,
+              }));
+
+              // Now, get the Actions run that this job is in.
+              const { data: actions_run } = (await actions.getWorkflowRun({
+                owner,
+                repo,
+                run_id: job.run_id,
+              }));
+
+              if (actions_run.event === 'pull_request' && actions_run.status === 'action_required') {
+                isCollaborator = false;
+                if (!includeRiskFiles) {
+                  await actions.approveWorkflowRun({
+                    owner,
+                    repo,
+                    run_id: actions_run.id,
+                  });
+                }
+              }
+            }
+          }
+
+          if (!isCollaborator) {
+            let body = '👋 Thanks for your contributing!\n\n';
+            if (includeRiskFiles) {
+              body += '🤖: "Sorry, due to risky changes, I can\'t approve checks to run.\n';
+              body += '🤖: "Don\'t worry about it, our collaborators will handle it asap."';
+            } else {
+              body += '🤖: "After a quick check, I will approve checks to run."';
+            }
+            await issues.createComment({
+              owner,
+              repo,
+              issue_number: pull_request.number,
+              body,
+            });
+          }
+

@@ -51,7 +51,7 @@ jobs:
 
           let body = '👋 Thanks for your contributing!\n\n';
           if (includeRiskFiles) {
-            body += '🤖: "Sorry, due to risky changes, I can\'t approve checks to run.\n';
+            body += '🤖: "Sorry, due to risky changes, I can\'t approve checks to run."\n';
             body += '🤖: "Don\'t worry about it, our collaborators will handle it asap."';
           } else {
             body += '🤖: "After a quick scan, I will approve checks to run."';

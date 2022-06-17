@@ -36,9 +36,14 @@ jobs:
             ref: pull_request.head.sha,
           }));
 
+          console.log(await actions.listWorkflowRunsForRepo({
+            owner,
+            repo,
+            event: 'pull_request'
+          }));
+
           let isCollaborator = true;
           for (const run of check_runs) {
-            console.log(check_runs);
             if (run.app.slug === 'github-actions') {
               // Get the corresponding Actions job.
               // The Actions job ID is the same as the Checks run ID

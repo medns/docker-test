@@ -19,7 +19,19 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const { pull_request } = context.payload;
-          const { checks, actions, pulls, issues } = github.rest;
+          const { actions, pulls, issues } = github.rest;
+
+          let { data: { workflow_runs } } = await actions.listWorkflowRunsForRepo({
+            owner,
+            repo,
+            event: 'pull_request',
+            status: 'action_required'
+          });
+          workflow_runs = workflow_runs.filter(workflow_run => workflow_run.head_sha === pull_request.head.sha)
+
+          if (workflow_runs.length === 0) {
+            return;
+          }
 
           const { data: files } = await pulls.listFiles({
             owner,
@@ -29,65 +41,26 @@ jobs:
 
           const includeRiskFiles = files.some(f => f.filename.startsWith('.github/workflows'));
 
-          // Obtain the check runs for the head SHA1 of this pull request.
-          const { data: { check_runs } } = (await checks.listForRef({
-            owner,
-            repo,
-            ref: pull_request.head.sha,
-          }));
+          if (!includeRiskFiles) {
+            for (const workflow_run of workflow_runs) {
+              await actions.approveWorkflowRun({
+                owner,
+                repo,
+                run_id: workflow_run.id,
+              });
+            }
+          }
 
-          const { data: { workflow_runs } } = await actions.listWorkflowRunsForRepo({
+          let body = '👋 Thanks for your contributing!\n\n';
+          if (includeRiskFiles) {
+            body += '🤖: "Sorry, due to risky changes, I can\'t approve checks to run.\n';
+            body += '🤖: "Don\'t worry about it, our collaborators will handle it asap."';
+          } else {
+            body += '🤖: "After a quick check, I will approve checks to run."';
+          }
+          await issues.createComment({
             owner,
             repo,
-            event: 'pull_request'
+            issue_number: pull_request.number,
+            body,
           });
-          console.log(workflow_runs.filter(workflow_run => workflow_run.head_sha === pull_request.head.sha));
-
-          let isCollaborator = true;
-          for (const run of check_runs) {
-            if (run.app.slug === 'github-actions') {
-              // Get the corresponding Actions job.
-              // The Actions job ID is the same as the Checks run ID
-              // (not to be confused with the Actions run ID).
-              const { data: job } = (await actions.getJobForWorkflowRun({
-                owner,
-                repo,
-                job_id: run.id,
-              }));
-
-              // Now, get the Actions run that this job is in.
-              const { data: actions_run } = (await actions.getWorkflowRun({
-                owner,
-                repo,
-                run_id: job.run_id,
-              }));
-              console.log(actions_run.status, actions_run.event);
-              if (actions_run.event === 'pull_request' && actions_run.status === 'action_required') {
-                isCollaborator = false;
-                if (!includeRiskFiles) {
-                  await actions.approveWorkflowRun({
-                    owner,
-                    repo,
-                    run_id: actions_run.id,
-                  });
-                }
-              }
-            }
-          }
-
-          if (!isCollaborator) {
-            let body = '👋 Thanks for your contributing!\n\n';
-            if (includeRiskFiles) {
-              body += '🤖: "Sorry, due to risky changes, I can\'t approve checks to run.\n';
-              body += '🤖: "Don\'t worry about it, our collaborators will handle it asap."';
-            } else {
-              body += '🤖: "After a quick check, I will approve checks to run."';
-            }
-            await issues.createComment({
-              owner,
-              repo,
-              issue_number: pull_request.number,
-              body,
-            });
-          }
-

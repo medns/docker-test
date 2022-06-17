@@ -41,7 +41,7 @@ jobs:
             repo,
             event: 'pull_request'
           });
-          console.log(workflow_runs.fliter(workflow_run => workflow_run.head_sha === pull_request.head.sha));
+          console.log(workflow_runs.filter(workflow_run => workflow_run.head_sha === pull_request.head.sha));
 
           let isCollaborator = true;
           for (const run of check_runs) {

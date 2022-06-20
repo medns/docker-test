@@ -38,7 +38,7 @@ on:
 jobs:
   android_prebuilt:
     if: github.event.inputs.is_build_for_android == 'true'
-    runs-on: [self-hosted, linux, trusted]
+    runs-on: [self-hosted, linux]
     container:
       image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
       credentials:

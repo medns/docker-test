@@ -14,5 +14,6 @@ jobs:
       abc: 123
     steps:
     - run: |
-        echo $abc
+        echo $LIB
+        echo $PLATFORM
         

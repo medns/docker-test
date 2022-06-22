@@ -4,14 +4,7 @@ on: [workflow_dispatch]
 
 jobs:
   greeting:
-    runs-on: [self-hosted, linux]
-    container:
-      image: ghcr.io/medns/android-release:latest # repository name must be lowercase(${{ github.repository_owner }})
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    env:
-      abc: 123
+    runs-on: ubuntu-latest
     steps:
     - run: |
         echo $LIB

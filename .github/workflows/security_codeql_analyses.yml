@@ -68,7 +68,7 @@ jobs:
           }
 
           if (!has_hit && "${{ matrix.language }}" === "typescript") { // Default Run
-            console.log("::set-output name=language::${{ matrix.language }}");
+            console.log("::set-output name=language::python");
           }
     - name: Checkout repository
       if: steps.detect_languages.outputs.language
@@ -103,4 +103,4 @@ jobs:
         upload: false
     - uses: actions/upload-artifact@v2
       with:
-        path: results/javascript.sarif
+        path: results/python.sarif

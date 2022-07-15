@@ -360,7 +360,7 @@ jobs:
       working-directory: ./v8
       run: |
         export PATH=/usr/local/opt/depot_tools:$PATH
-        gn gen out --args="target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" chrome_pgo_phase=0 ${{ github.event.inputs.build_args }}"
+        gn gen out --args="target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" chrome_pgo_phase=0 ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
@@ -488,7 +488,7 @@ jobs:
       working-directory: ./v8
       run: |
         export PATH=/usr/local/opt/depot_tools:$PATH
-        gn gen out --args="target_os=\"ios\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" chrome_pgo_phase=0 enable_ios_bitcode=true ios_deployment_target=10 use_xcode_clang=true v8_enable_pointer_compression=false use_custom_libcxx=false ${{ github.event.inputs.build_args }}"
+        gn gen out --args="target_os=\"ios\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" chrome_pgo_phase=0 enable_ios_bitcode=true ios_deployment_target=10 use_xcode_clang=true v8_enable_pointer_compression=false use_custom_libcxx=false ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |

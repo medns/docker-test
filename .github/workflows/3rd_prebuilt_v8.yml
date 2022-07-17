@@ -496,7 +496,7 @@ jobs:
     - name: Apply patch
       working-directory: ./v8/build
       run: |
-        git apply ../${{ github.repository }}/.github/workflows/tools/v8_remove_compiler_mllvm_flag.patch
+        git apply ../../${{ github.repository }}/.github/workflows/tools/v8_remove_compiler_mllvm_flag.patch
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |

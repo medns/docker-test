@@ -11,7 +11,7 @@ on:
       build_args:
         description: 'Build args'
         type: string
-        default: 'is_component_build=false is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false symbol_level=0 v8_enable_webassembly=false v8_monolithic=true'
+        default: 'is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false symbol_level=0 v8_enable_webassembly=false'
         required: true
       package_tag:
         description: 'Package TAG'
@@ -106,7 +106,7 @@ jobs:
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        gn gen out --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" android_ndk_root=\"${ANDROID_NDK_HOME}\" android32_ndk_api_level=21 android64_ndk_api_level=21 clang_use_chrome_plugins=false use_thin_lto=false use_custom_libcxx=false ${{ github.event.inputs.build_args }}"
+        gn gen out --args="target_os=\"android\" target_cpu=\"${{ matrix.cpu }}\" v8_target_cpu=\"${{ matrix.cpu }}\" android_ndk_root=\"${ANDROID_NDK_HOME}\" is_component_build=false v8_monolithic=true android32_ndk_api_level=21 android64_ndk_api_level=21 clang_use_chrome_plugins=false use_thin_lto=false use_custom_libcxx=false ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
@@ -155,7 +155,7 @@ jobs:
               target_compile_definitions(${PROJECT_NAME}
                   INTERFACE "-DV8_IMMINENT_DEPRECATION_WARNINGS"
                   INTERFACE "-DV8_DEPRECATION_WARNINGS"
-                  ${{ (github.event.inputs.v8_revision != '7.7.229' && (matrix.cpu == 'x64' || matrix.cpu == 'arm64')) && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
+                  ${{ (github.event.inputs.v8_revision != '7.7.229' && endsWith(matrix.arch, '64')) && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
 
               add_library(${PROJECT_NAME}_library STATIC IMPORTED)
               set_property(TARGET ${PROJECT_NAME}_library PROPERTY
@@ -236,7 +236,7 @@ jobs:
       run: |
         $env:DEPOT_TOOLS_WIN_TOOLCHAIN = 0
         $env:Path += ";C:\depot_tools"
-        gn gen out --args="target_cpu=""""""${{ matrix.arch }}"""""" v8_target_cpu=""""""${{ matrix.arch }}"""""" chrome_pgo_phase=0 ${{ github.event.inputs.build_args }}"
+        gn gen out --args="target_cpu=""""""${{ matrix.arch }}"""""" v8_target_cpu=""""""${{ matrix.arch }}"""""" is_component_build=false v8_monolithic=true chrome_pgo_phase=0 ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
@@ -286,7 +286,7 @@ jobs:
               target_compile_definitions(${PROJECT_NAME}
                   INTERFACE "-DV8_IMMINENT_DEPRECATION_WARNINGS"
                   INTERFACE "-DV8_DEPRECATION_WARNINGS"
-                  ${{ (matrix.cpu == 'x64' || matrix.cpu == 'arm64') && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
+                  ${{ endsWith(matrix.arch, '64') && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
 
               add_library(${PROJECT_NAME}_library STATIC IMPORTED)
               set_property(TARGET ${PROJECT_NAME}_library PROPERTY
@@ -344,7 +344,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        arch: [x64, amd64]
+        arch: [x64, arm64]
     steps:
     - name: Setup GN
       run: |
@@ -361,7 +361,7 @@ jobs:
       working-directory: ./v8
       run: |
         export PATH=/usr/local/opt/depot_tools:$PATH
-        gn gen out --args="target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" chrome_pgo_phase=0 ${{ github.event.inputs.build_args }}"
+        gn gen out --args="target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" chrome_pgo_phase=0 is_component_build=false v8_monolithic=true ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
@@ -411,7 +411,7 @@ jobs:
               target_compile_definitions(${PROJECT_NAME}
                   INTERFACE "-DV8_IMMINENT_DEPRECATION_WARNINGS"
                   INTERFACE "-DV8_DEPRECATION_WARNINGS"
-                  ${{ (matrix.cpu == 'x64' || matrix.cpu == 'amd64') && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
+                  ${{ endsWith(matrix.arch, '64') && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
 
               add_library(${PROJECT_NAME}_library STATIC IMPORTED)
               set_property(TARGET ${PROJECT_NAME}_library PROPERTY
@@ -500,7 +500,7 @@ jobs:
       working-directory: ./v8
       run: |
         export PATH=/usr/local/opt/depot_tools:$PATH
-        gn gen out --args="target_os=\"ios\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" chrome_pgo_phase=0 enable_ios_bitcode=true ios_deployment_target=10 v8_enable_pointer_compression=false use_custom_libcxx=false ios_enable_code_signing=false ${{ github.event.inputs.build_args }}"
+        gn gen out --args="target_os=\"ios\" target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" is_component_build=false v8_monolithic=true chrome_pgo_phase=0 enable_ios_bitcode=true ios_deployment_target=10 v8_enable_pointer_compression=false use_custom_libcxx=false ios_enable_code_signing=false ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |

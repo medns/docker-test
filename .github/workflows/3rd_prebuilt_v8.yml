@@ -489,15 +489,13 @@ jobs:
         export PATH=/usr/local/opt/depot_tools:$PATH
         echo "target_os = ['ios']" >> ../.gclient
         gclient sync -D
-    - name: Fetch patch
-      uses: actions/checkout@v2
-      with:
-        path: ${{ github.repository }}
     - name: Remove compiler flags
-      working-directory: ./v8/build
+      working-directory: ./v8/build/config/compiler
       run: |
-        awk '!/"-mllvm"/' config/compiler/BUILD.gn > config/compiler/BUILD.gn
-        awk '!/ldflags \+= \[ "-Wl,-mllvm,-instcombine-lower-dbg-declare=0" \]/' config/compiler/BUILD.gn > config/compiler/BUILD.gn
+        awk '!/"-mllvm"/' BUILD.gn > BUILD.gn.0
+        mv -f BUILD.gn.0 BUILD.gn
+        awk '!/ldflags \+= \[ "-Wl,-mllvm,-instcombine-lower-dbg-declare=0" \]/' BUILD.gn > BUILD.gn.0
+        mv -f BUILD.gn.0 BUILD.gn
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |

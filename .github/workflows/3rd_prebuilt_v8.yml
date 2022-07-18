@@ -21,6 +21,7 @@ on:
       hip_v8_root:
         description: 'HIP V8 root path'
         type: string
+        default: 'global_packages'
         require: true
       is_build_for_android:
         description: 'Build for Android platform'
@@ -492,10 +493,9 @@ jobs:
     - name: Remove compiler flags
       working-directory: ./v8/build/config/compiler
       run: |
-        awk '!/"-mllvm"/' BUILD.gn > BUILD.gn.0
-        mv -f BUILD.gn.0 BUILD.gn
-        awk '!/ldflags \+= \[ "-Wl,-mllvm,-instcombine-lower-dbg-declare=0" \]/' BUILD.gn > BUILD.gn.0
-        mv -f BUILD.gn.0 BUILD.gn
+        awk '!/"-mllvm"/' BUILD.gn > BUILD.gn.0 && mv -f BUILD.gn.0 BUILD.gn
+        awk '!/"-instcombine-lower-dbg-declare=0"/' BUILD.gn > BUILD.gn.0 && mv -f BUILD.gn.0 BUILD.gn
+        awk '!/ldflags \+= \[ "-Wl,-mllvm,-instcombine-lower-dbg-declare=0" \]/' BUILD.gn > BUILD.gn.0 && mv -f BUILD.gn.0 BUILD.gn
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |

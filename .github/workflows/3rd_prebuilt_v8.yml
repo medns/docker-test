@@ -493,10 +493,11 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: ${{ github.repository }}
-    - name: Apply patch
+    - name: Remove compiler flags
       working-directory: ./v8/build
       run: |
-        git apply ../../${{ github.repository }}/.github/workflows/tools/v8_remove_compiler_mllvm_flag.patch
+        awk '!/"-mllvm"/' config/compiler/BUILD.gn > config/compiler/BUILD.gn
+        awk '!/ldflags \+= \[ "-Wl,-mllvm,-instcombine-lower-dbg-declare=0" \]/' config/compiler/BUILD.gn > config/compiler/BUILD.gn
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |

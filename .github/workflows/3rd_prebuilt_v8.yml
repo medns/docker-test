@@ -27,7 +27,6 @@ on:
         description: 'Build for Android platform'
         type: boolean
         default: true
-        default: false
       is_build_for_ios:
         description: 'Build for iOS platform'
         type: boolean
@@ -39,9 +38,11 @@ on:
       is_build_for_macos:
         description: 'Build for MacOS platform'
         type: boolean
+        default: false
       is_build_for_linux:
         description: 'Build for Linux platform'
         type: boolean
+        default: false
 
 jobs:
   context_in_lowercase:

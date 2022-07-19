@@ -486,31 +486,29 @@ jobs:
     needs: context_in_lowercase
     runs-on: [self-hosted, linux]
     container:
-      image: ghcr.io/${{ needs.context_in_lowercase.outputs.repository_owner }}/android-release:latest
+      image: ghcr.io/${{ needs.context_in_lowercase.outputs.repository_owner }}/linux-release:latest
     strategy:
       matrix:
         arch: [x86, x64, arm64, arm]
     steps:
-    - name: Setup GN
-      run: |
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /usr/local/opt/depot_tools
-        export PATH=/usr/local/opt/depot_tools:$PATH
     - name: Checkout v8
       run: |
-        export PATH=/usr/local/opt/depot_tools:$PATH
         fetch v8
         cd v8
         git checkout ${{ github.event.inputs.v8_revision }}
         gclient sync -D
+    - name: Install sysroot(${{ matrix.arch }})
+      if: contains(matrix.arch, 'arm')
+      working-directory: ./v8
+      run: |
+        build/linux/sysroot_scripts/install-sysroot.py --arch=${{ matrix.arch }}
     - name: Generate ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        export PATH=/usr/local/opt/depot_tools:$PATH
         gn gen out --args="target_cpu=\"${{ matrix.arch }}\" v8_target_cpu=\"${{ matrix.arch }}\" chrome_pgo_phase=0 is_component_build=false v8_monolithic=true ${{ github.event.inputs.build_args }}"
     - name: Compile ${{ matrix.arch }}
       working-directory: ./v8
       run: |
-        export PATH=/usr/local/opt/depot_tools:$PATH
         ninja -C out v8_monolith
     - name: Prepare package
       working-directory: ./v8/out

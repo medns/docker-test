@@ -20,7 +20,6 @@ on:
       - 'docker/**'
 jobs:
   changed_images:
-    name: Changed images
     runs-on: ubuntu-latest
     outputs: 
       changed_images: ${{ steps.changed_images.outputs.changed_images }}
@@ -69,7 +68,6 @@ jobs:
 
             console.log(`::set-output name=changed_images::${JSON.stringify(Array.from(changedImages))}`);
   build_images:
-    name: Build images
     needs: changed_images
     runs-on: [self-hosted, linux]
     strategy:

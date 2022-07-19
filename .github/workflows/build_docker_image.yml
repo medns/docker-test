@@ -22,7 +22,8 @@ jobs:
   changed_images:
     name: Changed images
     runs-on: ubuntu-latest
-    outputs: ${{ steps.changed_images.outputs.changed_images }}
+    outputs: 
+      changed_images: ${{ steps.changed_images.outputs.changed_images }}
     steps:
       - name: Get changed images
         id: changed_images

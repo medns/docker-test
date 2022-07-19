@@ -17,7 +17,7 @@ on:
     tags-ignore:
       - '**'
     paths:
-      - 'docker/'
+      - 'docker/**'
 jobs:
   changed_images:
     name: Changed images

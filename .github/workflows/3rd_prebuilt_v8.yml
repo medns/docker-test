@@ -49,7 +49,7 @@ jobs:
     if: github.event.inputs.is_build_for_android == 'true' || github.event.inputs.is_build_for_linux == 'true'
     runs-on: ubuntu-latest
     outputs:
-      repository_owner: steps.get_owner.outputs.lowercase
+      repository_owner: ${{ steps.get_owner.outputs.lowercase }}
     steps:
       - name: Get repo owner(in lowercase)
         id: get_owner

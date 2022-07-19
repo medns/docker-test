@@ -45,7 +45,7 @@ jobs:
               const kMaxPage = 100;
               const kMaxPerPage = 100;
               for (; page < kMaxPage; page += 1) {
-                const { data: files } = await repos.compareCommits({
+                const { data: { files }} = await repos.compareCommits({
                   owner,
                   repo,
                   base: push.before,

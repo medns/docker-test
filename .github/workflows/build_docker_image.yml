@@ -30,11 +30,11 @@ jobs:
         uses: actions/github-script@v6.1.0
         with:
           script: |
+            const { basename, sep } = require('path');
             const { eventName } = context;
             const { owner, repo } = context.repo;
-            const { push } = context.payload;
             const { repos } = github.rest;
-            const { basename, sep } = require('path');
+            const push = context.payload;
 
             const changedImages = new Set();
 

@@ -11,7 +11,7 @@ on:
       build_args:
         description: 'Build args'
         type: string
-        default: 'is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false symbol_level=0 v8_enable_webassembly=false'
+        default: 'is_debug=false v8_use_external_startup_data=false is_official_build=true v8_enable_i18n_support=false treat_warnings_as_errors=false symbol_level=1 v8_enable_webassembly=false'
         required: true
       package_tag:
         description: 'Package TAG'
@@ -86,7 +86,7 @@ jobs:
       with:
         path: ${{ github.repository }}
     - name: Apply patch
-      if: github.event.inputs.v8_revision != '7.7.229'
+      if: !startsWith(github.event.inputs.v8_revision, '7.7.229')
       working-directory: ./v8
       continue-on-error: true
       run: |
@@ -97,7 +97,7 @@ jobs:
         echo "target_os = ['android']" >> ../.gclient
         gclient sync -D
     - name: Prepare android_ndk
-      if: github.event.inputs.v8_revision == '7.7.229'
+      if: startsWith(github.event.inputs.v8_revision, '7.7.229')
       working-directory: ./v8
       run: |
         if [ -d third_party/android_tools ]; then
@@ -112,8 +112,8 @@ jobs:
           rm -rf third_party/android_ndk
           ln -s $ANDROID_NDK_HOME third_party/android_ndk
         fi
-    - name: Apply 7.7.229 build patch
-      if: github.event.inputs.v8_revision == '7.7.229'
+    - name: Apply 7.7.229.* build patch
+      if: startsWith(github.event.inputs.v8_revision, '7.7.229')
       working-directory: ./v8/build
       run: |
         git apply ../../${{ github.repository }}/.github/workflows/tools/v8_7_7_229_build.patch
@@ -169,7 +169,7 @@ jobs:
               target_compile_definitions(${PROJECT_NAME}
                   INTERFACE "-DV8_IMMINENT_DEPRECATION_WARNINGS"
                   INTERFACE "-DV8_DEPRECATION_WARNINGS"
-                  ${{ (github.event.inputs.v8_revision != '7.7.229' && endsWith(matrix.arch, '64')) && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
+                  ${{ (!startsWith(github.event.inputs.v8_revision, '7.7.229') && endsWith(matrix.arch, '64')) && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || ''}})
 
               add_library(${PROJECT_NAME}_library STATIC IMPORTED)
               set_property(TARGET ${PROJECT_NAME}_library PROPERTY
@@ -480,7 +480,7 @@ jobs:
             Metadata={"x-cos-tagging": urlencode(metadata)}
         )
         print("ETag: " + response["ETag"])
-  
+
   linux_prebuilt:
     if: github.event.inputs.is_build_for_linux == 'true'
     needs: context_in_lowercase

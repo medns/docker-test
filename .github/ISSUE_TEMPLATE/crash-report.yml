@@ -41,6 +41,8 @@ body:
       label: Relevant crash log output
       description: Please copy and paste crash dump log output
       placeholder: |
+        Crash log output like the following example:
+        ```
         pid: 4637, tid: 4637, name: crasher  >>> crasher <<<
         signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
         Abort message: 'some_file.c:123: some_function: assertion "false" failed'
@@ -55,6 +57,7 @@ body:
             #03 pc 00002301  /system/bin/crasher (main+68)
             #04 pc 0008a809  /system/lib/libc.so (__libc_init+48)
             #05 pc 00001097  /system/bin/crasher (_start_main+38)
+        ```
   - type: textarea
     attributes:
       label: What steps will reproduce the crash?

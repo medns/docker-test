@@ -55,11 +55,11 @@ body:
             #03 pc 00002301  /system/bin/crasher (main+68)
             #04 pc 0008a809  /system/lib/libc.so (__libc_init+48)
             #05 pc 00001097  /system/bin/crasher (_start_main+38)
+      value:
   - type: markdown
     attributes:
       label: What steps will reproduce the crash?
-      description: |
-        Please provide a step by step description of what you did to reproduce the crash.
+      description: Please provide a step by step description of what you did to reproduce the crash.
       placeholder: |
         You can use the following template:
         ```

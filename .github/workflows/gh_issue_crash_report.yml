@@ -38,7 +38,6 @@ jobs:
       repository_owner: ${{ steps.triage-result.outputs.repository_owner }}
     steps:
     - uses: actions/setup-node@v3.4.1
-    - run: npm install markdown-it
     - name: Greetings
       uses: actions/github-script@v6.1.0
       with:
@@ -52,6 +51,7 @@ jobs:
             issue_number: ${{ github.event.issue.number }},
             body: process.env.greetings_message
           });
+    - run: npm install markdown-it
     - name: Triage
       id: triage-result
       uses: actions/github-script@v6.1.0
@@ -62,7 +62,7 @@ jobs:
           const path = require('path');
 
           function parse(markdown) {
-            const tokens = (new MarkdownIt()).parse(markdown);
+            const tokens = (new MarkdownIt()).parse(markdown, {});
             const result = {};
             let location = 'void';
             let key = [];
@@ -127,7 +127,7 @@ jobs:
   android-translates-addresses:
     needs:
       - triage
-    if: needs.triage.outputs.platform == 'Android'
+    if: needs.triage.outputs.platform == 'Android' && needs.triage.outputs.version && needs.triage.outputs.architecture && needs.triage.outputs.logs
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ needs.triage.outputs.repository_owner }}/android-release:latest

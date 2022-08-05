@@ -24,6 +24,10 @@ env:
     %s
     ```
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   triage:
     if: startsWith(github.event.issue.title, '[Crash]')

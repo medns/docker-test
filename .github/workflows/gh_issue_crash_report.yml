@@ -182,46 +182,45 @@ jobs:
       uses: actions/github-script@v6.1.0
       with:
         script: |
-        const { owner, repo } = context.repo;
-        const { execSync } = require('child_process');
-        const path = require('path');
-        const fs = require('fs');
-        const os = require('os');
-        const util = require('util');
+          const { owner, repo } = context.repo;
+          const { execSync } = require('child_process');
+          const path = require('path');
+          const fs = require('fs');
+          const os = require('os');
+          const util = require('util');
 
-        const bin = path.join(process.env['ANDROID_NDK_HOME'], 'toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-addr2line');
-        function addr2line(lib, pc) {
-          const [func, source] = execSync(`${bin} -C -f -e ${lib} ${pc}`).split(os.EOL);
-          return { func, source };
-        }
-
-        const backtrace = JSON.parse('${{ steps.backtrace_parsed.outputs.backtrace }}');
-
-        const symbols = fs.readdirSync('symbols');
-        const formatted = backtrace.map(stack => {
-          const lib = path.basename(stack.file);
-          if (symbols.includes(lib)) {
-            const { func, source} = addr2line(lib, stack.pc);
-            return {
-              pc: stack.pc,
-              file: stack.file,
-              func,
-              source
-            }
+          const bin = path.join(process.env['ANDROID_NDK_HOME'], 'toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-addr2line');
+          function addr2line(lib, pc) {
+            const [func, source] = execSync(`${bin} -C -f -e ${lib} ${pc}`).split(os.EOL);
+            return { func, source };
           }
-          
-          return stack;
-        }).map(({ pc, func, file, source }, i) => {
-          return `#${i} PC ${pc}  ${file} (${func})${source ? ` [${source}]` : ''}`;
-        });
 
-        const body = [`translated backtrace:`];
-        body.push(...formatted.map(line => `  ${line}`));
+          const backtrace = JSON.parse('${{ steps.backtrace_parsed.outputs.backtrace }}');
 
-        await issues.createComment({
-          owner,
-          repo,
-          issue_number: ${{ github.event.issue.number }},
-          body: util.format(process.env.translate_success_message, body.join(os.EOL))
-        });
-        
+          const symbols = fs.readdirSync('symbols');
+          const formatted = backtrace.map(stack => {
+            const lib = path.basename(stack.file);
+            if (symbols.includes(lib)) {
+              const { func, source} = addr2line(lib, stack.pc);
+              return {
+                pc: stack.pc,
+                file: stack.file,
+                func,
+                source
+              }
+            }
+            
+            return stack;
+          }).map(({ pc, func, file, source }, i) => {
+            return `#${i} PC ${pc}  ${file} (${func})${source ? ` [${source}]` : ''}`;
+          });
+
+          const body = [`translated backtrace:`];
+          body.push(...formatted.map(line => `  ${line}`));
+
+          await issues.createComment({
+            owner,
+            repo,
+            issue_number: ${{ github.event.issue.number }},
+            body: util.format(process.env.translate_success_message, body.join(os.EOL))
+          });

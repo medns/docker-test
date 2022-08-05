@@ -44,6 +44,8 @@ jobs:
       with:
         script: |
           const { owner, repo } = context.repo;
+          const { issues } = github.rest;
+
           await issues.createComment({
             owner,
             repo,
@@ -136,6 +138,7 @@ jobs:
       with:
         script: |
           const { owner, repo } = context.repo;
+          const { issues } = github.rest;
 
           function parse(log) {
             const stack = [];
@@ -169,6 +172,7 @@ jobs:
       with:
         script: |
           const { owner, repo } = context.repo;
+          const { issues } = github.rest;
           const util = require('util');
 
           await issues.createComment({
@@ -183,6 +187,7 @@ jobs:
       with:
         script: |
           const { owner, repo } = context.repo;
+          const { issues } = github.rest;
           const { execSync } = require('child_process');
           const path = require('path');
           const fs = require('fs');

@@ -128,7 +128,14 @@ jobs:
   android-translates-addresses:
     needs:
       - triage
-    if: needs.triage.outputs.platform == 'Android' && needs.triage.outputs.version && needs.triage.outputs.architecture && needs.triage.outputs.logs
+    if: |
+      needs.triage.outputs.platform == 'Android'
+      && needs.triage.outputs.architecture == 'arm'
+      && needs.triage.outputs.architecture == 'arm64'
+      && needs.triage.outputs.architecture == 'x86'
+      && needs.triage.outputs.architecture == 'x86_64'
+      && needs.triage.outputs.version
+      && needs.triage.outputs.logs
     runs-on: [self-hosted, linux]
     container:
       image: ghcr.io/${{ needs.triage.outputs.repository_owner }}/android-release:latest
@@ -165,9 +172,20 @@ jobs:
       if: steps.backtrace_parsed.outputs.backtrace
       continue-on-error: true
       run: |
-        mkdir symbols
-        ZIP_FILE="${{ needs.triage.outputs.architecture }}.zip"
+        if [[ "${{ needs.triage.outputs.architecture }}" == "arm" ]]; then
+          ZIP_FILE="armeabi-v7a.zip"
+        elif [[ "${{ needs.triage.outputs.architecture }}" == "arm64" ]]; then
+          ZIP_FILE="arm64-v8a.zip"
+        elif [[ "${{ needs.triage.outputs.architecture }}" == "x86" ]]; then
+          ZIP_FILE="x86.zip"
+        elif [[ "${{ needs.triage.outputs.architecture }}" == "x86_64" ]]; then
+          ZIP_FILE="x86_64.zip"
+        else
+          echo "Unknown architecture(${{ needs.triage.outputs.architecture }})"
+          exit 1
+        fi
         curl -Of https://artifacts-store.openhippy.com/hippy/android/hippy-common/${{ needs.triage.outputs.version }}/symbols/$ZIP_FILE
+        mkdir symbols
         unzip $ZIP_FILE symbols
         rm $ZIP_FILE
         echo "::set-output name=success::1"

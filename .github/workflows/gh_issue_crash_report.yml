@@ -155,7 +155,7 @@ jobs:
 
           function parse(log) {
             const stack = [];
-            for (const [_, pc, file, func] of log.matchAll(/#[0-9]+\s+pc\s+([0-9a-f]{${{ contains(needs.triage.outputs.architecture, '64') ? 16 : 8}}})\s+([^\s]+)(?:\s+\(([^\+]+\+[0-9]+)\))*/ig)) {
+            for (const [_, pc, file, func] of log.matchAll(/#[0-9]+\s+pc\s+([0-9a-f]{${{ contains(needs.triage.outputs.architecture, '64') && 16 || 8}}})\s+([^\s]+)(?:\s+\(([^\+]+\+[0-9]+)\))*/ig)) {
               stack.push({pc, func, file});
             }
             return stack;

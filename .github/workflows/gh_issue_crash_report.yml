@@ -130,12 +130,12 @@ jobs:
       - triage
     if: |
       needs.triage.outputs.platform == 'Android'
-      && needs.triage.outputs.architecture == 'arm'
-      && needs.triage.outputs.architecture == 'arm64'
-      && needs.triage.outputs.architecture == 'x86'
-      && needs.triage.outputs.architecture == 'x86_64'
       && needs.triage.outputs.version
       && needs.triage.outputs.logs
+      && (needs.triage.outputs.architecture == 'arm' 
+        || needs.triage.outputs.architecture == 'arm64'
+        || needs.triage.outputs.architecture == 'x86'
+        || needs.triage.outputs.architecture == 'x86_64')
     runs-on: [self-hosted, linux]
     container:
       image: ghcr.io/${{ needs.triage.outputs.repository_owner }}/android-release:latest

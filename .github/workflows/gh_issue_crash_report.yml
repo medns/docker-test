@@ -161,6 +161,7 @@ jobs:
             body: process.env[backtrace.length > 0 ? 'translates_addresses_message' : 'no_backtrace_message']
           });
     - name: Symbols
+      id: symbols_fetched
       if: steps.backtrace_parsed.outputs.backtrace
       continue-on-error: true
       run: |
@@ -169,8 +170,9 @@ jobs:
         curl -Of https://artifacts-store.openhippy.com/hippy/android/hippy-common/${{ needs.triage.outputs.version }}/symbols/$ZIP_FILE
         unzip $ZIP_FILE symbols
         rm $ZIP_FILE
+        echo "::set-output name=success::1"
     - uses: actions/github-script@v6.1.0
-      if: failure()
+      if: ${{ !steps.symbols_fetched.outputs.success }}
       with:
         script: |
           const { owner, repo } = context.repo;
@@ -184,7 +186,7 @@ jobs:
             body: util.format(process.env.fetch_symbol_failed_message, '${{ needs.triage.outputs.version }}', '${{ needs.triage.outputs.architecture }}')
           });
     - name: Translates
-      if: steps.backtrace_parsed.outputs.backtrace
+      if: steps.symbols_fetched.outputs.success
       uses: actions/github-script@v6.1.0
       with:
         script: |
@@ -198,7 +200,7 @@ jobs:
 
           const bin = path.join(process.env['ANDROID_NDK_HOME'], 'toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-addr2line');
           function addr2line(lib, pc) {
-            const [func, source] = execSync(`${bin} -C -f -e ${lib} ${pc}`).split(os.EOL);
+            const [ func, source ] = execSync(`${bin} -C -f -e ${lib} ${pc}`).split(os.EOL);
             return { func, source };
           }
 

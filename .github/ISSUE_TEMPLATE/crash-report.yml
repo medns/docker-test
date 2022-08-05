@@ -1,6 +1,6 @@
 name: 🐛 Crash Report
 description: File a crash report
-title: "[Crash]: "
+title: "[Crash]"
 labels: ["crash"]
 body:
   - type: markdown
@@ -38,8 +38,8 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Relevant crash log output
-      description: Please copy and paste crash dump log output
+      label: Logs
+      description: Please copy and paste crash log output
       placeholder: |
         Crash log output like the following example:
         ```
@@ -60,7 +60,7 @@ body:
         ```
   - type: textarea
     attributes:
-      label: What steps will reproduce the crash?
+      label: Steps
       description: Please provide a step by step description of what you did to reproduce the crash.
       placeholder: |
         You can use the following template:
@@ -70,5 +70,5 @@ body:
         ```
   - type: textarea
     attributes:
-      label: Additional information
+      label: Additional
       description: Tell us anything else you think we should know.

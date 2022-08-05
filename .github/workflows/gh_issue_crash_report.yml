@@ -118,7 +118,7 @@ jobs:
               if (['Version', 'Platform', 'Architecture'].includes(key)) {
                 value = value.replaceAll(/[^0-9a-z\-_]/ig, '');
               }
-              value = encodeURI(value);
+              value = value.replaceAll('%', '%25').replaceAll('\n', '%0A').replaceAll('\r', '%0D');
               console.log(`::set-output name=${key.toLowerCase()}::${value}`);
             }
           });
@@ -129,7 +129,7 @@ jobs:
     needs:
       - triage
     if: needs.triage.outputs.platform == 'Android' && needs.triage.outputs.version && needs.triage.outputs.architecture && needs.triage.outputs.logs
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     container:
       image: ghcr.io/${{ needs.triage.outputs.repository_owner }}/android-release:latest
     steps:

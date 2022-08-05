@@ -118,6 +118,7 @@ jobs:
               if (['Version', 'Platform', 'Architecture'].includes(key)) {
                 value = value.replaceAll(/[^0-9a-z\-_]/ig, '');
               }
+              value = encodeURI(value);
               console.log(`::set-output name=${key.toLowerCase()}::${value}`);
             }
           });
@@ -148,7 +149,7 @@ jobs:
             return stack;
           }
 
-          const backtrace = parse('${{ needs.triage.outputs.logs }}');
+          const backtrace = parse(`${{ needs.triage.outputs.logs }}`);
           if (backtrace.length > 0) {
             console.log(`::set-output name=backtrace::${JSON.stringify(backtrace)}`);
           }

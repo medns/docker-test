@@ -162,10 +162,11 @@ jobs:
           });
     - name: Symbols
       if: steps.backtrace_parsed.outputs.backtrace
+      continue-on-error: true
       run: |
         mkdir symbols
         ZIP_FILE="${{ needs.triage.outputs.architecture }}.zip"
-        curl -O https://artifacts-store.openhippy.com/hippy/android/hippy-common/${{ needs.triage.outputs.version }}/symbols/$ZIP_FILE
+        curl -Of https://artifacts-store.openhippy.com/hippy/android/hippy-common/${{ needs.triage.outputs.version }}/symbols/$ZIP_FILE
         unzip $ZIP_FILE symbols
         rm $ZIP_FILE
     - uses: actions/github-script@v6.1.0

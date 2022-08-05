@@ -113,7 +113,7 @@ jobs:
 
           const info = parse(`${{ github.event.issue.body }}`);
           ['Version', 'Platform', 'Architecture', 'Logs', 'Steps', 'Additional'].forEach(key => {
-            const value = info[key];
+            let value = info[key];
             if (value) {
               if (['Version', 'Platform', 'Architecture'].includes(key)) {
                 value = value.replaceAll(/[^0-9a-z\-_]/ig, '');

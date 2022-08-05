@@ -31,7 +31,9 @@ defaults:
 jobs:
   triage:
     if: startsWith(github.event.issue.title, '[Crash]')
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
+    container:
+      image: node:latest
     outputs:
       version: ${{ steps.triage-result.outputs.version }}
       platform: ${{ steps.triage-result.outputs.platform }}
@@ -41,7 +43,6 @@ jobs:
       additional: ${{ steps.triage-result.outputs.additional }}
       repository_owner: ${{ steps.triage-result.outputs.repository_owner }}
     steps:
-    - uses: actions/setup-node@v3.4.1
     - name: Greetings
       uses: actions/github-script@v6.1.0
       with:

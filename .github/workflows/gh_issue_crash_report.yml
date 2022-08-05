@@ -116,7 +116,7 @@ jobs:
             let value = info[key];
             if (value) {
               if (['Version', 'Platform', 'Architecture'].includes(key)) {
-                value = value.replaceAll(/[^0-9a-z\-_]/ig, '');
+                value = value.replaceAll(/[^0-9a-z\-_\.]/ig, '');
               }
               value = value.replaceAll('%', '%25').replaceAll('\n', '%0A').replaceAll('\r', '%0D');
               console.log(`::set-output name=${key.toLowerCase()}::${value}`);

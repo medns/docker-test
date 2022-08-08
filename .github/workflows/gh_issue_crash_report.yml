@@ -190,7 +190,7 @@ jobs:
         fi
         curl -Of https://artifacts-store.openhippy.com/hippy/android/hippy-common/${{ needs.triage.outputs.version }}/symbols/$ZIP_FILE
         mkdir symbols
-        unzip $ZIP_FILE symbols
+        unzip -d symbols $ZIP_FILE
         rm $ZIP_FILE
         echo "::set-output name=success::1"
     - uses: actions/github-script@v6.1.0

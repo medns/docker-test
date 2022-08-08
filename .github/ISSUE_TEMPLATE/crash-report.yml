@@ -1,7 +1,6 @@
 name: 🐛 Crash Report
 description: File a crash report
-title: "[Crash]"
-labels: ["crash"]
+title: "A crash occurred"
 body:
   - type: markdown
     attributes:

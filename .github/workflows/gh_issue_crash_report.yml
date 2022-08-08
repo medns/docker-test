@@ -28,7 +28,7 @@ env:
 
 jobs:
   triage:
-    if: startsWith(github.event.issue.title, '[Crash]')
+    if: contains(github.event.issue.title, 'crash')
     runs-on: [self-hosted, linux]
     container:
       image: node:latest

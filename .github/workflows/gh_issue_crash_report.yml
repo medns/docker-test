@@ -46,13 +46,19 @@ jobs:
       with:
         script: |
           const { owner, repo } = context.repo;
-          const { issues } = github.rest;
+          const { issues, reactions } = github.rest;
 
-          await issues.createComment({
+          const { data: { id } } = await issues.createComment({
             owner,
             repo,
             issue_number: ${{ github.event.issue.number }},
             body: process.env.greetings_message
+          });
+          await reactions.createForIssueComment({
+            owner,
+            repo,
+            comment_id: id,
+            content: '+1'
           });
     - run: npm install markdown-it
     - name: Triage

@@ -224,7 +224,7 @@ jobs:
             const formatted = backtrace.map(stack => {
               const lib = path.basename(stack.file);
               if (symbols.includes(lib)) {
-                const { func, source} = addr2line(lib, stack.pc);
+                const { func, source} = addr2line(os.path.join("symbols", lib), stack.pc);
                 return {
                   pc: stack.pc,
                   file: stack.file,

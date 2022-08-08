@@ -211,7 +211,7 @@ jobs:
 
           const bin = path.join(process.env['ANDROID_NDK_HOME'], 'toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-addr2line');
           function addr2line(lib, pc) {
-            const [ func, source ] = execSync(`${bin} -C -f -e ${lib} ${pc}`).split(os.EOL);
+            const [ func, source ] = execSync(`${bin} -C -f -e ${lib} ${pc}`, { encoding: 'utf8' }).split(os.EOL);
             return { func, source };
           }
 

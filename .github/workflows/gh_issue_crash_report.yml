@@ -202,7 +202,7 @@ jobs:
       with:
         script: |
           const { owner, repo } = context.repo;
-          const { issues } = github.rest;
+          const { issues, reactions } = github.rest;
           const { execSync } = require('child_process');
           const path = require('path');
           const fs = require('fs');
@@ -244,7 +244,7 @@ jobs:
             error = e;
           }
 
-          await issues.createComment({
+          const { id } = await issues.createComment({
             owner,
             repo,
             issue_number: ${{ github.event.issue.number }},
@@ -254,3 +254,10 @@ jobs:
           if (error) {
             throw error;
           }
+
+          await reactions.createForIssueComment({
+            owner,
+            repo,
+            comment_id: id,
+            content: 'eyes'
+          });

@@ -148,6 +148,8 @@ jobs:
     - name: Backtrace
       id: backtrace_parsed
       uses: actions/github-script@v6.1.0
+      env: 
+        triage_logs: ${{ needs.triage.outputs.logs }}
       with:
         script: |
           const { owner, repo } = context.repo;
@@ -161,7 +163,7 @@ jobs:
             return stack;
           }
 
-          const backtrace = parse(`${{ needs.triage.outputs.logs }}`);
+          const backtrace = parse(process.env.triage_logs);
           if (backtrace.length > 0) {
             console.log(`::set-output name=backtrace::${JSON.stringify(backtrace)}`);
           }

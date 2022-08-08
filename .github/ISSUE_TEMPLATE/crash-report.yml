@@ -60,15 +60,16 @@ body:
         ```
   - type: textarea
     attributes:
-      label: Steps
-      description: Please provide a step by step description of what you did to reproduce the crash.
+      label: Reproduce Condition
+      description: How often does it reproduce? Is there a required condition?
       placeholder: |
         You can use the following template:
         ```
+        After the following operations, there is a N percent chance of crashing:
         1. Do this
         2. Do that
         ```
   - type: textarea
     attributes:
-      label: Additional
+      label: Additional information
       description: Tell us anything else you think we should know.

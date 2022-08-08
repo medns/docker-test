@@ -23,10 +23,8 @@ env:
     ```
     %s
     ```
-
-defaults:
-  run:
-    shell: bash
+  translate_failed_message: |
+    🤖: "Sorry, the addresses translation encountered an error."
 
 jobs:
   triage:
@@ -117,7 +115,7 @@ jobs:
           }
 
           const info = parse(`${{ github.event.issue.body }}`);
-          ['Version', 'Platform', 'Architecture', 'Logs', 'Steps', 'Additional'].forEach(key => {
+          ['Version', 'Platform', 'Architecture', 'Logs', 'Reproduce Condition', 'Additional information'].forEach(key => {
             let value = info[key];
             if (value) {
               if (['Version', 'Platform', 'Architecture'].includes(key)) {
@@ -176,6 +174,7 @@ jobs:
       id: symbols_fetched
       if: steps.backtrace_parsed.outputs.backtrace
       continue-on-error: true
+      shell: bash
       run: |
         if [[ "${{ needs.triage.outputs.architecture }}" == "arm" ]]; then
           ZIP_FILE="armeabi-v7a.zip"
@@ -229,30 +228,40 @@ jobs:
 
           const backtrace = JSON.parse('${{ steps.backtrace_parsed.outputs.backtrace }}');
 
-          const symbols = fs.readdirSync('symbols');
-          const formatted = backtrace.map(stack => {
-            const lib = path.basename(stack.file);
-            if (symbols.includes(lib)) {
-              const { func, source} = addr2line(lib, stack.pc);
-              return {
-                pc: stack.pc,
-                file: stack.file,
-                func,
-                source
+          let body;
+          let error;
+          try {
+            const symbols = fs.readdirSync('symbols');
+            const formatted = backtrace.map(stack => {
+              const lib = path.basename(stack.file);
+              if (symbols.includes(lib)) {
+                const { func, source} = addr2line(lib, stack.pc);
+                return {
+                  pc: stack.pc,
+                  file: stack.file,
+                  func,
+                  source
+                }
               }
-            }
-            
-            return stack;
-          }).map(({ pc, func, file, source }, i) => {
-            return `#${i} PC ${pc}  ${file} (${func})${source ? ` [${source}]` : ''}`;
-          });
+              
+              return stack;
+            }).map(({ pc, func, file, source }, i) => {
+              return `#${i} PC ${pc}  ${file} (${func})${source ? ` [${source}]` : ''}`;
+            });
 
-          const body = [`translated backtrace:`];
-          body.push(...formatted.map(line => `  ${line}`));
+            body = util.format(process.env.translate_success_message, [`translated backtrace:`, ...formatted.map(line => `  ${line}`)].join(os.EOL));
+          } catch (e) {
+            body = process.env.translate_failed_message;
+            error = e;
+          }
 
           await issues.createComment({
             owner,
             repo,
             issue_number: ${{ github.event.issue.number }},
-            body: util.format(process.env.translate_success_message, body.join(os.EOL))
+            body
           });
+
+          if (error) {
+            throw error;
+          }

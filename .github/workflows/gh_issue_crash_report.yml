@@ -208,6 +208,7 @@ jobs:
           const fs = require('fs');
           const os = require('os');
           const util = require('util');
+          const path = require('path');
 
           const bin = path.join(process.env['ANDROID_NDK_HOME'], 'toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-addr2line');
           function addr2line(lib, pc) {
@@ -224,7 +225,7 @@ jobs:
             const formatted = backtrace.map(stack => {
               const lib = path.basename(stack.file);
               if (symbols.includes(lib)) {
-                const { func, source} = addr2line(os.path.join("symbols", lib), stack.pc);
+                const { func, source} = addr2line(path.join("symbols", lib), stack.pc);
                 return {
                   pc: stack.pc,
                   file: stack.file,

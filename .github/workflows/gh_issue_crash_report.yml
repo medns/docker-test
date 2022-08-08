@@ -69,46 +69,31 @@ jobs:
           function parse(markdown) {
             const tokens = (new MarkdownIt()).parse(markdown, {});
             const result = {};
-            let location = 'void';
+
+            let inHeading = true;
             let key = [];
             let value = [];
             tokens.forEach((token, index) => {
-              switch (token.type) {
-                case 'heading_open': {
-                  if (key.length > 0) {
-                    result[key.join(os.EOL)] = value.join(os.EOL);
+              if (token.type === 'heading_open' && token.markup === '###') {
+                if (key.length > 0) {
+                  result[key.join(os.EOL)] = value.join(os.EOL);
+                }
+                key = [];
+                value = [];
+                inHeading = true;
+              } else if (token.type === 'heading_close' && token.markup === '###') {
+                inHeading = false;
+              } else {
+                const { content } = token;
+                if (content) {
+                  if (inHeading) {
+                    key.push(content);
+                  } else {
+                    value.push(content);
                   }
-                  key = [];
-                  value = [];
-                  location = 'heading';
-                  break;
-                }
-                case 'heading_close': {
-                  location = 'void';
-                  break;
-                }
-                case 'paragraph_open': {
-                  location = 'paragraph';
-                  break;
-                }
-                case 'paragraph_close': {
-                  location = 'void';
-                  break;
-                }
-                case 'inline': {
-                  switch (location) {
-                    case 'heading': {
-                      key.push(token.content);
-                      break;
-                    }
-                    case 'paragraph': {
-                      value.push(token.content);
-                      break;
-                    }
-                  }
-                  break;
                 }
               }
+
               if (index === tokens.length - 1) {
                 result[key.join(os.EOL)] = value.join(os.EOL);
               }

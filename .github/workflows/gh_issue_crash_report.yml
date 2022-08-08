@@ -244,7 +244,7 @@ jobs:
             error = e;
           }
 
-          const { id } = await issues.createComment({
+          const { data: { id } } = await issues.createComment({
             owner,
             repo,
             issue_number: ${{ github.event.issue.number }},

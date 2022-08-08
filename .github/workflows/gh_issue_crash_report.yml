@@ -58,6 +58,8 @@ jobs:
     - name: Triage
       id: triage-result
       uses: actions/github-script@v6.1.0
+      env:
+        issue_body: ${{ github.event.issue.body }}
       with:
         script: |
           const MarkdownIt = require('markdown-it');
@@ -114,7 +116,7 @@ jobs:
             return result;
           }
 
-          const info = parse(`${{ github.event.issue.body }}`);
+          const info = parse(process.env.issue_body);
           ['Version', 'Platform', 'Architecture', 'Logs', 'Reproduce Condition', 'Additional information'].forEach(key => {
             let value = info[key];
             if (value) {

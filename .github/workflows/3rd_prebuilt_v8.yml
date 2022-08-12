@@ -115,21 +115,21 @@ env:
 
     project(v8)
 
-    add_library(${PROJECT_NAME} INTERFACE)
-    target_include_directories(${PROJECT_NAME}
+    add_library(${{PROJECT_NAME}} INTERFACE)
+    target_include_directories(${{PROJECT_NAME}}
         INTERFACE "include"
         INTERFACE "include/v8")
 
-    target_compile_definitions(${PROJECT_NAME}
+    target_compile_definitions(${{PROJECT_NAME}}
         INTERFACE "-DV8_IMMINENT_DEPRECATION_WARNINGS"
         INTERFACE "-DV8_DEPRECATION_WARNINGS"
         {0})
 
-    add_library(${PROJECT_NAME}_library STATIC IMPORTED)
-    set_property(TARGET ${PROJECT_NAME}_library PROPERTY
+    add_library(${{PROJECT_NAME}}_library STATIC IMPORTED)
+    set_property(TARGET ${{PROJECT_NAME}}_library PROPERTY
         IMPORTED_LOCATION "{1}")
-    target_link_libraries(${PROJECT_NAME}
-        INTERFACE ${PROJECT_NAME}_library)
+    target_link_libraries(${{PROJECT_NAME}}
+        INTERFACE ${{PROJECT_NAME}}_library)
 
 jobs:
   context_in_lowercase:
@@ -225,8 +225,7 @@ jobs:
       with:
         path: ./v8/out/artifact/CMakeLists.txt
         write-mode: overwrite
-        contents: |
-          ${{ format(env.cmakelists_template, (!startsWith(github.event.inputs.v8_revision, '7.7') && endsWith(matrix.arch, '64')) && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || '', '${CMAKE_CURRENT_SOURCE_DIR}/lib/libv8_monolith.a') }}
+        contents: ${{ format(env.cmakelists_template, (!startsWith(github.event.inputs.v8_revision, '7.7') && endsWith(matrix.arch, '64')) && 'INTERFACE "-DV8_COMPRESS_POINTERS"' || '', '${CMAKE_CURRENT_SOURCE_DIR}/lib/libv8_monolith.a') }}
     - name: Release package
       id: release_package
       working-directory: ./v8
@@ -244,8 +243,7 @@ jobs:
         local_file: ./v8/out/android-${{ matrix.arch }}.tgz
         cos_key: hippy/${{ github.event.inputs.hip_v8_root }}/v8/${{ github.event.inputs.package_tag }}/android-${{ matrix.arch }}.tgz
         v8_head: ${{ steps.release_package.outputs.head_full }}
-      run: |
-        ${{ env.publish_package_script }}
+      run: ${{ env.publish_package_script }}
 
   windows_prebuilt:
     if: github.event.inputs.is_build_for_windows == 'true'

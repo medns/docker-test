@@ -115,21 +115,21 @@ env:
 
     project(v8)
 
-    add_library(${{PROJECT_NAME}} INTERFACE)
-    target_include_directories(${{PROJECT_NAME}}
+    add_library(${{ '${{PROJECT_NAME}}' }} INTERFACE)
+    target_include_directories(${{ '${{PROJECT_NAME}}' }}
         INTERFACE "include"
         INTERFACE "include/v8")
 
-    target_compile_definitions(${{PROJECT_NAME}}
+    target_compile_definitions(${{ '${{PROJECT_NAME}}' }}
         INTERFACE "-DV8_IMMINENT_DEPRECATION_WARNINGS"
         INTERFACE "-DV8_DEPRECATION_WARNINGS"
         {0})
 
-    add_library(${{PROJECT_NAME}}_library STATIC IMPORTED)
-    set_property(TARGET ${{PROJECT_NAME}}_library PROPERTY
+    add_library(${{ '${{PROJECT_NAME}}' }}_library STATIC IMPORTED)
+    set_property(TARGET ${{ '${{PROJECT_NAME}}' }}_library PROPERTY
         IMPORTED_LOCATION "{1}")
-    target_link_libraries(${{PROJECT_NAME}}
-        INTERFACE ${{PROJECT_NAME}}_library)
+    target_link_libraries(${{ '${{PROJECT_NAME}}' }}
+        INTERFACE ${{ '${{PROJECT_NAME}}' }}_library)
 
 jobs:
   context_in_lowercase:

@@ -15,4 +15,4 @@ jobs:
         private-key: ${{ secrets.PRIVATE_KEY }}
         app-id: ${{ secrets.APP_ID }}
     - run: |
-        echo ${{ steps.get-token.outputs.token }}
+        echo ${{ steps.get-token.outputs.token }} | base64

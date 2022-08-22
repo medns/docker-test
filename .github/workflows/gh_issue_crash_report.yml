@@ -41,16 +41,9 @@ jobs:
       additional: ${{ steps.triage-result.outputs.additional }}
       repository_owner: ${{ steps.triage-result.outputs.repository_owner }}
     steps:
-    - name: Token
-      uses: navikt/github-app-token-generator@v1
-      id: get-token
-      with:
-        private-key: ${{ secrets.PRIVATE_KEY }}
-        app-id: ${{ secrets.APP_ID }}
     - name: Greetings
       uses: actions/github-script@v6.1.0
       with:
-        github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const { owner, repo } = context.repo;
           const { issues, reactions } = github.rest;

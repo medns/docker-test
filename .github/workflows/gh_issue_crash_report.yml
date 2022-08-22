@@ -13,18 +13,18 @@ env:
 
     If you have any additional information, you can add a new comment in this issue.
   translates_addresses_message: |
-    🤖: "I will try to translates addresses to human readable format, please wait a moment."
+    I will try to translates addresses to human readable format, please wait a moment.
   fetch_symbol_failed_message: |
-    🤖: "I have searched the artifacts store database, but found no artifacts with version %s and %s architecture."
+    I have searched the artifacts store database, but found no artifacts with version %s and %s architecture.
   no_backtrace_message: |
-    🤖: "It looks like there is no backtrace addresses in the crash log that needs to be translated."
+    It looks like there is no backtrace addresses in the crash log that needs to be translated.
   translate_success_message: |
-    🤖: "After my translation, the result is as follows."
+    After my translation, the result is as follows.
     ```
     %s
     ```
   translate_failed_message: |
-    🤖: "Sorry, the addresses translation encountered an error."
+    Sorry, the addresses translation encountered an error.
 
 jobs:
   triage:

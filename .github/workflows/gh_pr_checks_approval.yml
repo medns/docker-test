@@ -58,13 +58,26 @@ jobs:
           const { actions, pulls, issues } = github.rest;
           const util = require('util');
 
+          const kMaxPage = 10;
+          const kPerPage = 100;
+
+          const [includeRiskFiles] = await github.paginate(pulls.listFiles, {
+            owner,
+            repo,
+            pull_number: pull_request.number,
+            per_page: kPerPage
+          }, ({ data: { total_count, files } }, done) => {
+            console.log(total_count);
+            console.log(files);
+          });
+
           let workflow_runs = (await github.paginate(actions.listWorkflowRunsForRepo, {
             owner,
             repo,
             event: 'pull_request',
             status: 'action_required',
-            per_page: 100
-          }, response => console.log(response))).filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
+            per_page: kPerPage
+          })).filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
           if (workflow_runs.length === 0) {
             return;
           }
@@ -72,9 +85,10 @@ jobs:
           const [includeRiskFiles] = await github.paginate(pulls.listFiles, {
             owner,
             repo,
-            per_page: 100
-          }, ({ data: files }, done) => {
-            if (files.some(file => file.filename.startsWith('.github/workflows'))) {
+            pull_number: pull_request.number,
+            per_page: kPerPage
+          }, ({ data: { total_count, files } }, done) => {
+            if (total_count > kMaxPages * kPerPage || files.some(file => file.filename.startsWith('.github/workflows'))) {
               done();
               return [true];
             }

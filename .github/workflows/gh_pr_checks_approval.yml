@@ -58,6 +58,15 @@ jobs:
           const { actions, pulls, issues } = github.rest;
           const util = require('util');
 
+          const a = await github.paginate(actions.listWorkflowRunsForRepo, {
+            owner,
+            repo,
+            event: 'pull_request',
+            status: 'action_required',
+            per_page: 100
+          });
+          console.log(a);
+
           let { data: { workflow_runs } } = await github.paginate(actions.listWorkflowRunsForRepo, {
             owner,
             repo,

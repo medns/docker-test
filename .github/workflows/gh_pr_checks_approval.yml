@@ -8,6 +8,18 @@ on:
       - v3.0-dev
       - v3.0
 
+env:
+  greetings_message: |
+    👋 Thanks for your contributing!
+
+    Our collaborators will review your pull request after all status checks have passed.
+  safety_changes_message: |
+    After a quick scan, I have approved%s to run.
+  risky_changes_message: |
+    Sorry, due to risky changes, I can\'t approve%s to run.
+
+    Don\'t worry about it, our collaborators will handle it asap.
+
 jobs:
   pull_request_checks_approval:
     permissions:
@@ -15,33 +27,60 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - name: Checks approval
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.PRIVATE_KEY }}
+        app-id: ${{ secrets.APP_ID }}
+    - name: Greetings
+      if: github.event.action == 'opened'
       uses: actions/github-script@v6.1.0
       with:
         script: |
           const { owner, repo } = context.repo;
           const { pull_request } = context.payload;
-          const { actions, pulls, issues } = github.rest;
+          const { issues } = github.rest;
 
-          let { data: { workflow_runs } } = await actions.listWorkflowRunsForRepo({
+          await issues.createComment({
+            owner,
+            repo,
+            issue_number: pull_request.number,
+            body: process.env['greetings_message'],
+          });
+    - name: Checks
+      uses: actions/github-script@v6.1.0
+      with:
+        github-token: ${{ steps.get-token.outputs.token }}
+        script: |
+          const { owner, repo } = context.repo;
+          const { pull_request } = context.payload;
+          const { actions, pulls, issues } = github.rest;
+          const util = require('util');
+
+          let { data: { workflow_runs } } = await github.paginate(actions.listWorkflowRunsForRepo, {
             owner,
             repo,
             event: 'pull_request',
-            status: 'action_required'
+            status: 'action_required',
+            per_page: 100
           });
-          workflow_runs = workflow_runs.filter(workflow_run => workflow_run.head_sha === pull_request.head.sha)
-
+          workflow_runs = workflow_runs.filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
           if (workflow_runs.length === 0) {
             return;
           }
 
-          const { data: files } = await pulls.listFiles({
+          const [includeRiskFiles] = await github.paginate(pulls.listFiles, {
             owner,
             repo,
-            pull_number: pull_request.number,
+            per_page: 100
+          }, (response, done) => {
+            if (response.data.some(file => file.filename.startsWith('.github/workflows'))) {
+              done();
+              return [true];
+            }
+            return [];
           });
-
-          const includeRiskFiles = files.some(f => f.filename.startsWith('.github/workflows'));
 
           if (!includeRiskFiles) {
             await Promise.all(workflow_runs.map(workflow_run => actions.approveWorkflowRun({
@@ -51,16 +90,9 @@ jobs:
             })));
           }
 
-          let body = '👋 Thanks for your contributing!\n\n';
-          if (includeRiskFiles) {
-            body += `🤖: "Sorry, due to risky changes, I can\'t approve${workflow_runs.length === 1 ? " the " : " "}workflow${workflow_runs.length > 1 ? "s" : ""} to run."\n`;
-            body += '🤖: "Don\'t worry about it, our collaborators will handle it asap."';
-          } else {
-            body += `🤖: "After a quick scan, I have approved${workflow_runs.length === 1 ? " the " : " "}workflow${workflow_runs.length > 1 ? "s" : ""} to run."`;
-          }
           await issues.createComment({
             owner,
             repo,
             issue_number: pull_request.number,
-            body,
+            body: util.format(process.env[includeRiskFiles ? 'risky_changes_message' : 'safety_changes_message'], workflow_runs.length === 1 ? " the " : " "}workflow${workflow_runs.length > 1 ? "s" : ""),
           });

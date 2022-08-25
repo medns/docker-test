@@ -66,6 +66,7 @@ jobs:
             per_page,
             pull_number: pull_request.number
           }, ({ data: files }, done) => {
+            console.log(files.total_count);
             if (files.some(file => file.filename.startsWith('.github/workflows'))) {
               done();
               return [true];

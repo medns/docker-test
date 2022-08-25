@@ -66,9 +66,8 @@ jobs:
             repo,
             pull_number: pull_request.number,
             per_page: kPerPage
-          }, ({ data: { total_count, files } }, done) => {
-            console.log(total_count);
-            console.log(files);
+          }, (response, done) => {
+            console.log(response);
           });
           console.log(xxxxx);
 

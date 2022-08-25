@@ -12,7 +12,7 @@ env:
   greetings_message: |
     👋 Thanks for your contributing!
 
-    Our collaborators will review your pull request after all status checks have passed.
+    Our collaborators will review your pull request after all status checks have been passed.
   safety_changes_message: |
     After a quick scan, I have approved%sworkflow%s to run.
   risky_changes_message: |
@@ -58,23 +58,13 @@ jobs:
           const { actions, pulls, issues } = github.rest;
           const util = require('util');
 
-          const a = await actions.listWorkflowRunsForRepo({
+          let workflow_runs = (await github.paginate(actions.listWorkflowRunsForRepo, {
             owner,
             repo,
             event: 'pull_request',
             status: 'action_required',
             per_page: 100
-          });
-          console.log(a);
-
-          let { data: { workflow_runs } } = await github.paginate(actions.listWorkflowRunsForRepo, {
-            owner,
-            repo,
-            event: 'pull_request',
-            status: 'action_required',
-            per_page: 100
-          });
-          workflow_runs = workflow_runs.filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
+          }, reponse => console.log(response))).filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
           if (workflow_runs.length === 0) {
             return;
           }

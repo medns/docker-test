@@ -61,7 +61,7 @@ jobs:
           const kMaxPage = 10;
           const kPerPage = 100;
 
-          const [includeRiskFiles] = await github.paginate(pulls.listFiles, {
+          const [xxxxx] = await github.paginate(pulls.listFiles, {
             owner,
             repo,
             pull_number: pull_request.number,
@@ -70,6 +70,7 @@ jobs:
             console.log(total_count);
             console.log(files);
           });
+          console.log(xxxxx);
 
           let workflow_runs = (await github.paginate(actions.listWorkflowRunsForRepo, {
             owner,

@@ -14,9 +14,9 @@ env:
 
     Our collaborators will review your pull request after all status checks have passed.
   safety_changes_message: |
-    After a quick scan, I have approved%s to run.
+    After a quick scan, I have approved%sworkflow%s to run.
   risky_changes_message: |
-    Sorry, due to risky changes, I can\'t approve%s to run.
+    Sorry, due to risky changes, I can\'t approve%sworkflow%s to run.
 
     Don\'t worry about it, our collaborators will handle it asap.
 
@@ -74,8 +74,8 @@ jobs:
             owner,
             repo,
             per_page: 100
-          }, (response, done) => {
-            if (response.data.some(file => file.filename.startsWith('.github/workflows'))) {
+          }, ({ data: files }, done) => {
+            if (files.some(file => file.filename.startsWith('.github/workflows'))) {
               done();
               return [true];
             }
@@ -94,5 +94,5 @@ jobs:
             owner,
             repo,
             issue_number: pull_request.number,
-            body: util.format(process.env[includeRiskFiles ? 'risky_changes_message' : 'safety_changes_message'], workflow_runs.length === 1 ? " the " : " "}workflow${workflow_runs.length > 1 ? "s" : ""),
+            body: util.format(process.env[includeRiskFiles ? 'risky_changes_message' : 'safety_changes_message'], workflow_runs.length === 1 ? " the " : " ", workflow_runs.length > 1 ? "s" : ""),
           });

@@ -64,7 +64,7 @@ jobs:
             event: 'pull_request',
             status: 'action_required',
             per_page: 100
-          }, reponse => console.log(response))).filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
+          }, response => console.log(response))).filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
           if (workflow_runs.length === 0) {
             return;
           }

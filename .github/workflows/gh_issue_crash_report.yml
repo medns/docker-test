@@ -54,10 +54,10 @@ jobs:
             issue_number: ${{ github.event.issue.number }},
             body: process.env.greetings_message
           });
-          await reactions.createForIssueComment({
+          await reactions.createForIssue({
             owner,
             repo,
-            comment_id: id,
+            issue_number: ${{ github.event.issue.number }},
             content: '+1'
           });
     - run: npm install markdown-it

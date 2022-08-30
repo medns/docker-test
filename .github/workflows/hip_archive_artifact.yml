@@ -18,6 +18,7 @@ on:
       git_revision:
         description: 'Git <tag>|<branch>|<commit>, Git available'
         type: string
+        required: false
       hip_domain:
         description: 'HIP <domain>'
         type: choice
@@ -29,6 +30,14 @@ on:
       hip_artifact_path:
         description: 'HIP artifact <full path>(without domain)'
         type: string
+        required: true
+      hip_writing_mode:
+        description: 'HIP writing mode'
+        type: choice
+        options:
+        - preserve
+        - overwrite
+        default: 'preserve'
         required: true
 
 jobs:
@@ -86,13 +95,21 @@ jobs:
 
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
+
+        key = "${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}"
+
+        if "${{ github.event.inputs.hip_writing_mode }}" == "preserve" and client.object_exists(
+          Bucket="${{ secrets.COS_BUCKET }}",
+          Key=Key
+        ):
+          raise Exception("Package already exists")
+
         response = client.upload_file(
             Bucket="${{ secrets.COS_BUCKET }}",
-            Key="${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}",
+            Key=Key,
             LocalFilePath=artifact,
             EnableMD5=True,
             ContentMD5=metadata["artifact-md5"],
             Metadata={"x-cos-tagging": urlencode(metadata)}
         )
         print("ETag: " + response["ETag"])
-    

@@ -27,12 +27,6 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - name: Token
-      uses: navikt/github-app-token-generator@v1
-      id: get-token
-      with:
-        private-key: ${{ secrets.PRIVATE_KEY }}
-        app-id: ${{ secrets.APP_ID }}
     - name: Greetings
       if: github.event.action == 'opened'
       uses: actions/github-script@v6.1.0
@@ -48,6 +42,12 @@ jobs:
             issue_number: pull_request.number,
             body: process.env['greetings_message'],
           });
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.PRIVATE_KEY }}
+        app-id: ${{ secrets.APP_ID }}
     - name: Checks
       uses: actions/github-script@v6.1.0
       with:

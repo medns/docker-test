@@ -9,14 +9,14 @@ on:
         options:
         - Git
         - URL
-        default: 'Git'
+        default: 'URL'
         required: true
       source_url:
         description: 'URL or Git <repository>'
         type: string
         required: true
       git_revision:
-        description: 'Git <tag>|<branch>|<commit>, Git available'
+        description: 'Git ref(only Git source available)'
         type: string
         required: false
       hip_domain:
@@ -96,17 +96,17 @@ jobs:
         config = CosConfig(Region="${{ secrets.COS_REGION }}", SecretId="${{ secrets.TC_SECRET_ID }}", SecretKey="${{ secrets.TC_SECRET_KEY }}")
         client = CosS3Client(config)
 
-        key = "${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}"
+        cos_key = "${{ github.event.inputs.hip_domain }}/${{ github.event.inputs.hip_artifact_path }}"
 
         if "${{ github.event.inputs.hip_writing_mode }}" == "preserve" and client.object_exists(
           Bucket="${{ secrets.COS_BUCKET }}",
-          Key=Key
+          Key=cos_key
         ):
           raise Exception("Package already exists")
 
         response = client.upload_file(
             Bucket="${{ secrets.COS_BUCKET }}",
-            Key=Key,
+            Key=cos_key,
             LocalFilePath=artifact,
             EnableMD5=True,
             ContentMD5=metadata["artifact-md5"],

@@ -4,7 +4,7 @@ on: [workflow_dispatch]
 
 jobs:
   greeting:
-    runs-on: ${{ github.repository == 'nodejs/node' && 'ubuntu-latest' || fromJson("['self-hosted', 'linux']") }}
+    runs-on: ${{ github.repository == 'nodejs/node' && 'ubuntu-latest' || fromJson('[''self-hosted'', ''linux'']') }}
     steps:
     - run: |
         echo "Hello, World!"

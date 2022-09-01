@@ -4,15 +4,7 @@ on: [workflow_dispatch]
 
 jobs:
   greeting:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'nodejs/node' && 'ubuntu-latest' || ['self-hosted', 'linux'] }}
     steps:
     - run: |
-        echo $LIB
-        echo $PLATFORM
-    - uses: navikt/github-app-token-generator@v1
-      id: get-token
-      with:
-        private-key: ${{ secrets.PRIVATE_KEY }}
-        app-id: ${{ secrets.APP_ID }}
-    - run: |
-        echo ${{ steps.get-token.outputs.token }} | base64
+        echo "Hello, World!"

@@ -7,4 +7,4 @@ jobs:
     runs-on: ${{ github.repository == 'medns/docker-test' && 'ubuntu-latest' || fromJson('[''self-hosted'', ''linux'']') }}
     steps:
     - run: |
-        echo "Hello, World!"
+        echo "${{ github.repository }}"

@@ -253,7 +253,7 @@ jobs:
 
               return stack;
             }).map(({ pc, func, file, source }, i) => {
-              return `#${i} PC ${pc}  ${file} (${func})${source ? ` [${source}]` : ''}`;
+              return `#${i} PC ${pc}  ${file} ${func ? `(${func})` : ''}${source ? ` [${source}]` : ''}`;
             });
 
             body = util.format(process.env.translate_success_message, [`translated backtrace:`, ...formatted.map(line => `  ${line}`)].join(os.EOL));

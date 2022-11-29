@@ -1,0 +1,11 @@
+name: 'block'
+
+on:
+  pull_request_target:
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+      exit -1

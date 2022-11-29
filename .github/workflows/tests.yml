@@ -1,0 +1,12 @@
+name: 'block'
+
+on:
+  pull_request_target:
+    types: [auto_merge_disabled]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo "${{ github.event.reason }}"

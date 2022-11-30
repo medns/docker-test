@@ -1,0 +1,13 @@
+name: 'gh_pr_review_test'
+
+on:
+  pull_request_review:
+
+jobs:
+  review_test:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo "${{ github.event.action }}"
+        echo "${{ github.event.review.state }}"
+        echo "${{ github.event.review.user.login }}"

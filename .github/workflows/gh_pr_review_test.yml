@@ -9,7 +9,7 @@ jobs:
   review_test:
     runs-on: ubuntu-latest
     steps:
-      run: |
+    - run: |
         echo "${{ github.event.action }}"
         echo "${{ github.event.review.state }}"
         echo "${{ github.event.review.user.login }}"

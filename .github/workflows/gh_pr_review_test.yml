@@ -15,7 +15,8 @@ jobs:
         WECHAT_WORK_BOT_WEBHOOK: ${{secrets.WECHAT_WORK_BOT_WEBHOOK}}
       with:
         msgtype: markdown
-        content: "[${{ github.event.requested_reviewer.sender.login }}](https://github.com/${{ github.event.requested_reviewer.sender.login }}) requested your review on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.url }}) pull request. \n
+        content: "[${{ github.event.requested_reviewer.sender.login }}](https://github.com/${{ github.event.requested_reviewer.sender.login }}) requested your review on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request. \n
         > ${{ github.event.pull_request.title }} \n
-        > [${{ github.event.pull_request.url }}](${{ github.event.pull_request.url }}) \n
-        > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>"
+        > ${{ toJSON(github.event.requested_reviewer.sender) }} \n
+        > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }}) \n
+        > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>"

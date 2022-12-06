@@ -3,7 +3,7 @@ name: '[gh] pull request review target'
 on:
   workflow_run:
     workflows: 
-      - [gh] pull request review triage
+      - '[gh] pull request review triage'
     types: [ completed ]
 
 jobs:

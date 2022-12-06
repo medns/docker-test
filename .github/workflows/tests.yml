@@ -2,7 +2,7 @@ name: 'test'
 
 on:
   pull_request_target:
-    types: [auto_merge_disabled]
+    types: [auto_merge_disabled, auto_merge_enabled]
 
 jobs:
   test:

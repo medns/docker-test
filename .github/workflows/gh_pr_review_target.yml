@@ -65,15 +65,21 @@ jobs:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const { owner, repo } = context.repo;
-          const { issues } = github.rest;
+          const { issues, reactions } = github.rest;
           const util = require('util');
 
           const review_info = JSON.parse(process.env.REVIEW_INFO);
           const { pull_request } = review_info;
           const { user } = review_info.review;
 
-          await issues.createComment({
+          const { data: { id } } = await issues.createComment({
             issue_number: pull_request.number,
             body: util.format(process.env['MESSAGE'], user.login),
+            ...context.repo
+          });
+
+          await reactions.createForIssueComment({
+            comment_id: id,
+            content: 'eyes',
             ...context.repo
           });

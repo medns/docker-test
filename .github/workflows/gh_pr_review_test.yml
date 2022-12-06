@@ -20,19 +20,22 @@ jobs:
         > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }}) \n
         > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>"
     - name: Notice
-      env:
-        MESSAGE: |
-          2 [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) requested your review on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request. \n
-          > ${{ github.event.pull_request.title }} \n
-          > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }}) \n
-          > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>
-      run: |
-        curl ${{secrets.WECHAT_WORK_BOT_WEBHOOK}} \
-        -H 'Content-Type: application/json' \
-        -d '
-        {
-          "msgtype": "markdown",
-          "markdown": {
-            "content": "'$MESSAGE'"
-          }
-        }'
+      uses: actions/github-script@v6.3.3
+      with:
+        script: |
+          await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
+            headers: {
+              "content-type": "application/json"
+            },
+            data: {
+              msgtype: "markdown",
+              markdown: {
+                content: `
+                    [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) requested your review on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request. \n
+                    > ${{ github.event.pull_request.title }} \n
+                    > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }}) \n
+                    > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>
+                  `
+              }
+            }
+          });

@@ -9,5 +9,13 @@ jobs:
     if: github.event.action == 'submitted' && github.event.review.state == 'changes_requested'
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        echo "Review changes requested"
+    - name: Commit
+      env:
+        REVIEW_INFO: ${{ toJSON(github.event) }}
+      run: |
+        echo $REVIEW_INFO > ./review_info
+    - name: Push
+      uses: actions/upload-artifact@v3
+      with:
+        name: review_info
+        path: ./review_info

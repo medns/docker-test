@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   basic_info_labeler:
-    if: contains(['opened', 'reopened', 'synchronize'], github.event.action)
+    if: contains(fromJSON('[''opened'', ''reopened'', ''synchronize'']'), github.event.action)
     runs-on: ubuntu-latest
     steps:
     - name: Path
@@ -36,7 +36,7 @@ jobs:
         configuration-path: ".github/workflows/config/pr-size-labeler.yml"
 
   auto_merge_labeler:
-    if: contains(['auto_merge_enabled', 'auto_merge_disabled'], github.event.action)
+    if: contains(fromJSON('[''auto_merge_enabled'', ''auto_merge_disabled'']'), github.event.action)
     runs-on: ubuntu-latest
     steps:
     - name: Merge

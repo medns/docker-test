@@ -52,13 +52,13 @@ jobs:
         app-id: ${{ secrets.APP_ID }}
     - name: Notification
       uses: actions/github-script@v6
-      with:
-        github-token: ${{ steps.get-token.outputs.token }}
-        env:
+      env:
           MESSAGE: |
-            Our reviewer %s requested changes in PR.
+            Our reviewer @%s requested changes in PR.
             **Please Click the `Re-request review` button in the _Reviewers panel_ in the upper right corner(as shown below) when you have finished the changes**, and we will review it asap.
             ![reviewers pannel](https://user-images.githubusercontent.com/1575008/205927193-2a2f41c3-5aeb-4f39-96cd-8020cfe2da1c.png)
+      with:
+        github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const { owner, repo } = context.repo;
           const { issues } = github.rest;
@@ -71,6 +71,6 @@ jobs:
 
           await issues.createComment({
             issue_number: pull_request.number,
-            body: util.format(process.env['MESSAGE'], `@${user.login}`),
+            body: util.format(process.env['MESSAGE'], user.login),
             ...context.repo
           });

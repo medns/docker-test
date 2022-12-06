@@ -16,9 +16,11 @@ jobs:
           [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) requested your review on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request.
           > ${{ github.event.pull_request.title }}
           > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }})
-          > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color="info">${{ github.event.pull_request.additions }} additions</font> and <font color="warning">${{ github.event.pull_request.deletions }} deletions</font>
+          > [%s changed files](${{ github.event.pull_request.html_url }}/files) with <font color="info">%s additions</font> and <font color="warning">%s deletions</font>
       with:
         script: |
+          const { format } = require("util");
+
           await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
             headers: {
               "content-type": "application/json"
@@ -26,7 +28,7 @@ jobs:
             data: {
               msgtype: "markdown",
               markdown: {
-                content: process.env.MESSAGE,
+                content: format(process.env.MESSAGE, (${{ github.event.pull_request.changed_files }}).toLocaleString(), (${{ github.event.pull_request.additions }}).toLocaleString(), (${{ github.event.pull_request.deletions }}).toLocaleString()),
                 attachments: [{
                   callback_id: "review",
                   actions: [{

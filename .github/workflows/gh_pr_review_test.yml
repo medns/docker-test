@@ -8,7 +8,7 @@ on:
 
 jobs:
   review_notification:
-    if: github.action == 'pull_request' && github.event.requested_reviewer.type == 'User'
+    if: github.event.action == 'review_requested' && github.event.requested_reviewer.type == 'User'
     runs-on: ubuntu-latest
     steps:
     - name: Notice
@@ -65,7 +65,7 @@ jobs:
           });
 
   request_change_notification:
-    if: github.action == 'pull_request_review' && github.event.review.state == 'changes_requested'
+    if: github.event.action == 'submitted' && github.event.review.state == 'changes_requested'
     permissions:
       actions: write
       pull-requests: write

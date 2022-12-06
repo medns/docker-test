@@ -4,8 +4,8 @@ on:
   pull_request_review:
     types: [ submitted ]
 
-job:
-  comments:
+jobs:
+  review_info_commit:
     if: github.event.action == 'submitted' && github.event.review.state == 'changes_requested'
     runs-on: ubuntu-latest
     steps:

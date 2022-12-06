@@ -6,7 +6,7 @@ on:
     types: [ completed ]
 
 jobs:
-  comments:
+  review_info_triage:
     runs-on: ubuntu-latest
     steps:
     - run: |

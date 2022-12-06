@@ -26,19 +26,19 @@ jobs:
             data: {
               msgtype: "markdown",
               markdown: {
-                content: process.env.MESSAGE
-              },
-              "attachments": [{
-                "callback_id": "review",
-                "actions": [{
-                  "name": "review_btn",
-                  "text": "Reviewed",
-                  "type": "button",
-                  "value": "Reviewed",
-                  "replace_text": "Already reviewed",
-                  "border_color": "2EAB49",
-                  "text_color": "2EAB49"
+                content: process.env.MESSAGE,
+                attachments: [{
+                  callback_id: "review",
+                  actions: [{
+                    name: "review_btn",
+                    text: "Reviewed",
+                    type: "button",
+                    value: "Reviewed",
+                    replace_text: "Already reviewed",
+                    border_color: "2EAB49",
+                    text_color: "2EAB49"
+                  }]
                 }]
-              }]
+              }
             }
           });

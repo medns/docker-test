@@ -41,7 +41,6 @@ jobs:
 
   review_changes_requested_notification:
     needs: review_info_pull
-    if: needs.review_info_pull.outputs.success != ''
     runs-on: ubuntu-latest
     steps:
     - name: Token

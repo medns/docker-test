@@ -21,6 +21,12 @@ jobs:
         script: |
           const { format } = require("util");
 
+          const chatid = JSON.parse("${{ secrets.WECHAT_WORK_CHAT_ID }}")["${{ github.event.requested_reviewer.login }}"];
+          if (!chatid) {
+            console.log("reviewer ${{ github.event.requested_reviewer.login }} not found in secrets.WECHAT_WORK_CHAT_ID");
+            return;
+          }
+
           await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
             headers: {
               "content-type": "application/json"
@@ -33,14 +39,23 @@ jobs:
                   callback_id: "review",
                   actions: [{
                     name: "review_btn",
-                    text: "Reviewed",
+                    text: "Mark as Reviewed",
                     type: "button",
-                    value: "Reviewed",
+                    value: "Mark as Reviewed",
                     replace_text: "Already reviewed",
                     border_color: "2c974b",
                     text_color: "2c974b"
+                  }, {
+                    name: "ignore_btn",
+                    text: "Mark as Ignored",
+                    type: "button",
+                    value: "Mark as Ignored",
+                    replace_text: "Already ignored",
+                    border_color: "6e7781",
+                    text_color: "6e7781"
                   }]
-                }]
+                }],
+                //chatid
               }
             }
           });

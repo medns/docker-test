@@ -10,23 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Notice
-      uses: chf007/action-wechat-work@1.0.8
-      env:
-        WECHAT_WORK_BOT_WEBHOOK: ${{secrets.WECHAT_WORK_BOT_WEBHOOK}}
-      with:
-        msgtype: markdown
-        content: "[${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) requested your review on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request. \n
-        > ${{ github.event.pull_request.title }} \n
-        > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }}) \n
-        > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>"
-    - name: Notice
       uses: actions/github-script@v6.3.3
       env:
         MESSAGE: |
           [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) requested your review on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request. \n
           > ${{ github.event.pull_request.title }} \n
           > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }}) \n
-          > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>
+          > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color="info">${{ github.event.pull_request.additions }} additions</font> and <font color="warning">${{ github.event.pull_request.deletions }} deletions</font>
       with:
         script: |
           await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
@@ -37,6 +27,18 @@ jobs:
               msgtype: "markdown",
               markdown: {
                 content: process.env.MESSAGE
-              }
+              },
+              "attachments": [{
+                "callback_id": "review",
+                "actions": [{
+                  "name": "review_btn",
+                  "text": "Reviewed",
+                  "type": "button",
+                  "value": "Reviewed",
+                  "replace_text": "Already reviewed",
+                  "border_color": "2EAB49",
+                  "text_color": "2EAB49"
+                }]
+              }]
             }
           });

@@ -35,8 +35,8 @@ jobs:
                     type: "button",
                     value: "Reviewed",
                     replace_text: "Already reviewed",
-                    border_color: "158eff",
-                    text_color: "158eff"
+                    border_color: "2c974b",
+                    text_color: "2c974b"
                   }]
                 }]
               }

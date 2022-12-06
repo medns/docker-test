@@ -26,7 +26,7 @@ jobs:
           > ${{ github.event.pull_request.title }} \n
           > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }}) \n
           > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.html_url }}/files) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>
-      runs: |
+      run: |
         curl ${{secrets.WECHAT_WORK_BOT_WEBHOOK}} \
         -H 'Content-Type: application/json' \
         -d '

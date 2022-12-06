@@ -3,10 +3,12 @@ name: 'gh_pr_review'
 on:
   pull_request:
     types: [ review_requested ]
+  pull_request_review:
+    types: [ submitted ]
 
 jobs:
   review_notification:
-    if: github.event.requested_reviewer.type == 'User'
+    if: github.action == 'pull_request' && github.event.requested_reviewer.type == 'User'
     runs-on: ubuntu-latest
     steps:
     - name: Notice
@@ -57,7 +59,25 @@ jobs:
                     text_color: "6e7781"
                   }]
                 }],
-                //chatid
+                chatid
               }
             }
           });
+
+  request_change_notification:
+    if: github.action == 'pull_request_review' && github.event.review.state == 'changes_requested'
+    permissions:
+      actions: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - name: Comment
+      uses: peter-evans/create-or-update-comment@v2.1.0
+      env:
+        MESSAGE: |
+          Our reviewer @${{ github.event.review.user.login }} requested changes in PR.
+          **Please Click the `Re-request review` button in the _Reviewers panel_ in the upper right corner(as shown below) when you have finished the changes**, and we will review it asap.
+          ![reviewers pannel](https://user-images.githubusercontent.com/1575008/205927193-2a2f41c3-5aeb-4f39-96cd-8020cfe2da1c.png)
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: ${{ env.MESSAGE }}

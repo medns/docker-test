@@ -9,5 +9,5 @@ jobs:
     if: github.event.action == 'submitted' && github.event.review.state == 'changes_requested'
     runs-on: ubuntu-latest
     steps:
-    - runs: |
+    - run: |
         echo "Review changes requested by ${github.event.review.user.login} on PR ${github.event.pull_request.number}."

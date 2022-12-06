@@ -17,17 +17,19 @@ jobs:
           > ${{ github.event.pull_request.title }}
           > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }})
           > [%s changed files](${{ github.event.pull_request.html_url }}/files) with <font color="info">%s additions</font> and <font color="warning">%s deletions</font>
+        WECHAT_WORK_CHAT_ID: ${{ secrets.WECHAT_WORK_CHAT_ID }}
+        WECHAT_WORK_REQ: POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}
       with:
         script: |
           const { format } = require("util");
 
-          const chatid = JSON.parse("${{ secrets.WECHAT_WORK_CHAT_ID }}")["${{ github.event.requested_reviewer.login }}"];
+          const chatid = JSON.parse(process.env.WECHAT_WORK_CHAT_ID)["${{ github.event.requested_reviewer.login }}"];
           if (!chatid) {
-            console.log("reviewer ${{ github.event.requested_reviewer.login }} not found in secrets.WECHAT_WORK_CHAT_ID");
+            console.log("The reviewer ${{ github.event.requested_reviewer.login }} not found in secrets.WECHAT_WORK_CHAT_ID");
             return;
           }
 
-          await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
+          await github.request(process.env.WECHAT_WORK_REQ, {
             headers: {
               "content-type": "application/json"
             },

@@ -28,7 +28,7 @@ jobs:
             return artifact.name == "review_info"
           });
           if (!artifact) {
-            throw new Error(`Missing review_info artifact in parent workflow(${workflow_run.id})`);
+            throw new Error(`Missing review_info artifact generated in parent workflow(${workflow_run.id})`);
           }
 
           const download = await actions.downloadArtifact({

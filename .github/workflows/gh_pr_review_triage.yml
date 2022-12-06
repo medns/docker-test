@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo "Review changes requested by ${github.event.review.user.login} on PR ${github.event.pull_request.number}."
+        echo "Review changes requested"

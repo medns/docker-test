@@ -58,7 +58,7 @@ jobs:
       env:
           MESSAGE: |
             Our reviewer @%s requested changes in PR.
-            **If changes have been made, click the `Re-request review` button in the right sidebar**(as shown below) to notify the requested reviewers.
+            If changes have been made, **click the `Re-request review` button in the right sidebar(as shown below)** to notify the reviewers.
             ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
           REVIEW_INFO: ${{ needs.review_info_pull.outputs.review_info }}
       with:

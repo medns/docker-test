@@ -9,6 +9,8 @@ on:
 jobs:
   review_info_pull:
     runs-on: ubuntu-latest
+    outputs:
+      review_info: ${{ steps.info.outputs.review_info }}
     steps:
     - name: Pull
       uses: actions/github-script@v6
@@ -35,9 +37,11 @@ jobs:
              ...context.repo
           });
           fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/review_info.zip`, Buffer.from(download.data));
-    - name: Unzip
+    - name: Info
+      id: info
       run: |
         unzip review_info.zip
+        echo "review_info=$(cat review_info)" >> $GITHUB_OUTPUT
 
   review_changes_requested_notification:
     needs: review_info_pull
@@ -56,15 +60,15 @@ jobs:
             Our reviewer @%s requested changes in PR.
             **Please Click the `Re-request review` button in the _Reviewers panel_ in the upper right corner(as shown below) when you have finished the changes**, and we will review it asap.
             ![reviewers pannel](https://user-images.githubusercontent.com/1575008/205927193-2a2f41c3-5aeb-4f39-96cd-8020cfe2da1c.png)
+          REVIEW_INFO: ${{ needs.review_info_pull.outputs.review_info }}
       with:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const { owner, repo } = context.repo;
           const { issues } = github.rest;
-          const fs = require('fs');
           const util = require('util');
 
-          const review_info = JSON.parse(fs.readFileSync('review_info', 'utf8'));
+          const review_info = JSON.parse(process.env.REVIEW_INFO);
           const { pull_request } = review_info;
           const { user } = review_info.review;
 

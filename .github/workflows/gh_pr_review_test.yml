@@ -18,4 +18,4 @@ jobs:
         content: "[${{ github.event.requested_reviewer.sender }}](https://github.com/${{ github.event.requested_reviewer.sender }}) requested your review on [#${{ github.event.pull_request.id }}](${{ github.event.pull_request.issue_url }}) pull request. \n
         > ${{ github.event.pull_request.title }} \n
         > [${{ github.event.pull_request.issue_url }}](${{ github.event.pull_request.issue_url }}) \n
-        > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.diff_url }}) with <font color="info">${{ github.event.pull_request.additions }} additions</font> and <font color="warning">${{ github.event.pull_request.deletions }} deletions</font>"
+        > [${{ github.event.pull_request.changed_files }} changed files](${{ github.event.pull_request.diff_url }}) with <font color=\"info\">${{ github.event.pull_request.additions }} additions</font> and <font color=\"warning\">${{ github.event.pull_request.deletions }} deletions</font>"

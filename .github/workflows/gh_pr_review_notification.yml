@@ -1,13 +1,11 @@
-name: 'gh_pr_review'
+name: '[gh] pull request review notification'
 
 on:
   pull_request_target:
     types: [ review_requested ]
-  pull_request_review:
-    types: [ submitted ]
 
 jobs:
-  review_notification:
+  notification:
     if: github.event.action == 'review_requested' && github.event.requested_reviewer.type == 'User'
     runs-on: ubuntu-latest
     steps:
@@ -63,20 +61,3 @@ jobs:
               }
             }
           });
-
-  request_change_notification:
-    if: github.event.action == 'submitted' && github.event.review.state == 'changes_requested'
-    runs-on: ubuntu-latest
-    steps:
-    - run: |
-        echo ${{ secrets.BOT_APP_KEY }}
-    - name: Comment
-      uses: peter-evans/create-or-update-comment@v2.1.0
-      env:
-        MESSAGE: |
-          Our reviewer @${{ github.event.review.user.login }} requested changes in PR.
-          **Please Click the `Re-request review` button in the _Reviewers panel_ in the upper right corner(as shown below) when you have finished the changes**, and we will review it asap.
-          ![reviewers pannel](https://user-images.githubusercontent.com/1575008/205927193-2a2f41c3-5aeb-4f39-96cd-8020cfe2da1c.png)
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        body: ${{ env.MESSAGE }}

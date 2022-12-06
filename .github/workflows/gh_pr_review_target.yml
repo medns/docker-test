@@ -1,0 +1,13 @@
+name: '[gh] pull request review target'
+
+on:
+  workflow_run:
+    workflows: [ '[gh] pull request review triage' ]
+    types: [ completed ]
+
+jobs:
+  comments:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo "${{ toJSON(github.event.workflow_run) }}"

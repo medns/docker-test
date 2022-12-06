@@ -1,0 +1,13 @@
+name: '[gh] pull request review triage'
+
+on:
+  pull_request_review:
+    types: [ submitted ]
+
+job:
+  comments:
+    if: github.event.action == 'submitted' && github.event.review.state == 'changes_requested'
+    runs-on: ubuntu-latest
+    steps:
+    - runs: |
+        echo "Review changes requested by ${github.event.review.user.login} on PR ${github.event.pull_request.number}."

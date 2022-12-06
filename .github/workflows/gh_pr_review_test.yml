@@ -33,6 +33,6 @@ jobs:
         {
           "msgtype": "markdown",
           "markdown": {
-            "content": "$MESSAGE"
+            "content": "'$MESSAGE'"
           }
         }'

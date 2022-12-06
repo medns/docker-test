@@ -58,8 +58,8 @@ jobs:
       env:
           MESSAGE: |
             Our reviewer @%s requested changes in PR.
-            **Please Click the `Re-request review` button in the _Reviewers panel_ in the upper right corner(as shown below) when you have finished the changes**, and we will review it asap.
-            ![reviewers pannel](https://user-images.githubusercontent.com/1575008/205927193-2a2f41c3-5aeb-4f39-96cd-8020cfe2da1c.png)
+            **If changes have been made, click the `Re-request review` button in the right sidebar**(as shown below) to notify the requested reviewers.
+            ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
           REVIEW_INFO: ${{ needs.review_info_pull.outputs.review_info }}
       with:
         github-token: ${{ steps.get-token.outputs.token }}

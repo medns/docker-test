@@ -14,7 +14,7 @@ jobs:
   check_pull_request_title:
     if: github.event.label.name == "action:\ squash-merge"
     runs-on: ubuntu-latest
-    output:
+    outputs:
       failed_details: ${{ steps.commitlint.outputs.failed_details }}
     steps:
     - name: Checkout

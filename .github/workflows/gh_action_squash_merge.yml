@@ -10,13 +10,10 @@ on:
     types:
       - labeled
 
-env:
-  ACTION_LABEL: 'action: squash-merge'
-  ACTION_FAILED_LABEL: 'action: squash-merge-failed'
-
 jobs:
   check_pull_request_title:
-    if: github.event.label.name == env.ACTION_LABEL
+    if: |
+      github.event.label.name == "action: squash-merge"
     runs-on: ubuntu-latest
     outputs:
       failed_details: ${{ steps.commitlint.outputs.failed_details }}
@@ -51,7 +48,8 @@ jobs:
 
   squash_merge_action:
     needs: [ check_pull_request_title ]
-    if: always() && github.event.label.name == env.ACTION_LABEL
+    if: |
+      always() && github.event.label.name == "action: squash-merge"
     runs-on: ubuntu-latest
     steps:
     - name: Squash
@@ -88,7 +86,7 @@ jobs:
           const p = [];
           p.push(issues.removeLabel({
             issue_number: pull_request.number,
-            name: process.env.ACTION_LABEL,
+            name: 'action: squash-merge',
             ...context.repo,
           }));
           if (body) {
@@ -99,7 +97,7 @@ jobs:
             }));
             p.push(issues.addLabels({
               issue_number: pull_request.number,
-              labels: [process.env.ACTION_FAILED_LABEL],
+              labels: [ 'action: squash-merge-failed' ],
               ...context.repo
             })); 
           }

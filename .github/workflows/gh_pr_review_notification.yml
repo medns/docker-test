@@ -150,29 +150,3 @@ jobs:
         issue-number: ${{ needs.request_review_target.outputs.pull_request_number }}
         reactions: eyes
         body: ${{ env.MESSAGE }}
-    # - name: Comment
-    #   uses: actions/github-script@v6
-    #   env:
-    #       MESSAGE: |
-    #         Hi, @${{ needs.request_review_target.outputs.sender }}.
-
-    #         I noticed that our reviewers requested changes to this pull request.
-    #         When you're done, **click the `Re-request review` button in the right sidebar(shown below)** to notify the reviewer.
-    #         ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
-    #   with:
-    #     github-token: ${{ steps.get-token.outputs.token }}
-    #     script: |
-    #       const { owner, repo } = context.repo;
-    #       const { issues, reactions } = github.rest;
-
-    #       const { data: { id } } = await issues.createComment({
-    #         issue_number: ${{ needs.request_review_target.outputs.pull_request_number }},
-    #         body: process.env['MESSAGE'],
-    #         ...context.repo
-    #       });
-
-    #       await reactions.createForIssueComment({
-    #         comment_id: id,
-    #         content: 'eyes',
-    #         ...context.repo
-    #       });

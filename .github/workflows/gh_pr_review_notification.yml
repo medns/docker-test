@@ -107,11 +107,12 @@ jobs:
       run: |
         import zipfile
         import json
+        import os
 
         with zipfile.ZipFile("review_info.zip", "r") as zip_ref:
           buf = zip_ref.read("review_info")
           review_info = json.loads(buf)
-          with open(getenv("GITHUB_OUTPUT"), 'w', encoding='utf-8') as file:
+          with open(os.getenv("GITHUB_OUTPUT"), 'w', encoding='utf-8') as file:
             file.write("action=%s\n" % review_info["action"])
             file.write("review_state=%s\n" % review_info["review"]["state"])
             file.write("review_user=%s\n" % review_info["review"]["user"]["login"])

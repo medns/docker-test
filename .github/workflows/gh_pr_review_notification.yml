@@ -21,23 +21,24 @@ jobs:
           > ${{ github.event.pull_request.title }}
           > [${{ github.event.pull_request.html_url }}](${{ github.event.pull_request.html_url }})
           > [%s changed files](${{ github.event.pull_request.html_url }}/files) with <font color="info">%s additions</font> and <font color="warning">%s deletions</font>
-        WECHAT_WORK_CHAT_ID: ${{ secrets.WECHAT_WORK_CHAT_ID }}
-        WECHAT_WORK_REQ: POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}
+        WECHAT_WORK_USERS: ${{ secrets.WECHAT_WORK_USERS }}
       with:
         script: |
           const { format } = require("util");
 
-          const chatid = JSON.parse(process.env.WECHAT_WORK_CHAT_ID)["${{ github.event.requested_reviewer.login }}"];
-          if (!chatid) {
-            console.log("The reviewer ${{ github.event.requested_reviewer.login }} not found in secrets.WECHAT_WORK_CHAT_ID");
+          const userid = JSON.parse(process.env.WECHAT_WORK_USERS)["${{ github.event.requested_reviewer.login }}"];
+          if (!userid) {
+            console.log("The reviewer ${{ github.event.requested_reviewer.login }} not found in secrets.WECHAT_WORK_USERS");
             return;
           }
 
-          await github.request(process.env.WECHAT_WORK_REQ, {
+          await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
             headers: {
               "content-type": "application/json"
             },
             data: {
+              chatid: ${{ secrets.WECHAT_WORK_CHAT_ID }},
+              visible_to_user: userid,
               msgtype: "markdown",
               markdown: {
                 content: format(process.env.MESSAGE, (${{ github.event.pull_request.changed_files }}).toLocaleString(), (${{ github.event.pull_request.additions }}).toLocaleString(), (${{ github.event.pull_request.deletions }}).toLocaleString()),
@@ -60,8 +61,7 @@ jobs:
                     border_color: "6e7781",
                     text_color: "6e7781"
                   }]
-                }],
-                chatid
+                }]
               }
             }
           });

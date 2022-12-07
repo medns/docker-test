@@ -116,7 +116,7 @@ jobs:
             file.write("action=%s\n" % review_info["action"])
             file.write("review_state=%s\n" % review_info["review"]["state"])
             file.write("pull_request_number=%s\n" % review_info["pull_request"]["number"])
-            file.write("sender=%s\n" % review_info["sender"]["user"]["login"])
+            file.write("sender=%s\n" % review_info["sender"]["login"])
             file.write("raw=%s\n" % json.dumps(review_info))
     
   changes_requested_comment:

@@ -1,11 +1,15 @@
-name: '[gh] pull request review notification'
+name: '[gh] pull review notification'
 
 on:
   pull_request_target:
     types: [ review_requested ]
+  workflow_run:
+    workflows:
+      - \[gh\] pull request review
+    types: [ completed ]
 
 jobs:
-  notification:
+  request_notification:
     if: github.event.action == 'review_requested' && github.event.requested_reviewer.type == 'User'
     runs-on: ubuntu-latest
     steps:
@@ -60,4 +64,77 @@ jobs:
                 chatid
               }
             }
+          });
+
+  request_review_target:
+    if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      review_info: ${{ fromJSON(steps.info.outputs.review_info) }}
+    steps:
+    - name: Pull
+      uses: actions/github-script@v6.3.3
+      with:
+        script: |
+          const { workflow_run } = context.payload;
+          const { actions } = github.rest;
+          const fs = require('fs');
+
+          const { data: { artifacts } } = await actions.listWorkflowRunArtifacts({
+             run_id: workflow_run.id,
+             ...context.repo
+          });
+          const [ artifact ] = artifacts.filter((artifact) => {
+            return artifact.name == "review_info"
+          });
+          if (!artifact) {
+            throw new Error(`Missing review_info artifact generated in parent workflow(${workflow_run.id})`);
+          }
+
+          const download = await actions.downloadArtifact({
+             artifact_id: artifact.id,
+             archive_format: 'zip',
+             ...context.repo
+          });
+          fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/review_info.zip`, Buffer.from(download.data));
+    - name: Info
+      id: info
+      run: |
+        unzip review_info.zip
+        echo "review_info=$(cat review_info)" >> $GITHUB_OUTPUT
+    
+  changes_requested_comment:
+    needs: request_review_target
+    if: needs.request_review_target.outputs.review_info.action == 'submitted' && needs.request_review_target.outputs.review_info.review.state == 'changes_requested'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.PRIVATE_KEY }}
+        app-id: ${{ secrets.APP_ID }}
+    - name: Comment
+      uses: actions/github-script@v6
+      env:
+          MESSAGE: |
+            Our reviewer @${{ needs.request_review_target.outputs.review_info.review.user.login }} requested changes in PR.
+            If changes have been made, **click the `Re-request review` button in the right sidebar(as shown below)** to notify the reviewers.
+            ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
+      with:
+        github-token: ${{ steps.get-token.outputs.token }}
+        script: |
+          const { owner, repo } = context.repo;
+          const { issues, reactions } = github.rest;
+
+          const { data: { id } } = await issues.createComment({
+            issue_number: ${{ needs.request_review_target.outputs.review_info.pull_request.number }},
+            body: process.env['MESSAGE'],
+            ...context.repo
+          });
+
+          await reactions.createForIssueComment({
+            comment_id: id,
+            content: 'eyes',
+            ...context.repo
           });

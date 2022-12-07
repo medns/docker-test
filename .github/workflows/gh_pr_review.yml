@@ -1,12 +1,11 @@
-name: '[gh] pull request review triage'
+name: '[gh] pull request review'
 
 on:
   pull_request_review:
-    types: [ submitted ]
+    types: [ submitted, edit ]
 
 jobs:
-  review_info_push:
-    if: github.event.action == 'submitted' && github.event.review.state == 'changes_requested'
+  pull_request_review:
     runs-on: ubuntu-latest
     steps:
     - name: Commit

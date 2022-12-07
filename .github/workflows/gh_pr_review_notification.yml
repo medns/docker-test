@@ -69,8 +69,7 @@ jobs:
   request_review_target:
     if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    outputs:
-      review_info: ${{ fromJSON(steps.info.outputs.review_info) }}
+    outputs: ${{ fromJSON(steps.info.outputs.review_info) }}
     steps:
     - name: Pull
       uses: actions/github-script@v6.3.3

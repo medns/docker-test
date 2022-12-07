@@ -37,7 +37,7 @@ jobs:
               "content-type": "application/json"
             },
             data: {
-              chatid: ${{ secrets.WECHAT_WORK_CHAT_ID }},
+              chatid: "${{ secrets.WECHAT_WORK_CHAT_ID }}",
               visible_to_user: userid,
               msgtype: "markdown",
               markdown: {

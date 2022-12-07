@@ -72,8 +72,8 @@ jobs:
     outputs: 
       action: ${{ steps.parse.outputs.action }}
       review_state: ${{ steps.parse.outputs.review_state }}
-      review_user: ${{ steps.parse.outputs.review_user }}
       pull_request_number: ${{ steps.parse.outputs.pull_request_number }}
+      sender: ${{ steps.parse.outputs.sender }}
       raw: ${{ steps.parse.outputs.raw }}
     steps:
     - name: Pull
@@ -115,14 +115,21 @@ jobs:
           with open(os.getenv("GITHUB_OUTPUT"), 'w', encoding='utf-8') as file:
             file.write("action=%s\n" % review_info["action"])
             file.write("review_state=%s\n" % review_info["review"]["state"])
-            file.write("review_user=%s\n" % review_info["review"]["user"]["login"])
             file.write("pull_request_number=%s\n" % review_info["pull_request"]["number"])
+            file.write("sender=%s\n" % review_info["sender"]["user"]["login"])
             file.write("raw=%s\n" % json.dumps(review_info))
     
   changes_requested_comment:
     needs: request_review_target
     if: needs.request_review_target.outputs.action == 'submitted' && needs.request_review_target.outputs.review_state == 'changes_requested'
     runs-on: ubuntu-latest
+    env:
+      MESSAGE: |
+        Hi, @${{ needs.request_review_target.outputs.sender }}.
+
+        I noticed that our reviewers requested changes to this pull request.
+        When you're done, **click the `Re-request review` button in the right sidebar(shown below)** to notify the reviewer.
+        ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
     steps:
     - name: Token
       uses: navikt/github-app-token-generator@v1
@@ -130,27 +137,42 @@ jobs:
       with:
         private-key: ${{ secrets.PRIVATE_KEY }}
         app-id: ${{ secrets.APP_ID }}
-    - name: Comment
-      uses: actions/github-script@v6
-      env:
-          MESSAGE: |
-            Our reviewer @${{ needs.request_review_target.outputs.review_user }} requested changes in PR.
-            If changes have been made, **click the `Re-request review` button in the right sidebar(as shown below)** to notify the reviewers.
-            ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
+    - name: Find
+      uses: peter-evans/find-comment@v2.1.0
+      id: find
       with:
-        github-token: ${{ steps.get-token.outputs.token }}
-        script: |
-          const { owner, repo } = context.repo;
-          const { issues, reactions } = github.rest;
+        issue-number: ${{ needs.request_review_target.outputs.pull_request_number }}
+        body-includes: ${{ env.MESSAGE }}
+    - name: Comment
+      if: steps.find.outputs.comment-id == ''
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ needs.request_review_target.outputs.pull_request_number }}
+        reactions: eyes
+        body: ${{ env.MESSAGE }}
+    # - name: Comment
+    #   uses: actions/github-script@v6
+    #   env:
+    #       MESSAGE: |
+    #         Hi, @${{ needs.request_review_target.outputs.sender }}.
 
-          const { data: { id } } = await issues.createComment({
-            issue_number: ${{ needs.request_review_target.outputs.pull_request_number }},
-            body: process.env['MESSAGE'],
-            ...context.repo
-          });
+    #         I noticed that our reviewers requested changes to this pull request.
+    #         When you're done, **click the `Re-request review` button in the right sidebar(shown below)** to notify the reviewer.
+    #         ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
+    #   with:
+    #     github-token: ${{ steps.get-token.outputs.token }}
+    #     script: |
+    #       const { owner, repo } = context.repo;
+    #       const { issues, reactions } = github.rest;
 
-          await reactions.createForIssueComment({
-            comment_id: id,
-            content: 'eyes',
-            ...context.repo
-          });
+    #       const { data: { id } } = await issues.createComment({
+    #         issue_number: ${{ needs.request_review_target.outputs.pull_request_number }},
+    #         body: process.env['MESSAGE'],
+    #         ...context.repo
+    #       });
+
+    #       await reactions.createForIssueComment({
+    #         comment_id: id,
+    #         content: 'eyes',
+    #         ...context.repo
+    #       });

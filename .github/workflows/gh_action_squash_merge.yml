@@ -11,7 +11,7 @@ on:
       - labeled
 
 permissions:
-  actions: write
+  contents: write
   pull-requests: write
 
 jobs:
@@ -86,7 +86,7 @@ jobs:
           :warning: `squash-merge` action execution failed, because of **%s**.
 
           Please check the following details:
-          <details>
+          <details open>
 
           ```
           %s

@@ -11,12 +11,15 @@ on:
       - labeled
 
 jobs:
-  check_pull_request_title:
+  squash_merge_action:
     if: github.event.label.name == 'action(squash-merge)'
     runs-on: ubuntu-latest
-    outputs:
-      failed_result: ${{ steps.commitlint.outputs.failed_result }}
     steps:
+    - name: Check
+      if: "contains(github.event.pull_request.labels.*.name, 'action(squash-merge): failed')"
+      uses: actions-ecosystem/action-remove-labels@v1.3.0
+      with:
+        labels: "action(squash-merge): failed"
     - name: Checkout
       if: github.event.pull_request.commits > 1
       uses: actions/checkout@v3
@@ -52,15 +55,9 @@ jobs:
           fi
         fi
         exit 0
-
-  squash_merge_action:
-    needs: [ check_pull_request_title ]
-    if: github.event.label.name == 'action(squash-merge)'
-    runs-on: ubuntu-latest
-    steps:
     - name: Squash
       id: squash
-      if: ${{ !needs.check_pull_request_title.outputs.failed_result }}
+      if: ${{ !steps.commitlint.outputs.failed_result }}
       env:
         GH_TOKEN: ${{ github.token }}
       shell: bash {0}
@@ -80,7 +77,7 @@ jobs:
       uses: actions/github-script@v6.3.3
       env:
         SQUASH_RESULT: ${{ steps.squash.outputs.failed_result }}
-        CHECK_RESULT: ${{ needs.check_pull_request_title.outputs.failed_result }}
+        CHECK_RESULT: ${{ steps.commitlint.outputs.failed_result }}
         FAILED_MESSAGE: |
           :warning: `squash-merge` action execution failed, because of **%s**.
 
@@ -123,7 +120,7 @@ jobs:
             }));
             p.push(issues.addLabels({
               issue_number: pull_request.number,
-              labels: [ 'action(squash-merge): f' ],
+              labels: [ 'action(squash-merge): failed' ],
               ...context.repo
             })); 
           }

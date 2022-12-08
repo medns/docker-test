@@ -92,8 +92,8 @@ jobs:
           ```
 
           </details>
-          
-          @{{ github.event.sender.login }}
+
+          @${{ github.event.sender.login }}
       with:
         script: |
           const { pull_request } = context.payload;

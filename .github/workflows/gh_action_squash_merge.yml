@@ -102,8 +102,10 @@ jobs:
           const p = [];
           p.push(issues.removeLabel({
             issue_number: pull_request.number,
-            name: 'action: squash-merge',
+            name: 'action(squash-merge)',
             ...context.repo,
+          }).catch(e => {
+            console.log('issues.removeLabel', e);
           }));
           if (body) {
             p.push(issues.createComment({

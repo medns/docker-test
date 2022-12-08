@@ -82,7 +82,7 @@ jobs:
         SQUASH_RESULT: ${{ steps.squash.outputs.failed_result }}
         CHECK_RESULT: ${{ needs.check_pull_request_title.outputs.failed_result }}
         FAILED_MESSAGE: |
-          `squash-merge` action execution failed, because of **%s**.
+          :warning: `squash-merge` action execution failed, because of **%s**.
 
           Please check the following details:
           <details>
@@ -90,8 +90,10 @@ jobs:
           ```
           %s
           ```
-          
+
           </details>
+          
+          @{{ github.event.sender.login }}
       with:
         script: |
           const { pull_request } = context.payload;

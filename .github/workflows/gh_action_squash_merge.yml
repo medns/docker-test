@@ -65,6 +65,7 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       shell: bash {0}
       run: |
+        echo ${{ github.event.pull_request.mergeable }}
         result=`gh pr merge ${{ github.event.pull_request.number }} --squash --auto --match-head-commit ${{ github.event.pull_request.head.sha }} --repo $GITHUB_REPOSITORY 2>&1`
         if [ $? -ne 0 ]; then
             if [ -z $result ]; then

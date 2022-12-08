@@ -6,6 +6,6 @@ on:
 jobs:
   block:
     runs-on: ubuntu-latest
-    steps:
+    steps:  
     - run: |
         exit -1

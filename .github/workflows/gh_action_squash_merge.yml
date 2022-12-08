@@ -33,7 +33,7 @@ jobs:
       if: github.event.pull_request.commits > 1
       run: |
         npm install commitlint-plugin-function-rules@1.6.0 @commitlint/cli@16.2.1 @commitlint/config-conventional@16.2.1 @commitlint/lint@16.2.1 @commitlint/prompt-cli@16.2.1
-    - name: commitlint
+    - name: Commitlint
       id: commitlint
       env:
         PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
@@ -44,20 +44,24 @@ jobs:
             echo "failed_details=$result" >> $GITHUB_OUTPUT
           fi
         fi
+        exit 0
 
   squash_merge_action:
     needs: [ check_pull_request_title ]
-    if: always() && github.event.label.name == 'action(squash-merge)'
+    if: github.event.label.name == 'action(squash-merge)'
     runs-on: ubuntu-latest
     steps:
     - name: Squash
       id: squash
       if: ${{ !needs.check_pull_request_title.outputs.failed_details }}
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         result=`gh pr merge ${{ github.event.pull_requests.number }} --squash --auto --match-head-commit ${{ github.event.pull_request.head.sha }} --repo $GITHUB_REPOSITORY`
         if [ $? -ne 0 ]; then
           echo "failed_result=$result" >> $GITHUB_OUTPUT
         fi
+        exit 0
     - name: Comment
       uses: actions/github-script@v6.3.3
       env:

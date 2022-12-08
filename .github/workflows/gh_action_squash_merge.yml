@@ -88,7 +88,7 @@ jobs:
           <details>%s</details>
       with:
         script: |
-          const { pull_request } = github.event;
+          const { pull_request } = context.payload;
           const { issue } = github.rest;
           const util = require('util');
           

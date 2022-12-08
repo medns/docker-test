@@ -61,8 +61,8 @@ jobs:
     - name: Squash
       id: squash
       if: ${{ !steps.commitlint.outputs.failed_result }}
-      # env:
-      #   GH_TOKEN: ${{ github.token }}
+      env:
+        GH_TOKEN: ${{ github.token }}
       shell: bash {0}
       run: |
         result=`gh pr merge ${{ github.event.pull_requests.number }} --squash --auto --match-head-commit ${{ github.event.pull_request.head.sha }} --repo $GITHUB_REPOSITORY 2>&1`

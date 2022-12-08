@@ -50,7 +50,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MESSAGE: |
-        ${{ toJSON(github.event) }}
         [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) needs help on [#${{ github.event.issue.number }}](${{ github.event.comment.html_url }}) pull request.
         > ${{ github.event.comment.body }}
     steps:

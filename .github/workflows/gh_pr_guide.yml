@@ -46,10 +46,11 @@ jobs:
           });
 
   pull_request_help_needed:
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '#help')
+    if: github.event.sender.login != '' && github.event.issue.pull_request && contains(github.event.comment.body, '#help')
     runs-on: ubuntu-latest
     env:
       MESSAGE: |
+        ${{ toJSON(github.event.issue.pull_request) }}
         [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) needs help on [#${{ github.event.issue.pull_request.number }}](${{ github.event.issue.pull_request.html_url }}) pull request.
         > ${{ github.event.pull_request.title }}
         > [${{ github.event.comment.issue_url }}](${{ github.event.comment.issue_url }})

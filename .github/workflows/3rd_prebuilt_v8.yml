@@ -3,7 +3,7 @@ name: '[3rd] prebuilt v8'
 on:
   workflow_dispatch:
     inputs:
-      v8_revision:
+      v8_revision:  
         description: 'V8 TAG(Branch) to build'   
         type: string
         default: '9.8-lkgr'

@@ -86,7 +86,11 @@ jobs:
 
           Please check the following details:
           <details>
+
+          ```
           %s
+          ```
+          
           </details>
       with:
         script: |

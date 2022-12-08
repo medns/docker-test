@@ -19,9 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MESSAGE: |
-        Hi, @${{ github.event.sender.login }}, Thanks for your PR!👋 
+        Hi, @${{ github.event.sender.login }}, Thanks for your PR! :clap:
 
-        When you need help (e.g. a status checks run failed due to internal issue), please leave a comment in this PR with **`#help`** tag, our collaborators will help asap.
+        :label: You can leave a comment in this PR with **`#help`** tag when you need help (e.g. a status checks run failed due to internal issue or anything else), admin team members will help asap.
     steps:
     - name: Token
       uses: navikt/github-app-token-generator@v1
@@ -46,11 +46,12 @@ jobs:
           });
 
   pull_request_help_needed:
-    if: github.event.sender.login != '' && github.event.issue.pull_request && contains(github.event.comment.body, '#help')
+    if: github.event.sender.type == 'User' && github.event.issue.pull_request && contains(github.event.comment.body, '#help')
     runs-on: ubuntu-latest
     env:
       MESSAGE: |
         [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) needs help on [#${{ github.event.issue.number }}](${{ github.event.comment.html_url }}) pull request.
+        > [${{ github.event.comment.html_url }}](${{ github.event.comment.html_url }})
         > ${{ github.event.comment.body }}
     steps:
     - name: Token
@@ -60,7 +61,7 @@ jobs:
         private-key: ${{ secrets.PRIVATE_KEY }}
         app-id: ${{ secrets.APP_ID }}
     - name: Action
-      uses: actions/github-script@v6.1.0
+      uses: actions/github-script@v6.3.3
       with:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |

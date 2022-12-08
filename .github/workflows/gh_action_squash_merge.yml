@@ -89,7 +89,7 @@ jobs:
       with:
         script: |
           const { pull_request } = context.payload;
-          const { issue } = github.rest;
+          const { issues } = github.rest;
           const util = require('util');
           
           let body;

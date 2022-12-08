@@ -85,7 +85,9 @@ jobs:
           `squash-merge` action execution failed, because of **%s**.
 
           Please check the following details:
-          <details>%s</details>
+          <details>
+          %s
+          </details>
       with:
         script: |
           const { pull_request } = context.payload;
@@ -93,10 +95,10 @@ jobs:
           const util = require('util');
           
           let body;
-          if (!process.env.CHECK_RESULT) {
+          if (process.env.CHECK_RESULT) {
             body = util.format(process.env.FAILED_MESSAGE, 'pull request title does not meet the [Convention Commit](https://conventionalcommits.org/) guideline', process.env.CHECK_RESULT);
-          } else if (!process.env.SQUASH_RESULT) {
-            body = util.format(process.env.FAILED_MESSAGE, 'enable squash and merge failed', process.env.SQUASH_RESULT);
+          } else if (process.env.SQUASH_RESULT) {
+            body = util.format(process.env.FAILED_MESSAGE, 'auto squash and merge failed', process.env.SQUASH_RESULT);
           }
 
           const p = [];

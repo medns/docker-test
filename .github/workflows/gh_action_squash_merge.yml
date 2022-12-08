@@ -15,7 +15,7 @@ jobs:
     if: github.event.label.name == 'action(squash-merge)'
     runs-on: ubuntu-latest
     outputs:
-      failed_details: ${{ steps.commitlint.outputs.failed_details }}
+      failed_result: ${{ steps.commitlint.outputs.failed_result }}
     steps:
     - name: Checkout
       if: github.event.pull_request.commits > 1
@@ -37,11 +37,16 @@ jobs:
       id: commitlint
       env:
         PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
+      shell: bash {0}
       run: |
         if [ ${{ github.event.pull_request.commits }} -gt 1 ]; then
-          details=`echo $PULL_REQUEST_TITLE | npx commitlint -c false`
+          result=`echo $PULL_REQUEST_TITLE | npx commitlint -c false`
           if [ $? -ne 0 ]; then
-            echo "failed_details=$result" >> $GITHUB_OUTPUT
+            if [ -z $result ]; then
+              echo "failed_result=(empty response)" >> $GITHUB_OUTPUT
+            else
+              echo "failed_result=$result" >> $GITHUB_OUTPUT
+            fi
           fi
         fi
         exit 0
@@ -53,13 +58,18 @@ jobs:
     steps:
     - name: Squash
       id: squash
-      if: ${{ !needs.check_pull_request_title.outputs.failed_details }}
+      if: ${{ !needs.check_pull_request_title.outputs.failed_result }}
       env:
         GH_TOKEN: ${{ github.token }}
+      shell: bash {0}
       run: |
         result=`gh pr merge ${{ github.event.pull_requests.number }} --squash --auto --match-head-commit ${{ github.event.pull_request.head.sha }} --repo $GITHUB_REPOSITORY`
         if [ $? -ne 0 ]; then
-          echo "failed_result=$result" >> $GITHUB_OUTPUT
+            if [ -z $result ]; then
+              echo "failed_result=(empty response)" >> $GITHUB_OUTPUT
+            else
+              echo "failed_result=$result" >> $GITHUB_OUTPUT
+            fi
         fi
         exit 0
     - name: Comment

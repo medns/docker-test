@@ -51,9 +51,7 @@ jobs:
     env:
       MESSAGE: |
         ${{ toJSON(github.event) }}
-        [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) needs help on [#${{ github.event.issue.pull_request.number }}](${{ github.event.issue.pull_request.html_url }}) pull request.
-        > ${{ github.event.pull_request.title }}
-        > [${{ github.event.comment.issue_url }}](${{ github.event.comment.issue_url }})
+        [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) needs help on [#${{ github.event.issue.number }}](${{ github.event.comment.html_url }}) pull request.
         > ${{ github.event.comment.body }}
     steps:
     - name: Token
@@ -74,7 +72,7 @@ jobs:
           const p = [];
 
           p.push(issues.addLabels({
-            issue_number: issue.pull_request.number,
+            issue_number: issue.number,
             labels: [ 'needs: help' ],
             ...context.repo,
           }));

@@ -83,7 +83,7 @@ jobs:
               "content-type": "application/json"
             },
             data: {
-              chatid: "${{ secrets.WECHAT_WORK_CHAT_ADMIN_ID }}",
+              chatid: "${{ secrets.WECHAT_WORK_ADMIN_CHAT_ID }}",
               msgtype: "markdown",
               markdown: {
                 content: process.env.MESSAGE,

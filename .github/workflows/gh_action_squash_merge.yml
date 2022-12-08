@@ -43,7 +43,7 @@ jobs:
       shell: bash {0}
       run: |
         if [ ${{ github.event.pull_request.commits }} -gt 1 ]; then
-          result=`echo $PULL_REQUEST_TITLE | npx commitlint -c false`
+          result=`echo $PULL_REQUEST_TITLE | npx commitlint -c false 2>&1`
           if [ $? -ne 0 ]; then
             if [ -z $result ]; then
               echo "failed_result=(empty response)" >> $GITHUB_OUTPUT
@@ -62,7 +62,8 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       shell: bash {0}
       run: |
-        result=`gh pr merge ${{ github.event.pull_requests.number }} --squash --auto --match-head-commit ${{ github.event.pull_request.head.sha }} --repo $GITHUB_REPOSITORY`
+        result=`gh pr merge ${{ github.event.pull_requests.number }} --squash --auto --match-head-commit ${{ github.event.pull_request.head.sha }} --repo $GITHUB_REPOSITORY 2>&1`
+        echo $GITHUB_REPOSITORY
         if [ $? -ne 0 ]; then
             if [ -z $result ]; then
               echo "failed_result=(empty response)" >> $GITHUB_OUTPUT

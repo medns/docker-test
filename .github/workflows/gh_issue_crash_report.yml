@@ -115,9 +115,9 @@ jobs:
               if (['Version', 'Platform', 'Architecture'].includes(key)) {
                 value = value.replaceAll(/[^0-9a-z\-_\.]/ig, '');
               }
-              fs.appendFileSync(process.env.GITHUB_OUTPUT, `${key.toLowerCase()}<<EOF`, { encoding: 'utf8' });
-              fs.appendFileSync(process.env.GITHUB_OUTPUT, value, { encoding: 'utf8' });
-              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'EOF', { encoding: 'utf8' });
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `${key.toLowerCase()}<<EOF${os.EOL}`, { encoding: 'utf8' });
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, value + os.EOL, { encoding: 'utf8' });
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, `EOF${os.EOL}`, { encoding: 'utf8' });
             }
           });
 

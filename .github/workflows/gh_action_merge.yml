@@ -216,7 +216,6 @@ jobs:
           await Promise.all(p);
 
   rebase_merge_action_privileged:
-    if: github.event.label.name == 'action(rebase-merge)'
     needs: [ rebase_merge_action ]
     runs-on: ubuntu-latest
     environment: github-actions-privileged
@@ -273,11 +272,6 @@ jobs:
           const { pull_request } = context.payload;
           const { issues } = github.rest;
           const util = require('util');
-          
-          let body;
-          if (process.env.REBASE_RESULT) {
-            body = util.format(process.env.FAILED_MESSAGE, 'auto rebase and merge failed', process.env.REBASE_RESULT);
-          }
 
           const p = [];
           p.push(issues.removeLabel({
@@ -287,10 +281,10 @@ jobs:
           }).catch(e => {
             console.log('issues.removeLabel', e);
           }));
-          if (body) {
+          if (process.env.REBASE_RESULT) {
             p.push(issues.createComment({
               issue_number: pull_request.number,
-              body: body,
+              body: util.format(process.env.FAILED_MESSAGE, 'auto rebase and merge failed', process.env.REBASE_RESULT),
               ...context.repo
             }));
             p.push(issues.addLabels({
@@ -301,9 +295,37 @@ jobs:
           }
           await Promise.all(p);
 
-  rebase_merge_action_result:
+  rebase_merge_action_reject:
     needs: [ rebase_merge_action_privileged ]
-    if: failure()
+    if: reject()
     runs-on: ubuntu-latest
     steps:
-    - run: echo ${{ toJSON(needs.rebase_merge_action_privileged) }}
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.ACTION_PRIVATE_KEY }}
+        app-id: ${{ secrets.ACTION_APP_ID }}
+    - name: Label
+      uses: actions/github-script@v6.3.3
+      with:
+        github-token: ${{ steps.get-token.outputs.token }}
+        script: |
+          const { pull_request } = context.payload;
+          const { issues } = github.rest;
+
+          const p = [];
+          p.push(issues.removeLabel({
+            issue_number: pull_request.number,
+            name: 'action(rebase-merge)',
+            ...context.repo,
+          }).catch(e => {
+            console.log('issues.removeLabel', e);
+          }));
+          p.push(issues.addLabels({
+            issue_number: pull_request.number,
+            labels: [ 'action(rebase-merge): failed' ],
+            ...context.repo
+          })); 
+          
+          await Promise.all(p);

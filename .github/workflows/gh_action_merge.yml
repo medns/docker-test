@@ -297,7 +297,7 @@ jobs:
 
   rebase_merge_action_reject:
     needs: [ rebase_merge_action_privileged ]
-    if: reject()
+    if: ${{ reject() }}
     runs-on: ubuntu-latest
     steps:
     - name: Token

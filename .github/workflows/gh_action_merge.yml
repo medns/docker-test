@@ -306,4 +306,4 @@ jobs:
     if: failure()
     runs-on: ubuntu-latest
     steps:
-    - run: echo ${{ toJSON(needs.rebase_merge_action_privileged.outputs) }}
+    - run: echo ${{ toJSON(needs.rebase_merge_action_privileged) }}

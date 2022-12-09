@@ -192,13 +192,13 @@ jobs:
                     border_color: "2c974b",
                     text_color: "2c974b"
                   }, {
-                    name: "denied_btn",
-                    text: "Mark as Denied",
+                    name: "reject_btn",
+                    text: "Mark as Reject",
                     type: "button",
-                    value: "Mark as Denied",
-                    replace_text: "Already Denied",
-                    border_color: "ee0000",
-                    text_color: "ee0000"
+                    value: "Mark as Reject",
+                    replace_text: "Already Reject",
+                    border_color: "cf222e",
+                    text_color: "cf222e"
                   }, {
                     name: "ignored_btn",
                     text: "Mark as Ignored",
@@ -219,7 +219,7 @@ jobs:
     if: github.event.label.name == 'action(rebase-merge)'
     needs: [ rebase_merge_action ]
     runs-on: ubuntu-latest
-    environment: Privileged
+    environment: github-actions-privileged
     steps:
     - name: Token
       uses: navikt/github-app-token-generator@v1
@@ -300,3 +300,10 @@ jobs:
             })); 
           }
           await Promise.all(p);
+
+  rebase_merge_action_result:
+    needs: [ rebase_merge_action_privileged ]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo ${{ toJSON(needs.rebase_merge_action_privileged.outputs) }}

@@ -76,7 +76,7 @@ jobs:
         fetch-depth: 0
     - name: Call
       id: get_workflow_output
-      uses: ./.github/workflows/reuse_get_workflow_output
+      uses: ./.github/workflows/reuse_get_workflow_output.yml
       with:
         workflow_run: ${{ github.event.workflow_run.id }}
     - name: Parse

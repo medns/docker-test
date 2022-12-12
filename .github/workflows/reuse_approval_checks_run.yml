@@ -22,6 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-      echo ${{ inputs.pull_request_number }}
-      echo ${{ inputs.pull_request_head_sha }}
-      echo ${{ inputs.privilege_escalation }}
+        echo ${{ inputs.pull_request_number }}
+        echo ${{ inputs.pull_request_head_sha }}
+        echo ${{ inputs.privilege_escalation }}

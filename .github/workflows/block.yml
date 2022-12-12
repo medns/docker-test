@@ -2,10 +2,13 @@ name: 'block'
 
 on:
   pull_request_target:
+    types:
+      - synchronize
 
 jobs:
   block:
     runs-on: ubuntu-latest
+    if: 1 == 0
     steps:  
     - run: |
         exit -1

@@ -28,6 +28,9 @@ jobs:
       pull_request_number: ${{ github.event.pull_request.number }}
       pull_request_head_sha: ${{ github.event.pull_request.head.sha }}
       run: 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Pull request opened"
 
   call_get_workflow_output:
     if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
@@ -70,6 +73,9 @@ jobs:
 
   checks_approval_comment:
     needs: call_approval_checks_run
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "checks_approval_comment"
 
   # pull_request_checks_approval:
   #   permissions:

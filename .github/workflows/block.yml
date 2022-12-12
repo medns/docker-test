@@ -4,12 +4,19 @@ on:
   pull_request_target:
     types:
       - auto_merge_enabled
+      - auto_merge_disabled
 
 jobs:
   block:
     runs-on: ubuntu-latest
     steps:  
-    - run: |
+    - if: github.event.action == 'auto_merge_enabled'
+      run: |
         echo "${{ github.event.reason }}"
-        echo "${{ github.event.sender.login }}"
+        echo "${{ github.event.sender.type }}"
         exit 0
+    - if: github.event.action == 'auto_merge_disabled'
+      run: |
+        echo "${{ github.event.reason }}"
+        echo "${{ github.event.sender.type }}"
+        exit -1

@@ -7,7 +7,7 @@ on:
       - main
       - v3.0-dev
       - v3.0
-    types: [ opened ]
+    types: [ opened, reopened ]
   workflow_run:
     workflows:
       - \[gh\] pull request review
@@ -15,7 +15,7 @@ on:
 
 jobs:
   pull_request_opened:
-    if: github.event.action == 'opened'
+    if: contains(github.event.action, 'opened')
     outputs:
       pull_request_number: ${{ github.event.pull_request.number }}
       pull_request_head_sha: ${{ github.event.pull_request.head.sha }}
@@ -91,7 +91,7 @@ jobs:
           const os = require('os');
 
           let body = process.env['${{ needs.call_approval_checks_run.outputs.included_risk_files == 'true' && 'risky_changes_message' || 'safety_changes_message' }}'];
-          ${{ github.event.action == 'opened' && 'body += os.EOL + os.EOL + process.env.tips_message;' || '' }}
+          ${{ contains(github.event.action, 'opened') && 'body += os.EOL + os.EOL + process.env.tips_message;' || '' }}
 
           await issues.createComment({
             issue_number: ${{ needs.call_approval_checks_run.outputs.pull_request_number }},

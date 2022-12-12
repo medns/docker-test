@@ -37,7 +37,7 @@ jobs:
     steps:
     - name: Action
       id: action
-      uses: actions/github-script@v6.1.0
+      uses: actions/github-script@v6.3.3
       with:
         script: |
           const { actions, pulls } = github.rest;

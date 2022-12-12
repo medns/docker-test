@@ -2,7 +2,8 @@ name: 'block'
 
 on:
   workflow_run:
-    workflows: ["[gh] pull request checks approval"]
+    workflows: 
+      - \[gh\] pull request checks approval
     types:
       - completed
 

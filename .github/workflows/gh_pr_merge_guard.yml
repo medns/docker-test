@@ -1,4 +1,4 @@
-name: 'block'
+name: '[gh] pull request merge guard'
 
 on:
   pull_request_target:
@@ -7,7 +7,7 @@ on:
       - auto_merge_disabled
 
 jobs:
-  block:
+  merge_guard:
     runs-on: ubuntu-latest
     steps:  
     - name: Enabled

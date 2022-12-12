@@ -68,7 +68,7 @@ jobs:
     if: always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) && contains(needs.*.outputs.run, 'true')
     uses: ./.github/workflows/reuse_approval_checks_run.yml
     with:
-      pull_request_number: ${{ needs.pull_request_opened.outputs.pull_request_number || needs.pull_request_approved.outputs.pull_request_number }}
+      pull_request_number: ${{ fromJSON(needs.pull_request_opened.outputs.pull_request_number || needs.pull_request_approved.outputs.pull_request_number) }}
       pull_request_head_sha: ${{ needs.pull_request_opened.outputs.pull_request_head_sha || needs.pull_request_approved.outputs.pull_request_head_sha }}
 
   checks_approval_comment:

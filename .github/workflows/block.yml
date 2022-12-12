@@ -10,10 +10,12 @@ jobs:
   block:
     runs-on: ubuntu-latest
     steps:  
-    - if: github.event.action == 'auto_merge_enabled'
+    - name: Enabled
+      if: github.event.action == 'auto_merge_enabled'
       run: |
-        echo "Auto-merge is enabled by a ${{ github.event.sender.login }}[${{ github.event.sender.type }}]. ${{ github.event.sender.type == 'Bot' && 'Passing' || 'Blocking' }}."
+        echo "Auto-merge is enabled by a ${{ github.event.sender.login }}. ${{ github.event.sender.type == 'Bot' && 'Passing' || 'Blocking' }}."
         exit ${{ github.event.sender.type == 'Bot' && '0' || '-1' }}
-    - if: github.event.action == 'auto_merge_disabled'
+    - name: Disabled
+      if: github.event.action == 'auto_merge_disabled'
       run: |
         exit -1

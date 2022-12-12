@@ -107,13 +107,12 @@ jobs:
         body-includes: ${{ env.MESSAGE }}
     - name: Token
       id: get-token
-      if: success() && !cancelled() && steps.find_comment.outputs.comment-id == ''
+      if: success() && steps.find_comment.outputs.comment-id == ''
       uses: navikt/github-app-token-generator@v1
       with:
         private-key: ${{ secrets.PRIVATE_KEY }}
         app-id: ${{ secrets.APP_ID }}
     - name: Comment
-      if: success() && !cancelled()
       uses: peter-evans/create-or-update-comment@v2
       with:
         token: ${{ steps.get-token.outputs.token }}

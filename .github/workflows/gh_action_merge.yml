@@ -21,8 +21,8 @@ env:
             echo "$2" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
+          exit 0
       fi
-      exit 0
     }
 
 jobs:

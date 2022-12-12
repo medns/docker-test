@@ -2,10 +2,14 @@ name: 'block'
 
 on:
   pull_request_target:
+    types:
+      - auto_merge_enabled
 
 jobs:
   block:
     runs-on: ubuntu-latest
     steps:  
     - run: |
-        exit -1
+        echo "${{ github.event.reason }}"
+        echo "${{ github.event.sender.login }}"
+        exit 0

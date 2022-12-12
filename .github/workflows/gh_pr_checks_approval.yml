@@ -65,8 +65,7 @@ jobs:
 
   checks_approval_comment:
     needs: call_approval_checks_run
-    if: always()
-    # if: needs.call_approval_checks_run.outputs.action_required == 'true'
+    if: always() && needs.call_approval_checks_run.outputs.action_required == 'true'
     runs-on: ubuntu-latest
     env:
       safety_changes_message: |
@@ -77,27 +76,25 @@ jobs:
       tips_message: |
         :label: **I will not automatically test new commits in this PR**, until our collaborators to verified. To become verified, they should either approve this PR or apply the `action(approve-checks)` label to this PR.
     steps:
-    - run: |
-        echo "action_required: ${{ needs.call_approval_checks_run.outputs.action_required }}"
-    # - name: Token
-    #   uses: navikt/github-app-token-generator@v1
-    #   id: get-token
-    #   with:
-    #     private-key: ${{ secrets.PRIVATE_KEY }}
-    #     app-id: ${{ secrets.APP_ID }}
-    # - name: Checks
-    #   uses: actions/github-script@v6.3.3
-    #   with:
-    #     github-token: ${{ steps.get-token.outputs.token }}
-    #     script: |
-    #       const { issues } = github.rest;
-    #       const os = require('os');
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.PRIVATE_KEY }}
+        app-id: ${{ secrets.APP_ID }}
+    - name: Checks
+      uses: actions/github-script@v6.3.3
+      with:
+        github-token: ${{ steps.get-token.outputs.token }}
+        script: |
+          const { issues } = github.rest;
+          const os = require('os');
 
-    #       let body = process.env['${{ needs.call_approval_checks_run.outputs.included_risk_files == 'true' && 'risky_changes_message' || 'safety_changes_message' }}'];
-    #       ${{ contains(github.event.action, 'opened') && 'body += os.EOL + os.EOL + process.env.tips_message;' || '' }}
+          let body = process.env['${{ needs.call_approval_checks_run.outputs.included_risk_files == 'true' && 'risky_changes_message' || 'safety_changes_message' }}'];
+          ${{ contains(github.event.action, 'opened') && 'body += os.EOL + os.EOL + process.env.tips_message;' || '' }}
 
-    #       await issues.createComment({
-    #         issue_number: ${{ needs.call_approval_checks_run.outputs.pull_request_number }},
-    #         body,
-    #         ...context.repo
-    #       });
+          await issues.createComment({
+            issue_number: ${{ needs.call_approval_checks_run.outputs.pull_request_number }},
+            body,
+            ...context.repo
+          });

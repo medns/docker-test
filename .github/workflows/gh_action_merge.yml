@@ -69,7 +69,7 @@ jobs:
         GH_TOKEN: ${{ steps.get-token.outputs.token }}
       shell: bash {0}
       run: |
-        result=`gh pr merge ${{ github.event.pull_request.number }} --squash --auto --repo $GITHUB_REPOSITORY 2>&1`
+        result=`gh pr merge ${{ github.event.pull_request.number }} --squash --auto --disable-auto --repo $GITHUB_REPOSITORY 2>&1`
         if [ $? -ne 0 ]; then
             if [[ -z $result ]]; then
               echo "failed_result=(empty response)" >> $GITHUB_OUTPUT

@@ -1,14 +1,14 @@
 name: 'block'
 
 on:
-  pull_request_target:
+  workflow_run:
+    workflows: [pull request checks approval]
     types:
-      - synchronize
+      - completed
 
 jobs:
   block:
     runs-on: ubuntu-latest
-    if: 1 == 1
     steps:  
     - run: |
-        exit -1
+        exit 0

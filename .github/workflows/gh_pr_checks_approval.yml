@@ -69,7 +69,7 @@ jobs:
     uses: ./.github/workflows/reuse_approval_checks_run.yml
     with:
       pull_request_number: ${{ needs.pull_request_opened.outputs.pull_request_number || needs.pull_request_approved.outputs.pull_request_number }}
-      pull_request_head_sha: ${{ needs.*.outputs.pull_request_head_sha[0] || needs.*.outputs.pull_request_head_sha[1] }}
+      pull_request_head_sha: ${{ needs.pull_request_opened.outputs.pull_request_head_sha || needs.pull_request_approved.outputs.pull_request_head_sha }}
 
   checks_approval_comment:
     needs: call_approval_checks_run

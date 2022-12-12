@@ -116,6 +116,7 @@ jobs:
       if: success() && !cancelled()
       uses: peter-evans/create-or-update-comment@v2
       with:
-        issue-number: ${{ needs.call_get_workflow_output.outputs.pull_request_number }}
-        reactions: eyes
+        token: ${{ steps.get-token.outputs.token }}
+        issue-number: ${{ steps.parse_workflow_output.outputs.pull_request_number }}
         body: ${{ env.MESSAGE }}
+        reactions: eyes

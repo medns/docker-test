@@ -66,26 +66,28 @@ jobs:
             }
           });
 
-  changes_requested_comment:
+  call_get_workflow_output:
     if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/reuse_get_workflow_output.yml
+    with:
+      workflow_run: ${{ github.event.workflow_run.id }}
+    
+  changes_requested_comment:
+    needs: call_get_workflow_output
+    if: needs.call_get_workflow_output.outputs.action == 'submitted'
     runs-on: ubuntu-latest
+    env:
+      MESSAGE: |
+        Hi, @${{ needs.call_get_workflow_output.outputs.sender }}.
+
+        I noticed that our reviewers requested changes to this pull request.
+        When you're done, **click the `Re-request review` button in the right sidebar(shown below)** to notify the reviewer.
+        ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
     steps:
-    - name: Call
-      id: get_workflow_output
-      uses: ./.github/actions/reuse_get_workflow_output
-      with:
-        workflow_run: ${{ github.event.workflow_run.id }}
     - name: Parse
       id: parse_workflow_output
-      if: steps.get_workflow_output.outputs.action == 'submitted'
       env:
-        RAW: ${{ steps.get_workflow_output.outputs.raw }}
-        MESSAGE: |
-          Hi, @${{ steps.get_workflow_output.outputs.sender }}.
-
-          I noticed that our reviewers requested changes to this pull request.
-          When you're done, **click the `Re-request review` button in the right sidebar(shown below)** to notify the reviewer.
-          ![Re-request review button in the right sidebar](https://docs.github.com/assets/cb-4714/images/help/pull_requests/request-re-review.png)
+        RAW: ${{ needs.call_get_workflow_output.outputs.raw }}
       shell: python
       run: |
         import json
@@ -94,29 +96,27 @@ jobs:
         raw = os.getenv("RAW")
         data = json.loads(raw)
         with open(os.getenv("GITHUB_OUTPUT"), 'w', encoding='utf-8') as file:
-          file.write("action=%s\n" % data["action"])
           file.write("review_state=%s\n" % data["review"]["state"])
           file.write("pull_request_number=%s\n" % data["pull_request"]["number"])
-          file.write("message=%s\n" % os.getenv("MESSAGE"))
     - name: Find
       id: find_comment
       if: steps.parse_workflow_output.outputs.review_state == 'changes_requested'
       uses: peter-evans/find-comment@v2.1.0
       with:
         issue-number: ${{ steps.parse_workflow_output.outputs.pull_request_number }}
-        body-includes: ${{ steps.parse_workflow_output.outputs.message }}
+        body-includes: ${{ env.MESSAGE }}
     - name: Token
       id: get-token
-      if: success() && !cancelled() && steps.find_comment.outputs.comment-id == ''
+      if: steps.find_comment.outputs.comment-id == '' && steps.parse_workflow_output.outputs.review_state == 'changes_requested'
       uses: navikt/github-app-token-generator@v1
       with:
         private-key: ${{ secrets.PRIVATE_KEY }}
         app-id: ${{ secrets.APP_ID }}
     - name: Comment
-      if: success() && !cancelled()
       uses: peter-evans/create-or-update-comment@v2
+      if: steps.get-token.outputs.token != ''
       with:
         token: ${{ steps.get-token.outputs.token }}
         issue-number: ${{ steps.parse_workflow_output.outputs.pull_request_number }}
-        body: ${{ steps.parse_workflow_output.outputs.message }}
+        body: ${{ env.MESSAGE }}
         reactions: eyes

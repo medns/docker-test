@@ -1,0 +1,27 @@
+name: '[reuse] approval checks run'
+
+on:
+  workflow_call:
+    inputs:
+      pull_request_number:
+        description: 'A pull request number'
+        required: true
+        type: number
+      pull_request_head_sha:
+        description: 'A pull request head sha'
+        required: true
+        type: string
+      is_privilege_escalation:
+        description: 'Is privilege escalation required'
+        required: false
+        default: false
+        type: string
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo ${{ inputs.pull_request_number }}
+        echo ${{ inputs.pull_request_head_sha }}
+        echo ${{ inputs.privilege_escalation }}

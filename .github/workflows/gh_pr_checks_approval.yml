@@ -1,7 +1,17 @@
 name: '[gh] pull request checks approval'
 
 on:
-  workflow_dispatch:
+  pull_request_target:
+    branches:
+      - master
+      - main
+      - v3.0-dev
+      - v3.0
+    types: [ opened ]
+  workflow_run:
+    workflows:
+      - \[gh\] pull request review
+    types: [ completed ]
 
 env:
   safety_changes_message: |
@@ -12,65 +22,120 @@ env:
     Don\'t worry about it, our collaborators will handle it asap.
 
 jobs:
-  pull_request_checks_approval:
-    permissions:
-      actions: write
-      pull-requests: write
+  pull_request_opened:
+    if: github.event.action == 'opened'
+    outputs:
+      pull_request_number: ${{ github.event.pull_request.number }}
+      pull_request_head_sha: ${{ github.event.pull_request.head.sha }}
+      run: 'true'
     runs-on: ubuntu-latest
     steps:
-    - name: Token
-      uses: navikt/github-app-token-generator@v1
-      id: get-token
-      with:
-        private-key: ${{ secrets.PRIVATE_KEY }}
-        app-id: ${{ secrets.APP_ID }}
-    - name: Checks
-      uses: actions/github-script@v6.1.0
-      with:
-        github-token: ${{ steps.get-token.outputs.token }}
-        script: |
-          const { owner, repo } = context.repo;
-          const { pull_request } = context.payload;
-          const { actions, pulls, issues } = github.rest;
-          const util = require('util');
+      - run: echo "Pull request opened"
 
-          const per_page = 100;
+  call_get_workflow_output:
+    if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/reuse_get_workflow_output.yml
+    with:
+      workflow_run: ${{ github.event.workflow_run.id }}
 
-          let workflow_runs = (await github.paginate(actions.listWorkflowRunsForRepo, {
-            owner,
-            repo,
-            per_page,
-            event: 'pull_request',
-            status: 'action_required'
-          })).filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
-          if (workflow_runs.length === 0) {
-            return;
-          }
+  pull_request_approved:
+    needs: call_get_workflow_output
+    if: needs.call_get_workflow_output.outputs.action == 'submitted'
+    outputs:
+      pull_request_number: ${{ needs.parse_workflow_output.outputs.pull_request_number }}
+      pull_request_head_sha: ${{ needs.parse_workflow_output.outputs.pull_request_head_sha }}
+      run: ${{ steps.parse_workflow_output.outputs.run }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Parse
+      id: parse_workflow_output
+      env:
+        RAW: ${{ needs.call_get_workflow_output.outputs.raw }}
+      shell: python
+      run: |
+        import json
+        import os
 
-          const [includeRiskFiles] = await github.paginate(pulls.listFiles, {
-            owner,
-            repo,
-            per_page,
-            pull_number: pull_request.number
-          }, ({ data: files }, done) => {
-            if (files.some(file => file.filename.startsWith('.github/workflows'))) {
-              done();
-              return [true];
-            }
-            return [];
-          });
+        raw = os.getenv("RAW")
+        data = json.loads(raw)
+        with open(os.getenv("GITHUB_OUTPUT"), 'w', encoding='utf-8') as file:
+          file.write('run=%s\n' % 'true' if data["review"]["state"] == 'approved' else 'false')
+          file.write("pull_request_number=%s\n" % data["pull_request"]["number"])
+          file.write("pull_request_head_sha=%s\n" % data["pull_request"]["head"]["sha"])
 
-          if (!includeRiskFiles) {
-            await Promise.all(workflow_runs.map(workflow_run => actions.approveWorkflowRun({
-              owner,
-              repo,
-              run_id: workflow_run.id,
-            })));
-          }
+  call_approval_checks_run:
+    needs: [ pull_request_opened, pull_request_approved ]
+    if: always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) && contains(needs.*.outputs.run, 'true')
+    uses: ./.github/workflows/reuse_approval_checks_run.yml
+    with:
+      pull_request_number: ${{ needs.pull_request_opened.outputs.pull_request_number || needs.pull_request_approved.outputs.pull_request_number }}
+      pull_request_head_sha: ${{ needs.*.outputs.pull_request_head_sha[0] || needs.*.outputs.pull_request_head_sha[1] }}
 
-          await issues.createComment({
-            owner,
-            repo,
-            issue_number: pull_request.number,
-            body: util.format(process.env[includeRiskFiles ? 'risky_changes_message' : 'safety_changes_message'], workflow_runs.length === 1 ? " the " : " ", workflow_runs.length > 1 ? "s" : ""),
-          });
+  checks_approval_comment:
+    needs: call_approval_checks_run
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "checks_approval_comment"
+
+  # pull_request_checks_approval:
+  #   permissions:
+  #     actions: write
+  #     pull-requests: write
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Token
+  #     uses: navikt/github-app-token-generator@v1
+  #     id: get-token
+  #     with:
+  #       private-key: ${{ secrets.PRIVATE_KEY }}
+  #       app-id: ${{ secrets.APP_ID }}
+  #   - name: Checks
+  #     uses: actions/github-script@v6.1.0
+  #     with:
+  #       github-token: ${{ steps.get-token.outputs.token }}
+  #       script: |
+  #         const { owner, repo } = context.repo;
+  #         const { pull_request } = context.payload;
+  #         const { actions, pulls, issues } = github.rest;
+  #         const util = require('util');
+
+  #         const per_page = 100;
+
+  #         let workflow_runs = (await github.paginate(actions.listWorkflowRunsForRepo, {
+  #           owner,
+  #           repo,
+  #           per_page,
+  #           event: 'pull_request',
+  #           status: 'action_required'
+  #         })).filter(workflow_run => workflow_run.head_sha === pull_request.head.sha);
+  #         if (workflow_runs.length === 0) {
+  #           return;
+  #         }
+
+  #         const [includeRiskFiles] = await github.paginate(pulls.listFiles, {
+  #           owner,
+  #           repo,
+  #           per_page,
+  #           pull_number: pull_request.number
+  #         }, ({ data: files }, done) => {
+  #           if (files.some(file => file.filename.startsWith('.github/workflows'))) {
+  #             done();
+  #             return [true];
+  #           }
+  #           return [];
+  #         });
+
+  #         if (!includeRiskFiles) {
+  #           await Promise.all(workflow_runs.map(workflow_run => actions.approveWorkflowRun({
+  #             owner,
+  #             repo,
+  #             run_id: workflow_run.id,
+  #           })));
+  #         }
+
+  #         await issues.createComment({
+  #           owner,
+  #           repo,
+  #           issue_number: pull_request.number,
+  #           body: util.format(process.env[includeRiskFiles ? 'risky_changes_message' : 'safety_changes_message'], workflow_runs.length === 1 ? " the " : " ", workflow_runs.length > 1 ? "s" : ""),
+  #         });

@@ -2,20 +2,14 @@ name: 'block'
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
-  workflow_run:
-    workflows: 
-      - \[gh\] pull request checks approval
     types:
-      - completed
+      - auto_merge_enabled
 
 jobs:
   block:
     runs-on: ubuntu-latest
     steps:  
-    - if: github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize'
-      run: |
-        exit -1
-    - if: github.event.workflow_run.conclusion == 'success'
-      run: |
+    - run: |
+        echo "${{ github.event.reason }}"
+        echo "${{ github.event.sender.login }}"
         exit 0

@@ -70,6 +70,10 @@ jobs:
     if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Call
       id: get_workflow_output
       uses: ./.github/actions/reuse_get_workflow_output
@@ -94,7 +98,6 @@ jobs:
         raw = os.getenv("RAW")
         data = json.loads(raw)
         with open(os.getenv("GITHUB_OUTPUT"), 'w', encoding='utf-8') as file:
-          file.write("action=%s\n" % data["action"])
           file.write("review_state=%s\n" % data["review"]["state"])
           file.write("pull_request_number=%s\n" % data["pull_request"]["number"])
           file.write("message=%s\n" % os.getenv("MESSAGE"))

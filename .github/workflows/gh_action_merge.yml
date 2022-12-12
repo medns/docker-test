@@ -79,7 +79,7 @@ jobs:
         ${{ env.OUTPUT_FUNCTION }}
         result=`gh pr merge ${{ github.event.pull_request.number }} --disable-auto --repo $GITHUB_REPOSITORY 2>&1`
         output $? "$result"
-        result=`gh pr merge ${{ github.event.pull_request.number }} --squash --auto --disable-auto --repo $GITHUB_REPOSITORY 2>&1`
+        result=`gh pr merge ${{ github.event.pull_request.number }} --squash --auto --repo $GITHUB_REPOSITORY 2>&1`
         output $? "$result"
     - name: Comment
       uses: actions/github-script@v6.3.3

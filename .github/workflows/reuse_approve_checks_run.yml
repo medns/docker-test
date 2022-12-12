@@ -99,10 +99,3 @@ jobs:
             run_id: workflow_run,
             ...context.repo
           })));
-
-  approve_checks_run_unprivileged:
-    needs: approve_checks_run_privileged
-    if: always() && needs.approve_checks_run_privileged.result == 'skipped'
-    runs-on: ubuntu-latest
-    steps:
-    - run: echo "Approve checks run unprivileged"

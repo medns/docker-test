@@ -65,6 +65,7 @@ jobs:
 
   checks_approval_comment:
     needs: call_approval_checks_run
+    if: always()
     # if: needs.call_approval_checks_run.outputs.action_required == 'true'
     runs-on: ubuntu-latest
     env:

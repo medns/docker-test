@@ -48,7 +48,7 @@ jobs:
           const { pull_request } = context.payload;
           const { issues } = github.rest;
 
-          cosnt p = [];
+          const p = [];
           if (process.env.PRIVILEGE_ESCALATION == 'true') {
             p.push(issues.createComment({
               issue_number: pull_request.number,

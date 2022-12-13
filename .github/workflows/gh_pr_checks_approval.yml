@@ -71,8 +71,7 @@ jobs:
       safety_changes_message: |
         After a quick scan, I have approved workflow to run.
       risky_changes_message: |
-        Sorry, due to risky changes, I can\'t approve workflow to run.
-        Don\'t worry about it, our collaborators will handle it asap.
+        Sorry, due to risky changes, I can\'t approve workflow to run, our collaborators will handle it asap.
       tips_message: |
         :label: **I will not automatically test new commits in this PR**, until our collaborators to verified. To become verified, they should either approve this PR or apply the `action(approve-checks)` label to this PR.
     steps:

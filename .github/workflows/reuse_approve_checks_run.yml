@@ -81,7 +81,7 @@ jobs:
 
   approve_checks_run_privileged:
     needs: approve_checks_run
-    if: needs.approve_checks_run.outputs.included_risk_files == 'true' && inputs.requied_privilege_escalation == 'true'
+    if: needs.approve_checks_run.outputs.included_risk_files == 'true' && inputs.requied_privilege_escalation == true
     environment: github-actions-privileged
     runs-on: ubuntu-latest
     steps:

@@ -194,10 +194,10 @@ jobs:
                     text_color: "2c974b"
                   }, {
                     name: "reject_btn",
-                    text: "Mark as Reject",
+                    text: "Mark as Rejected",
                     type: "button",
-                    value: "Mark as Reject",
-                    replace_text: "Already Reject",
+                    value: "Mark as Rejected",
+                    replace_text: "Already Rejected",
                     border_color: "cf222e",
                     text_color: "cf222e"
                   }, {

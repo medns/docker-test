@@ -80,6 +80,7 @@ jobs:
         </details>
       tips_message: |
         :label: **I will not automatically test new commits in this PR**, until our collaborators to verified. To become verified, they should either approve this PR or apply the `action(approve-checks)` label to this PR.
+        :label: **No need worry about the status of the `[gh] pull request merge guard / merge_guard (pull_request_target)` check**, once this PR is merged via `action(rebase-merge)` or `action(squash-merge)`, it will automatically trans to success status.
     steps:
     - name: Message
       id: generate_message

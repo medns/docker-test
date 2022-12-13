@@ -84,20 +84,21 @@ jobs:
     - name: Message
       id: generate_message
       run: |
-        echo "message<<EOF" >> $GITHUB_ENV
-        echo "${{ needs.call_approval_checks_run.outputs.included_risk_files == 'true' && env.safety_changes_message || env.risky_changes_message }}" >> $GITHUB_ENV
-        echo "${{ env.details_message }}" >> $GITHUB_ENV
+        echo "message<<EOF" >> $GITHUB_OUTPUT
+        echo "${{ needs.call_approval_checks_run.outputs.included_risk_files == 'true' && env.safety_changes_message || env.risky_changes_message }}" >> $GITHUB_OUTPUT
+        echo "${{ env.details_message }}" >> $GITHUB_OUTPUT
         if [[ "${{ github.event.action }}" == *"opened"* ]]; then
-          echo >> $GITHUB_ENV
-          echo "${{ env.tips_message }}" >> $GITHUB_ENV
+          echo >> $GITHUB_OUTPUT
+          echo "${{ env.tips_message }}" >> $GITHUB_OUTPUT
         fi
-        echo "EOF" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_OUTPUT
     - name: Find
       uses: peter-evans/find-comment@v2.1.0
       id: find_comment
       with:
         issue-number: ${{ needs.call_approval_checks_run.outputs.pull_request_number }}
         body-includes: ${{ steps.generate_message.outputs.message }}
+        direction: last
     - name: Token
       id: get-token
       if: steps.find_comment.outputs.comment-id == ''

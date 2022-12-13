@@ -12,7 +12,7 @@ on:
         default: 'hippy'
         required: true
       hip_path:
-        description: 'HIP <path>(without domain)'
+        description: 'HIP <path>(without domain) '
         type: string
 
 jobs:

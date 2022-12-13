@@ -97,7 +97,7 @@ jobs:
       id: find_comment
       with:
         issue-number: ${{ needs.call_approval_checks_run.outputs.pull_request_number }}
-        body-includes: ${{ env.message }}
+        body-includes: ${{ steps.generate_message.outputs.message }}
     - name: Token
       id: get-token
       if: steps.find_comment.outputs.comment-id == ''
@@ -111,4 +111,4 @@ jobs:
       with:
         token: ${{ steps.get-token.outputs.token }}
         issue-number: ${{ needs.call_approval_checks_run.outputs.pull_request_number }}
-        body: ${{ env.MESSAGE }}
+        body: ${{ steps.generate_message.outputs.message }}

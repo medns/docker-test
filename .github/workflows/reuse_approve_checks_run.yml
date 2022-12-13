@@ -20,6 +20,9 @@ on:
       pull_request_number:
         description: 'Pull request number'
         value: ${{ inputs.pull_request_number }}
+      pull_request_head_sha:
+        description: 'Pull request head sha'
+        value: ${{ inputs.pull_request_head_sha }}
       action_required:
         description: "Checks require approve"
         value: ${{ jobs.approve_checks_run.outputs.action_required }}

@@ -105,6 +105,7 @@ jobs:
           const { pull_request, sender } = context.payload;
           const { issues } = github.rest;
           const util = require('util');
+          const os = require('os');
           
           let body;
           if (process.env.CHECK_RESULT) {
@@ -112,10 +113,7 @@ jobs:
           } else if (process.env.SQUASH_RESULT) {
             body = util.format(process.env.FAILED_MESSAGE, 'auto squash and merge failed', process.env.SQUASH_RESULT);
           } else if (pull_request.user.login === sender.login) {
-            body = util.format(process.env.FAILED_MESSAGE, 'can not squash and merge your own pull request', `
-            * Pull requests: ${pull_request.user.login}
-            * Trigger: ${sender.login}
-            `);
+            body = util.format(process.env.FAILED_MESSAGE, 'cannot squash and merge your own pull request', `* Pull requests: ${pull_request.user.login}${os.EOL}* Trigger: ${sender.login}`);
           }
 
           const p = [];

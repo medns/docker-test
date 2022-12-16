@@ -113,7 +113,7 @@ jobs:
           } else if (process.env.SQUASH_RESULT) {
             body = util.format(process.env.FAILED_MESSAGE, 'auto squash and merge failed', process.env.SQUASH_RESULT);
           } else if (pull_request.user.login === sender.login) {
-            body = util.format(process.env.FAILED_MESSAGE, 'cannot squash and merge your own pull request', `* Pull requests: ${pull_request.user.login}${os.EOL}* Trigger: ${sender.login}`);
+            body = util.format(process.env.FAILED_MESSAGE, 'cannot squash and merge your own pull request', `(empty response)`);
           }
 
           const p = [];

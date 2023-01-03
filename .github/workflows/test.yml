@@ -36,17 +36,18 @@ jobs:
 
           pull_requests.forEach((pull, index) => {
             for (let review of pull_review[index]) {
-              console.log(review.state);
-              # if (review.state === 'xxxxx') {
-              #   const user_id = wechat_work_users[review.user.login];
-              #   if (user_id) {
-              #     (notification_users[user_id] ||= []).push({
-              #       number: pull.number,
-              #       title: pull.title
-              #       url: pull.html_url
-              #     });
-              #   }
-              # }
+              console.log(pull.number, review.state);
+              return;
+              if (review.state === 'xxxxx') {
+                const user_id = wechat_work_users[review.user.login];
+                if (user_id) {
+                  (notification_users[user_id] ||= []).push({
+                    number: pull.number,
+                    title: pull.title
+                    url: pull.html_url
+                  });
+                }
+              }
             }
           });
 

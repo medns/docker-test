@@ -51,7 +51,7 @@ jobs:
           });
 
           await Promise.all(Object.entries(notification_users).map(([user_id, pulls]) => {
-            const content = `${pulls.length} pull requests are awaiting your review:${os.EOL}` + pulls.map(pull => `* [#${pull.number}](${pull.html_url}) ${pull.title}`).join(os.EOL);
+            const content = `${pulls.length} pull requests are awaiting your review:${os.EOL}` + pulls.map(pull => `> [#${pull.number}](${pull.html_url}) ${pull.title}`).join(os.EOL);
 
             return github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
               headers: {

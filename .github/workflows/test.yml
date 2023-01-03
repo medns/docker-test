@@ -22,13 +22,13 @@ jobs:
             ...context.repo
           });
 
-          const { data: requested_reviewers } = await Promise.all(
+          const requested_reviewers = await Promise.all(
             pull_requests.map(
               pull => pulls.listRequestedReviewers({
                 per_page: 100,
                 pull_number: pull.number,
                 ...context.repo
-              })
+              }).then(({ data }) => data)
             )
           );
           

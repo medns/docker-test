@@ -41,7 +41,6 @@ jobs:
 
           pull_requests.forEach((pull, index) => {
             requested_reviewers[index].users.forEach(reviewer => {
-              console.log(pull.number, reviewer.login);
               if (reviewer.type === 'User') {
                 const user_id = wechat_work_users[reviewer.login];
                 if (user_id) {
@@ -51,7 +50,6 @@ jobs:
             });
           });
 
-          return;
           await Promise.all(Object.entries(notification_users).map(([user_id, pulls]) => {
             const content = `${pulls.length} pull requests are awaiting your review:${os.EOL}` + pulls.map(pull => `* [#${pull.number}](${pull.html_url}) ${pull.title}`).join(os.EOL);
 

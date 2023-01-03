@@ -13,7 +13,6 @@ jobs:
         WECHAT_WORK_USERS: ${{ secrets.WECHAT_WORK_USERS }}
       with:
         script: |
-          const { context } = github;
           const { pulls } = github.rest;
           const os = require('os');
 

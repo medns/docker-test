@@ -16,20 +16,25 @@ jobs:
           const { pulls } = github.rest;
           const os = require('os');
 
-          const pull_requests = await github.paginate(pulls.list({
+          const pull_requests = await github.paginate(pulls.list, {
             per_page: 100,
             state: 'open',
             ...context.repo
-          }));
+          });
 
-          const pull_reviews = await Promise.all(pull_requests.map(pull => {
-            return github.paginate(pulls.listReviews({
-              per_page: 100,
-              pull_number: pull.number,
-              ...context.repo
-            }));
-          }));
+          const pull_reviews = await Promise.all(
+            pull_requests.map(
+              pull => github.paginate(pulls.listReviews, {
+                per_page: 100,
+                pull_number: pull.number,
+                ...context.repo
+              })
+            )
+          );
           
+          if (pull_requests.length !== pull_reviews.length) {
+            throw new Error("The length of pull_requests and pull_reviews is not equal");
+          }
 
           const wechat_work_users = JSON.parse(process.env.WECHAT_WORK_USERS);
           const notification_users = {};

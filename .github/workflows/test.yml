@@ -52,8 +52,9 @@ jobs:
 
           await Promise.all(Object.entries(notification_users).map(([user_id, pulls]) => {
             const content = [];
-            content.push(`${pulls.length} pull requests are awaiting your review:`);
+            content.push(`<font color="warning">${pulls.length}</font> pull requests are awaiting your review:`);
             content.push(...pulls.map(pull => `> [#${pull.number}](${pull.html_url}) ${pull.title}`));
+            content.push('');
             content.push(`<@${user_id}>`);
 
             return github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {

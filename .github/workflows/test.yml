@@ -22,7 +22,7 @@ jobs:
             ...context.repo
           });
 
-          const requested_reviewers = await Promise.all(
+          const { data: requested_reviewers } = await Promise.all(
             pull_requests.map(
               pull => pulls.listRequestedReviewers({
                 per_page: 100,
@@ -31,7 +31,6 @@ jobs:
               })
             )
           );
-          console.log(requested_reviewers);
           
           if (pull_requests.length !== requested_reviewers.length) {
             throw new Error("The length of pull_requests and requested_reviewers is not equal");

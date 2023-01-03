@@ -43,7 +43,7 @@ jobs:
             requested_reviewers[index].users.forEach(reviewer => {
               console.log(pull.number, reviewer.login);
               if (reviewer.type === 'User') {
-                const user_id = wechat_work_users[review.login];
+                const user_id = wechat_work_users[reviewer.login];
                 if (user_id) {
                   (notification_users[user_id] ||= []).push(pull);
                 }

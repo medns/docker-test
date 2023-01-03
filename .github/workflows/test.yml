@@ -42,7 +42,6 @@ jobs:
           pull_requests.forEach((pull, index) => {
             for (let review of pull_reviews[index]) {
               console.log(pull.number, review.state);
-              return;
               if (review.state === 'xxxxx') {
                 const user_id = wechat_work_users[review.user.login];
                 if (user_id) {

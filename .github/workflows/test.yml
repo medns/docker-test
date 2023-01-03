@@ -21,6 +21,7 @@ jobs:
             state: 'open',
             ...context.repo
           });
+          console.log(pull_requests);
 
           const pull_reviews = await Promise.all(
             pull_requests.map(

@@ -31,6 +31,7 @@ jobs:
               })
             )
           );
+          console.log(requested_reviewers);
           
           if (pull_requests.length !== requested_reviewers.length) {
             throw new Error("The length of pull_requests and requested_reviewers is not equal");
@@ -42,10 +43,11 @@ jobs:
           pull_requests.forEach((pull, index) => {
             requested_reviewers[index].users.forEach(reviewer => {
               console.log(pull.number, reviewer.login);
-
-              const user_id = wechat_work_users[review.login];
-              if (user_id) {
-                (notification_users[user_id] ||= []).push(pull);
+              if (reviewer.type === 'User') {
+                const user_id = wechat_work_users[review.login];
+                if (user_id) {
+                  (notification_users[user_id] ||= []).push(pull);
+                }
               }
             });
           });

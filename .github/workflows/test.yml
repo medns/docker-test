@@ -1,0 +1,71 @@
+name: '[gh] pull review test'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  review_notification:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notice
+      uses: actions/github-script@v6.3.3
+      env:
+        WECHAT_WORK_USERS: ${{ secrets.WECHAT_WORK_USERS }}
+      with:
+        script: |
+          const { context } = github;
+          const { pulls } = github.rest;
+          const os = require('os');
+
+          const pull_requests = await github.paginate(pulls.list({
+            per_page: 100,
+            state: 'open',
+            ...context.repo
+          }));
+
+          const pull_reviews = await Promise.all(pull_requests.map(pull => {
+            return github.paginate(pulls.listReviews({
+              per_page: 100,
+              pull_number: pull.number,
+              ...context.repo
+            }));
+          }));
+          
+
+          const wechat_work_users = JSON.parse(process.env.WECHAT_WORK_USERS);
+          const notification_users = {};
+
+          pull_requests.forEach((pull, index) => {
+            for (let review of pull_review[index]) {
+              console.log(review.state);
+              # if (review.state === 'xxxxx') {
+              #   const user_id = wechat_work_users[review.user.login];
+              #   if (user_id) {
+              #     (notification_users[user_id] ||= []).push({
+              #       number: pull.number,
+              #       title: pull.title
+              #       url: pull.html_url
+              #     });
+              #   }
+              # }
+            }
+          });
+
+          return;
+          await Promise.all(Object.entries(notification_users).map(([user_id, pulls]) => {
+            const content = `The following pull requests are awaiting your review:${os.EOL}` + pulls.map(pull => `* [#${pull.number}](${pull.url}) ${pull.title}`).join(os.EOL);
+
+            return github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
+              headers: {
+                "content-type": "application/json"
+              },
+              data: {
+                chatid: "${{ secrets.WECHAT_WORK_CHAT_ID }}",
+                visible_to_user: user_id,
+                msgtype: "markdown",
+                markdown: {
+                  content: content
+                }
+              }
+            });
+          }));

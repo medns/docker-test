@@ -35,7 +35,7 @@ jobs:
           const notification_users = {};
 
           pull_requests.forEach((pull, index) => {
-            for (let review of pull_review[index]) {
+            for (let review of pull_reviews[index]) {
               console.log(pull.number, review.state);
               return;
               if (review.state === 'xxxxx') {

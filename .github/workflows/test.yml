@@ -21,36 +21,33 @@ jobs:
             state: 'open',
             ...context.repo
           });
-          console.log(pull_requests);
 
-          const pull_reviews = await Promise.all(
+          const requested_reviewers = await Promise.all(
             pull_requests.map(
-              pull => github.paginate(pulls.listReviews, {
+              pull => pulls.listRequestedReviewers({
                 per_page: 100,
                 pull_number: pull.number,
                 ...context.repo
               })
             )
           );
-          console.log(pull_reviews);
           
-          if (pull_requests.length !== pull_reviews.length) {
-            throw new Error("The length of pull_requests and pull_reviews is not equal");
+          if (pull_requests.length !== requested_reviewers.length) {
+            throw new Error("The length of pull_requests and requested_reviewers is not equal");
           }
 
           const wechat_work_users = JSON.parse(process.env.WECHAT_WORK_USERS);
           const notification_users = {};
 
           pull_requests.forEach((pull, index) => {
-            for (let review of pull_reviews[index]) {
-              console.log(pull.number, review.state);
-              if (review.state === 'xxxxx') {
-                const user_id = wechat_work_users[review.user.login];
-                if (user_id) {
-                  (notification_users[user_id] ||= []).push(pull);
-                }
+            requested_reviewers[index].users.forEach(reviewer => {
+              console.log(pull.number, reviewer.login);
+
+              const user_id = wechat_work_users[review.login];
+              if (user_id) {
+                (notification_users[user_id] ||= []).push(pull);
               }
-            }
+            });
           });
 
           return;

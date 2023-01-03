@@ -32,6 +32,7 @@ jobs:
               })
             )
           );
+          console.log(pull_reviews);
           
           if (pull_requests.length !== pull_reviews.length) {
             throw new Error("The length of pull_requests and pull_reviews is not equal");

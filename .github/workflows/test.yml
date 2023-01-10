@@ -1,0 +1,30 @@
+name: '[gh] pull review test'
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number'
+        required: true
+        default: '1'
+
+jobs:
+  review_notification:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notice
+      uses: actions/github-script@v6.3.3
+      env:
+        WECHAT_WORK_USERS: ${{ secrets.WECHAT_WORK_USERS }}
+      with:
+        script: |
+          const { pulls } = github.rest;
+          const os = require('os');
+
+          const result = await pulls.updateBranch({
+            ...context.repo,
+            pull_number: ${{ github.event.inputs.pr }}
+          });
+
+          console.log(result);

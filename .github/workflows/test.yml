@@ -21,9 +21,7 @@ jobs:
             state: 'open',
             base: '${{ github.ref_name }}',
             ...context.repo
-          }));
-          console.log(pull_requests);
-          return;
+          })).filter(pull => pull.draft === false && pull.auto_merge);
 
           await Promise.all(
             pull_requests.map(pull => 

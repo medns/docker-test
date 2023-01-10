@@ -1,4 +1,4 @@
-name: '[gh] pull review test'
+name: '[gh] auto update branch'
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
               repos.compareCommitsWithBasehead({
                 ...context.repo,
                 basehead: `${pull.base.label}...${pull.head.label}`,
-              }).then({ data: comparison } => {
+              }).then(({ data: comparison }) => {
                 if (comparison.behind_by > 0) {
                   return pulls.updateBranch({
                     ...context.repo,

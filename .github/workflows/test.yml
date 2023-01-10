@@ -31,13 +31,12 @@ jobs:
             ...context.repo,
             basehead: `${pr.base.label}...${pr.head.label}`,
           });
-          console.log(pr.base.label, pr.head.label, comparison.behind_by);
+          console.log(comparison.behind_by);
+          
+          if (comparison.behind_by > 0) {
+            await pulls.updateBranch({
+              ...context.repo,
+              pull_number: ${{ github.event.inputs.pr }}
+            });
+          }
 
-          /*
-          const result = await pulls.updateBranch({
-            ...context.repo,
-            pull_number: ${{ github.event.inputs.pr }}
-          });
-
-          console.log(result);
-          */

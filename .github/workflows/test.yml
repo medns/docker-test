@@ -19,10 +19,10 @@ jobs:
           const pull_requests = (await github.paginate(pulls.list, {
             per_page: 100,
             state: 'open',
-            base: '${{ github.event.push.base_ref }}',
+            base: '${{ github.event.base_ref }}',
             ...context.repo
           })).filter(pull => pull.draft === false && pull.auto_merge === true);
-          console.log("${{ github.event.push.base_ref }}", pull_requests);
+          console.log("${{ github.event.base_ref }}", pull_requests);
 
           await Promise.all(
             pull_requests.map(pull => 

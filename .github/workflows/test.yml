@@ -28,11 +28,3 @@ jobs:
           });
 
           console.log(result);
-
-          # const pull_requests = await github.paginate(pulls.list, {
-          #   per_page: 100,
-          #   state: 'open',
-          #   ...context.repo
-          # });
-
-          # console.log(JSON.stringify(pull_requests));

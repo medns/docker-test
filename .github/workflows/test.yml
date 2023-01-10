@@ -22,6 +22,7 @@ jobs:
             base: '${{ github.ref_name }}',
             ...context.repo
           })).filter(pull => pull.draft === false && pull.auto_merge === true);
+          console.log(pull_requests);
 
           await Promise.all(
             pull_requests.map(pull => 

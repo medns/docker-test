@@ -1,42 +1,40 @@
-name: '[gh] pull review test'
+name: '[gh] auto update branch'
 
 on:
-  workflow_dispatch:
-    inputs:
-      pr:
-        description: 'PR number'
-        required: true
-        default: '1'
+  push:
+    branches:
+      - 'master'
 
 jobs:
-  review_notification:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+  auto_updater:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-    - name: Notice
+    - name: Updater
       uses: actions/github-script@v6.3.3
-      env:
-        WECHAT_WORK_USERS: ${{ secrets.WECHAT_WORK_USERS }}
       with:
         script: |
           const { pulls, repos } = github.rest;
-          const os = require('os');
 
-          const { data: pr } = await pulls.get({
-            ...context.repo,
-            pull_number: ${{ github.event.inputs.pr }}
-          });
+          const pull_requests = (await github.paginate(pulls.list, {
+            per_page: 100,
+            state: 'open',
+            base: '${{ github.ref_name }}',
+            ...context.repo
+          })).filter(pull => pull.draft === false && pull.auto_merge);
 
-          const { data: comparison } = await repos.compareCommitsWithBasehead({
-            ...context.repo,
-            basehead: `${pr.base.label}...${pr.head.label}`,
-          });
-          console.log(comparison.behind_by);
-          
-          if (comparison.behind_by > 0) {
-            await pulls.updateBranch({
-              ...context.repo,
-              pull_number: ${{ github.event.inputs.pr }}
-            });
-          }
-
+          await Promise.all(
+            pull_requests.map(pull => 
+              repos.compareCommitsWithBasehead({
+                ...context.repo,
+                basehead: `${pull.base.label}...${pull.head.label}`,
+              }).then(({ data: comparison }) => {
+                if (comparison.behind_by > 0) {
+                  return pulls.updateBranch({
+                    ...context.repo,
+                    pull_number: pull.number
+                  }).catch(error => console.error(error));
+                }
+              })
+            )
+          );

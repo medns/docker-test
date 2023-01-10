@@ -31,7 +31,7 @@ jobs:
             ...context.repo,
             basehead: `${pr.base.label}...${pr.head.label}`,
           });
-          console.log(comparison.behind_by);
+          console.log(pr.base.label, pr.head.label, comparison.behind_by);
 
           /*
           const result = await pulls.updateBranch({

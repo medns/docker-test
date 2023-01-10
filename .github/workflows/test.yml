@@ -2,6 +2,11 @@ name: '[gh] pull review test'
 
 on:
   workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number'
+        required: true
+        default: '1'
 
 jobs:
   review_notification:
@@ -14,13 +19,25 @@ jobs:
         WECHAT_WORK_USERS: ${{ secrets.WECHAT_WORK_USERS }}
       with:
         script: |
-          const { pulls } = github.rest;
+          const { pulls, repos } = github.rest;
           const os = require('os');
 
-          const pull_requests = await github.paginate(pulls.list, {
-            per_page: 100,
-            state: 'open',
-            ...context.repo
+          const { data: pr } = await pulls.get({
+            ...context.repo,
+            pull_number: ${{ github.event.inputs.pr }}
           });
 
-          console.log(JSON.stringify(pull_requests));
+          const { data: comparison } = await repos.compareCommitsWithBasehead({
+            ...context.repo,
+            basehead: `${pr.head.label}...${pr.base.label}`,
+          });
+          console.log(comparison.behind_by);
+
+          /*
+          const result = await pulls.updateBranch({
+            ...context.repo,
+            pull_number: ${{ github.event.inputs.pr }}
+          });
+
+          console.log(result);
+          */

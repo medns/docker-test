@@ -25,6 +25,7 @@ jobs:
                 base: '${{ github.ref_name }}',
                 ...context.repo
               })).filter(pull => pull.draft === false && pull.auto_merge);
+              console.log(pull_requests);
               break;
             }
             case 'pull_request_target': {

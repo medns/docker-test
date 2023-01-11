@@ -29,7 +29,7 @@ jobs:
               })).filter(pull => pull.draft === false && pull.auto_merge);
               break;
             }
-            case 'pull_request': {
+            case 'pull_request_target': {
               const { pull_request } = context.payload;
               if (pull_request.draft === true) {
                 return;
@@ -38,7 +38,7 @@ jobs:
               break;
             }
             default: {
-              throw new Error(`Unsupported event name: ${eventName}`);
+              throw new Error(`Unsupported event name: ${context.eventName}`);
               break;
             }
           }

@@ -25,7 +25,6 @@ jobs:
                 base: '${{ github.ref_name }}',
                 ...context.repo
               })).filter(pull => pull.draft === false && pull.auto_merge);
-              console.log(pull_requests);
               break;
             }
             case 'pull_request_target': {
@@ -48,6 +47,7 @@ jobs:
                 ...context.repo,
                 basehead: `${pull.base.label}...${pull.head.label}`,
               }).then(({ data: comparison }) => {
+                console.log(pull.number, comparison.behind_by);
                 if (comparison.behind_by > 0) {
                   return pulls.updateBranch({
                     ...context.repo,

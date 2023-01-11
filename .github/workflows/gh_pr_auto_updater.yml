@@ -47,12 +47,14 @@ jobs:
                 ...context.repo,
                 basehead: `${pull.base.label}...${pull.head.label}`,
               }).then(({ data: comparison }) => {
-                console.log(pull.number, comparison.behind_by);
                 if (comparison.behind_by > 0) {
                   return pulls.updateBranch({
                     ...context.repo,
                     pull_number: pull.number
-                  }).catch(error => console.error(error));
+                  }).catch(error => {
+                    console.error(pull.number);
+                    console.error(error);
+                  });
                 }
               })
             )

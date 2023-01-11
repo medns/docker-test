@@ -1,15 +1,13 @@
 name: '[gh] pull request auto updater'
 
 on:
-  push:
-    branches:
-      - 'master'
   pull_request_target:
     types:
       - auto_merge_enabled
+  push:
 
 jobs:
-  auto_update_to_date:
+  auto_up_to_date:
     runs-on: ubuntu-latest
     steps:
     - name: Updater

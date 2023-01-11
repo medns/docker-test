@@ -1,13 +1,15 @@
-name: '[gh] auto update branch'
+name: '[gh] pull request auto updater'
 
 on:
   push:
     branches:
       - 'master'
+  pull_request_target:
+    types:
+      - auto_merge_enabled
 
 jobs:
-  auto_updater:
-    if: github.event_name == 'push'
+  auto_update_to_date:
     runs-on: ubuntu-latest
     steps:
     - name: Updater
@@ -16,12 +18,30 @@ jobs:
         script: |
           const { pulls, repos } = github.rest;
 
-          const pull_requests = (await github.paginate(pulls.list, {
-            per_page: 100,
-            state: 'open',
-            base: '${{ github.ref_name }}',
-            ...context.repo
-          })).filter(pull => pull.draft === false && pull.auto_merge);
+          let pull_requests;
+          switch (context.eventName) {
+            case 'push': {
+              pull_requests = (await github.paginate(pulls.list, {
+                per_page: 100,
+                state: 'open',
+                base: '${{ github.ref_name }}',
+                ...context.repo
+              })).filter(pull => pull.draft === false && pull.auto_merge);
+              break;
+            }
+            case 'pull_request': {
+              const { pull_request } = context.payload;
+              if (pull_request.draft === true) {
+                return;
+              }
+              pull_requests = [pull_request];
+              break;
+            }
+            default: {
+              throw new Error(`Unsupported event name: ${eventName}`);
+              break;
+            }
+          }
 
           await Promise.all(
             pull_requests.map(pull => 

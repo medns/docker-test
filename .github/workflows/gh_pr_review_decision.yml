@@ -27,8 +27,8 @@ jobs:
             name: context.repo.repo,
             number: ${{ github.event.pull_request.number }}
           };
-          const { data: repository } = await github.graphql(query, variables);
-          console.log(repository);
+          const data = await github.graphql(query, variables);
+          console.log(data);
     - name: Notification
       uses: actions/github-script@v6
       with:

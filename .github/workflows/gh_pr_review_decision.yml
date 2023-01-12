@@ -15,7 +15,7 @@ jobs:
         script: |
           const fs = require('fs');
 
-          const query = `query($owner:String!, $name:String!, $number:Number!) {
+          const query = `query($owner:String!, $name:String!, $number:Int!) {
               repository(name: $name, owner: $owner) {
                 pullRequest(number: $number) {
                   reviewDecision

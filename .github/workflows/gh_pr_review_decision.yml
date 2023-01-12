@@ -1,0 +1,36 @@
+name: '[gh] pull review decision'
+
+on:
+  pull_request_review:
+    types: [ edited, submitted ]
+
+jobs:
+  review_decision:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+
+          const query = `query($owner:String!, $name:String!, $number:Number!) {
+              repository(name: $name, owner: $owner) {
+                pullRequest(number: $number) {
+                  reviewDecision
+                }
+              }
+          }`;
+          const variables = {
+            owner: context.repo.owner,
+            name: context.repo.repo,
+            number: ${{ github.event.pull_request.number }}
+          };
+          const { data: repository } = await github.graphql(query, variables);
+          console.log(repository);
+    - name: Notification
+      uses: actions/github-script@v6
+      with:
+        script: |
+          console.log(123);

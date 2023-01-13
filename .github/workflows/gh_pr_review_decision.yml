@@ -45,7 +45,7 @@ jobs:
 
           const { data: comparison } = await repos.compareCommitsWithBasehead({
             ...context.repo,
-            basehead: `${{ github.event.pull_request.base.label }}...${{ github.event.pull_request.base.label }}`,
+            basehead: `${{ github.event.pull_request.base.label }}...${{ github.event.pull_request.head.label }}`,
           });
 
           console.log(`ahead_by=${comparison.ahead_by}`);

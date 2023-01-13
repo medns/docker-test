@@ -26,7 +26,14 @@ env:
     }
 
 jobs:
+  call_classify_commits:
+    if: github.event.label.name == 'action(squash-merge)' || github.event.label.name == 'action(rebase-merge)'
+    uses: ./.github/workflows/reuse_classify_commits.yml
+    with:
+      pull_request_number: ${{ github.event.pull_request.number }}
+
   squash_merge_action:
+    needs: call_classify_commits
     if: github.event.label.name == 'action(squash-merge)'
     runs-on: ubuntu-latest
     steps:
@@ -43,19 +50,19 @@ jobs:
         github_token: ${{ steps.get-token.outputs.token }}
         labels: "action(squash-merge): failed"
     - name: Checkout
-      if: github.event.pull_request.commits > 1
+      if: needs.call_classify_commits.outputs.normal_commits_count > 1
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Setup
-      if: github.event.pull_request.commits > 1
+      if: needs.call_classify_commits.outputs.normal_commits_count > 1
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
         cache: 'npm'
         cache-dependency-path: package-lock.json
     - name: Install
-      if: github.event.pull_request.commits > 1
+      if: needs.call_classify_commits.outputs.normal_commits_count > 1
       run: |
         npm install commitlint-plugin-function-rules@1.6.0 @commitlint/cli@16.2.1 @commitlint/config-conventional@16.2.1 @commitlint/lint@16.2.1 @commitlint/prompt-cli@16.2.1
     - name: Commitlint
@@ -65,7 +72,7 @@ jobs:
       shell: bash {0}
       run: |
         ${{ env.OUTPUT_FUNCTION }}
-        if [ ${{ github.event.pull_request.commits }} -gt 1 ]; then
+        if [ ${{ needs.call_classify_commits.outputs.normal_commits_count }} -gt 1 ]; then
           result=`echo $PULL_REQUEST_TITLE | npx commitlint -c false 2>&1`
           output $? "$result"
         fi
@@ -98,7 +105,7 @@ jobs:
 
           </details>
 
-          @${{ github.event.sender.login }}
+          ${{ github.event.sender.type == 'User' && format('@{0}', github.event.sender.login) || '#help' }}
       with:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |
@@ -139,6 +146,7 @@ jobs:
           await Promise.all(p);
 
   rebase_merge_action:
+    needs: call_classify_commits
     if: github.event.label.name == 'action(rebase-merge)'
     runs-on: ubuntu-latest
     steps:
@@ -149,13 +157,14 @@ jobs:
         private-key: ${{ secrets.ACTION_PRIVATE_KEY }}
         app-id: ${{ secrets.ACTION_APP_ID }}
     - name: Comment
+      if: needs.call_classify_commits.outputs.normal_commits_count > 1
       env:
         COMMENT_MESSAGE: |
           :lock: `rebase-merge` action execution needs privilege escalation.
 
           Please wait for admin team member approval ...
 
-          @${{ github.event.sender.login }}
+          ${{ github.event.sender.type == 'User' && format('@{0}', github.event.sender.login) || '' }}
         WECHAT_WORK_MESSAGE: |
           [${{ github.event.sender.login }}](https://github.com/${{ github.event.sender.login }}) requested privilege escalation action on [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request.
           > ${{ github.event.pull_request.title }}
@@ -220,9 +229,9 @@ jobs:
           await Promise.all(p);
 
   rebase_merge_action_privileged:
-    needs: [ rebase_merge_action ]
+    needs: [ rebase_merge_action, call_classify_commits ]
     runs-on: ubuntu-latest
-    environment: github-actions-privileged
+    environment: ${{ needs.call_classify_commits.outputs.normal_commits_count > 1 && 'github-actions-privileged' || '' }}
     steps:
     - name: Token
       uses: navikt/github-app-token-generator@v1
@@ -263,7 +272,7 @@ jobs:
 
           </details>
 
-          @${{ github.event.sender.login }}
+          ${{ github.event.sender.type == 'User' && format('@{0}', github.event.sender.login) || '#help' }}
       with:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |

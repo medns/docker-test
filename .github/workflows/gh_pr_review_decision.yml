@@ -62,7 +62,7 @@ jobs:
 
   manual_merge:
     needs: call_classify_commits
-    if: needs.call_classify_commits.outputs.normal_commits_count > 1
+    if: needs.call_classify_commits.outputs.normal_commits_count > 1 || !needs.call_classify_commits.outputs.normal_commits_count
     runs-on: ubuntu-latest
     steps:
     - name: Manual

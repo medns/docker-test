@@ -9,10 +9,8 @@ on:
 env:
  GREETINGS_MESSAGE: |
   :tada: It seems that this pull request has been approved by all required reviewers and only contains one normal commit.
- AUTO_MERGE_MESSAGE: |
-  I will rebase and merge it automatically via `action(rebase-merge)` label.
- MANUAL_MERGE_MESSAGE: |
-  I will notify admin team member to merge it manually, please wait a moment.
+ AUTO_MERGE_MESSAGE: I will rebase and merge it automatically via add `action(rebase-merge)` label.
+ MANUAL_MERGE_MESSAGE: I will notify admin team member to merge it manually, please wait a moment.
 
 jobs:
   call_get_workflow_output:
@@ -105,7 +103,7 @@ jobs:
           p.push(issues.createComment({
             ...context.repo,
             issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
-            body: process.env.GREETINGS_MESSAGE + process.env.AUTO_MERGE_MESSAGE,
+            body: process.env.GREETINGS_MESSAGE + " " + process.env.AUTO_MERGE_MESSAGE,
           }));
 
           await Promise.all(p);
@@ -139,7 +137,7 @@ jobs:
           p.push(issues.createComment({
             ...context.repo,
             issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
-            body: process.env.GREETINGS_MESSAGE + process.env.MANUAL_MERGE_MESSAGE
+            body: process.env.GREETINGS_MESSAGE + " " + process.env.MANUAL_MERGE_MESSAGE
           }));
 
           p.push(github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {

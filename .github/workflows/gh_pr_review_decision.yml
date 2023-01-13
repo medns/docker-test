@@ -45,10 +45,10 @@ jobs:
 
           const { data: comparison } = await repos.compareCommitsWithBasehead({
             ...context.repo,
-            basehead: `${{ github.event.pull_request.base.label }}...${{ github.event.pull_request.head.label }}`,
+            basehead: `${{ github.event.pull_request.head.label }}...${{ github.event.pull_request.base.label }}`,
           });
 
-          console.log(`ahead_by=${comparison.ahead_by}`);
+          console.log(`behind_by=${comparison.behind_by}, ahead_by=${comparison.ahead_by}`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `ahead_by=${comparison.ahead_by}${os.EOL}`, { encoding: 'utf8' });
     - name: Auto
       if: fromJSON(steps.comparison.outputs.ahead_by) == 1
@@ -81,7 +81,6 @@ jobs:
             },
             data: {
               chatid: "${{ secrets.WECHAT_WORK_ADMIN_CHAT_ID }}",
-              visible_to_user: userid,
               msgtype: "markdown",
               markdown: {
                 content: util.format(process.env.MESSAGE, (${{ steps.comparison.outputs.ahead_by }}).toLocaleString()),

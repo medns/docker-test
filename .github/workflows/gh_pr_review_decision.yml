@@ -7,8 +7,7 @@ on:
     types: [ completed ]
 
 env:
- GREETINGS_MESSAGE: |
-  :tada: It seems that this pull request has been approved by all required reviewers and only contains one normal commit.
+ GREETINGS_MESSAGE: ':tada: It seems that this pull request has been approved by all required reviewers and only contains one normal commit.'
  AUTO_MERGE_MESSAGE: I will rebase and merge it automatically via add `action(rebase-merge)` label.
  MANUAL_MERGE_MESSAGE: I will notify admin team member to merge it manually, please wait a moment.
 

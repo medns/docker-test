@@ -1,8 +1,10 @@
 name: '[gh] pull review decision'
 
 on:
-  pull_request_review:
-    types: [ edited, submitted ]
+  workflow_run:
+    workflows:
+      - \[gh\] pull request review
+    types: [ completed ]
 
 env:
  GREETINGS_MESSAGE: |
@@ -13,14 +15,38 @@ env:
   I will notify admin team member to merge it manually, please wait a moment.
 
 jobs:
+  call_get_workflow_output:
+    if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/reuse_get_workflow_output.yml
+    with:
+      workflow_run: ${{ github.event.workflow_run.id }}
+
   get_decision:
-    if: github.event.review.state == 'approved'
+    needs: call_get_workflow_output
     runs-on: ubuntu-latest
     outputs:
-      reviewDecision: ${{ steps.decision.outputs.reviewDecision }}
+      review_decision: ${{ steps.decision.outputs.review_decision }}
+      pull_request_number: ${{ steps.parse_workflow_output.outputs.pull_request_number }}
     steps:
+    - name: Parse
+      id: parse_workflow_output
+      env:
+        RAW: ${{ needs.call_get_workflow_output.outputs.raw }}
+      shell: python
+      run: |
+        import json
+        import os
+
+        raw = os.getenv("RAW")
+        data = json.loads(raw)
+        with open(os.getenv("GITHUB_OUTPUT"), 'w', encoding='utf-8') as file:
+          file.write("review_state=%s\n" % data["review"]["state"])
+          file.write("pull_request_number=%s\n" % data["pull_request"]["number"])
+          file.write("pull_request_title=%s\n" % data["pull_request"]["title"])
+          file.write("pull_request_url=%s\n" % data["pull_request"]["html_url"])
     - name: Decision
       id: decision
+      if: steps.parse_workflow_output.outputs.review_state == 'approved'
       uses: actions/github-script@v6
       with:
         script: |
@@ -36,19 +62,19 @@ jobs:
           }`;
           const variables = {
             ...context.repo,
-            number: ${{ github.event.pull_request.number }}
+            number: ${{ steps.parse_workflow_output.outputs.pull_request_number }}
           };
           const { repository: { pullRequest: { reviewDecision } } } = await github.graphql(query, variables);
           if (reviewDecision === 'APPROVED' || !reviewDecision) {
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `reviewDecision=APPROVED${os.EOL}`, { encoding: 'utf8' });
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `review_decision=APPROVED${os.EOL}`, { encoding: 'utf8' });
           }
 
   call_classify_commits:
     needs: get_decision
-    if: needs.get_decision.outputs.reviewDecision == 'APPROVED'
+    if: needs.get_decision.outputs.review_decision == 'APPROVED'
     uses: ./.github/workflows/reuse_classify_commits.yml
     with:
-      pull_request_number: ${{ github.event.pull_request.number }}
+      pull_request_number: ${{ needs.get_decision.outputs.pull_request_number }}
 
   auto_merge:
     needs: call_classify_commits
@@ -59,8 +85,8 @@ jobs:
       uses: navikt/github-app-token-generator@v1
       id: get-token
       with:
-        private-key: ${{ secrets.PRIVATE_KEY }}
-        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.BOT_APP_KEY }}
+        app-id: ${{ secrets.BOT_APP_ID }}
     - name: Auto
       uses: actions/github-script@v6
       with:
@@ -72,13 +98,13 @@ jobs:
 
           p.push(issues.addLabels({
             ...context.repo,
-            issue_number: ${{ github.event.pull_request.number }},
+            issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
             labels: [ 'action(rebase-merge)2' ]
           }));
 
           p.push(issues.createComment({
             ...context.repo,
-            issue_number: ${{ github.event.pull_request.number }},
+            issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
             body: process.env.GREETINGS_MESSAGE + process.env.AUTO_MERGE_MESSAGE,
           }));
 
@@ -93,15 +119,15 @@ jobs:
       uses: navikt/github-app-token-generator@v1
       id: get-token
       with:
-        private-key: ${{ secrets.PRIVATE_KEY }}
-        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.BOT_APP_KEY }}
+        app-id: ${{ secrets.BOT_APP_ID }}
     - name: Manual
       uses: actions/github-script@v6
       env:
-        MESSAGE: |
-          [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request is met merge requirements.
-          > ${{ github.event.pull_request.title }}
-          > <font color="warning">%s</font> commits ahead 
+        WECHAT_WORK_MESSAGE: |
+          [#${{ needs.call_classify_commits.outputs.pull_request_number }}](${{ needs.call_classify_commits.outputs.pull_request_url }}) pull request is met merge requirements.
+          > ${{ needs.call_classify_commits.outputs.pull_request_title }}
+          > <font color="warning">%s</font> normal commits ahead of base branch.
       with:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |
@@ -112,7 +138,7 @@ jobs:
 
           p.push(issues.createComment({
             ...context.repo,
-            issue_number: ${{ github.event.pull_request.number }},
+            issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
             body: process.env.GREETINGS_MESSAGE + process.env.MANUAL_MERGE_MESSAGE
           }));
 
@@ -124,7 +150,7 @@ jobs:
               chatid: "${{ secrets.WECHAT_WORK_ADMIN_CHAT_ID }}",
               msgtype: "markdown",
               markdown: {
-                content: util.format(process.env.MESSAGE, (${{ steps.comparison.outputs.ahead_by }}).toLocaleString()),
+                content: util.format(process.env.WECHAT_WORK_MESSAGE, (Number.parseInt("${{ needs.call_classify_commits.outputs.normal_commits_count }}") || Infinity).toLocaleString()),
                 attachments: [{
                   callback_id: "merge",
                   actions: [{

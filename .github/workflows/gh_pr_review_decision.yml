@@ -4,6 +4,14 @@ on:
   pull_request_review:
     types: [ edited, submitted ]
 
+env:
+ GREETINGS_MESSAGE: |
+  :tada: It seems that this pull request has been approved by all required reviewers and only contains one normal commit.
+ AUTO_MERGE_MESSAGE: |
+  I will rebase and merge it automatically via `action(rebase-merge)` label.
+ MANUAL_MERGE_MESSAGE: |
+  I will notify admin team member to merge it manually, please wait a moment.
+
 jobs:
   get_decision:
     if: github.event.review.state == 'approved'
@@ -19,16 +27,15 @@ jobs:
           const fs = require('fs');
           const os = require('os');
 
-          const query = `query($owner:String!, $name:String!, $number:Int!) {
-              repository(name: $name, owner: $owner) {
+          const query = `query($owner:String!, $repo:String!, $number:Int!) {
+              repository(name: $repo, owner: $owner) {
                 pullRequest(number: $number) {
                   reviewDecision
                 }
               }
           }`;
           const variables = {
-            owner: context.repo.owner,
-            name: context.repo.repo,
+            ...context.repo,
             number: ${{ github.event.pull_request.number }}
           };
           const { repository: { pullRequest: { reviewDecision } } } = await github.graphql(query, variables);
@@ -48,23 +55,46 @@ jobs:
     if: needs.call_classify_commits.outputs.normal_commits_count == 1
     runs-on: ubuntu-latest
     steps:
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.BOT_APP_KEY }}
+        app-id: ${{ secrets.BOT_APP_ID }}
     - name: Auto
       uses: actions/github-script@v6
       with:
+        github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const { issues } = github.rest;
 
-          await issues.addLabels({
+          const p = [];
+
+          p.push(issues.addLabels({
             ...context.repo,
             issue_number: ${{ github.event.pull_request.number }},
             labels: [ 'action(rebase-merge)2' ]
-          });
+          }));
+
+          p.push(issues.createComment({
+            ...context.repo,
+            issue_number: ${{ github.event.pull_request.number }},
+            body: process.env.GREETINGS_MESSAGE + process.env.AUTO_MERGE_MESSAGE,
+          }));
+
+          await Promise.all(p);
 
   manual_merge:
     needs: call_classify_commits
     if: needs.call_classify_commits.outputs.normal_commits_count > 1 || !needs.call_classify_commits.outputs.normal_commits_count
     runs-on: ubuntu-latest
     steps:
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.BOT_APP_KEY }}
+        app-id: ${{ secrets.BOT_APP_ID }}
     - name: Manual
       uses: actions/github-script@v6
       env:
@@ -73,11 +103,20 @@ jobs:
           > ${{ github.event.pull_request.title }}
           > <font color="warning">%s</font> commits ahead 
       with:
+        github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const util = require('util');
           const { issues } = github.rest;
 
-          await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
+          const p = [];
+
+          p.push(issues.createComment({
+            ...context.repo,
+            issue_number: ${{ github.event.pull_request.number }},
+            body: process.env.GREETINGS_MESSAGE + process.env.MANUAL_MERGE_MESSAGE
+          }));
+
+          p.push(github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
             headers: {
               "content-type": "application/json"
             },
@@ -108,4 +147,6 @@ jobs:
                 }]
               }
             }
-          });
+          }));
+
+          await Promise.all(p);

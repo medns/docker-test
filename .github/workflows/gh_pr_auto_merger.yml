@@ -1,4 +1,4 @@
-name: '[gh] pull review decision'
+name: '[gh] pull request auto merger'
 
 on:
   workflow_run:
@@ -24,6 +24,8 @@ jobs:
     outputs:
       review_decision: ${{ steps.decision.outputs.review_decision }}
       pull_request_number: ${{ steps.parse_workflow_output.outputs.pull_request_number }}
+      pull_request_title: ${{ steps.parse_workflow_output.outputs.pull_request_title }}
+      pull_request_url: ${{ steps.parse_workflow_output.outputs.pull_request_url }}
     steps:
     - name: Parse
       id: parse_workflow_output

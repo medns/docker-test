@@ -8,9 +8,6 @@ on:
         required: true
         type: number
     outputs:
-      pull_request_number:
-        description: 'Pull request number'
-        value: ${{ inputs.pull_request_number }}
       merge_commits_sha:
         description: 'Merge commits sha'
         value: ${{ jobs.classify_commits.outputs.merge_commits_sha }}

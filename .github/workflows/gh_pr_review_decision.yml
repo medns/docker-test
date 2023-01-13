@@ -10,10 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check
+      id: check
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
+          const os = require('os');
 
           const query = `query($owner:String!, $name:String!, $number:Int!) {
               repository(name: $name, owner: $owner) {
@@ -27,10 +29,81 @@ jobs:
             name: context.repo.repo,
             number: ${{ github.event.pull_request.number }}
           };
-          const data = await github.graphql(query, variables);
-          console.log(data);
-    - name: Notification
+          const { repository: { pullRequest: { reviewDecision } } } = await github.graphql(query, variables);
+          if (reviewDecision === 'APPROVED' || !reviewDecision) {
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `reviewDecision=APPROVED${os.EOL}`, { encoding: 'utf8' });
+          }
+    - name: Comparison
+      id: comparison
+      if: steps.check.outputs.reviewDecision == 'APPROVED'
       uses: actions/github-script@v6
       with:
         script: |
-          console.log(123);
+          const os = require('os');
+          const { repos } = github.rest;
+
+          const { data: comparison } = await repos.compareCommitsWithBasehead({
+            ...context.repo,
+            basehead: `${{ github.event.pull_request.base.label }}...${{ github.event.pull_request.base.label }}`,
+          });
+
+          console.log(ahead_by=${comparison.ahead_by});
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `ahead_by=${comparison.ahead_by}${os.EOL}`, { encoding: 'utf8' });
+    - name: Auto
+      if: fromJSON(steps.comparison.outputs.ahead_by) == 1
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { issues } = github.rest;
+
+          await issues.addLabels({
+            ...context.repo,
+            issue_number: ${{ github.event.pull_request.number }},
+            labels: [ 'action(rebase-merge)2' ]
+          });
+    - name: Manual
+      if: fromJSON(steps.comparison.outputs.ahead_by) > 1
+      uses: actions/github-script@v6
+      env:
+        MESSAGE: |
+          [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull requests meet merge condition.
+          > ${{ github.event.pull_request.title }}
+          > <font color="warning">%s</font> commits ahead 
+      with:
+        script: |
+          const util = require('util');
+          const { issues } = github.rest;
+
+          await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
+            headers: {
+              "content-type": "application/json"
+            },
+            data: {
+              chatid: "${{ secrets.WECHAT_WORK_ADMIN_CHAT_ID }}",
+              visible_to_user: userid,
+              msgtype: "markdown",
+              markdown: {
+                content: util.format(process.env.MESSAGE, (${{ steps.comparison.outputs.ahead_by }}).toLocaleString()),
+                attachments: [{
+                  callback_id: "merge",
+                  actions: [{
+                    name: "merge_btn",
+                    text: "Mark as Merged",
+                    type: "button",
+                    value: "Mark as Merged",
+                    replace_text: "Already merged",
+                    border_color: "2c974b",
+                    text_color: "2c974b"
+                  }, {
+                    name: "ignore_btn",
+                    text: "Mark as Ignored",
+                    type: "button",
+                    value: "Mark as Ignored",
+                    replace_text: "Already ignored",
+                    border_color: "6e7781",
+                    text_color: "6e7781"
+                  }]
+                }]
+              }
+            }
+          });

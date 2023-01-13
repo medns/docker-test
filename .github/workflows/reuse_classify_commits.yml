@@ -13,19 +13,19 @@ on:
         value: ${{ inputs.pull_request_number }}
       merge_commits_sha:
         description: 'Merge commits sha'
-        value: ${{ jobs.get_merge_commits.outputs.merge_commits_sha }}
+        value: ${{ jobs.classify_commits.outputs.merge_commits_sha }}
       merge_commits_count:
         description: 'Merge commits count'
-        value: ${{ jobs.get_merge_commits.outputs.merge_commits_count }}
+        value: ${{ jobs.classify_commits.outputs.merge_commits_count }}
       normal_commits_sha:
         description: 'Normal commits sha'
-        value: ${{ jobs.get_normal_commits.outputs.normal_commits_sha }}
+        value: ${{ jobs.classify_commits.outputs.normal_commits_sha }}
       normal_commits_count:
         description: 'Normal commits count'
-        value: ${{ jobs.get_normal_commits.outputs.normal_commits_count }}
+        value: ${{ jobs.classify_commits.outputs.normal_commits_count }}
 
 jobs:
-  get_merge_commits:
+  classify_commits:
     runs-on: ubuntu-latest
     outputs:
       merge_commits_sha: ${{ steps.action.outputs.merge_commits_sha }}

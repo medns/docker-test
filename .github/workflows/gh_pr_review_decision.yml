@@ -74,7 +74,7 @@ jobs:
     if: needs.get_decision.outputs.review_decision == 'APPROVED'
     uses: ./.github/workflows/reuse_classify_commits.yml
     with:
-      pull_request_number: ${{ needs.get_decision.outputs.pull_request_number }}
+      pull_request_number: ${{ fromJSON(needs.get_decision.outputs.pull_request_number) }}
 
   auto_merge:
     needs: call_classify_commits

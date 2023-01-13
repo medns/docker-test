@@ -59,8 +59,8 @@ jobs:
       uses: navikt/github-app-token-generator@v1
       id: get-token
       with:
-        private-key: ${{ secrets.BOT_APP_KEY }}
-        app-id: ${{ secrets.BOT_APP_ID }}
+        private-key: ${{ secrets.PRIVATE_KEY }}
+        app-id: ${{ secrets.APP_ID }}
     - name: Auto
       uses: actions/github-script@v6
       with:
@@ -93,8 +93,8 @@ jobs:
       uses: navikt/github-app-token-generator@v1
       id: get-token
       with:
-        private-key: ${{ secrets.BOT_APP_KEY }}
-        app-id: ${{ secrets.BOT_APP_ID }}
+        private-key: ${{ secrets.PRIVATE_KEY }}
+        app-id: ${{ secrets.APP_ID }}
     - name: Manual
       uses: actions/github-script@v6
       env:

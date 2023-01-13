@@ -5,12 +5,14 @@ on:
     types: [ edited, submitted ]
 
 jobs:
-  review_decision:
+  get_decision:
     if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
+    outputs:
+      reviewDecision: ${{ steps.decision.outputs.reviewDecision }}
     steps:
-    - name: Check
-      id: check
+    - name: Decision
+      id: decision
       uses: actions/github-script@v6
       with:
         script: |
@@ -33,25 +35,20 @@ jobs:
           if (reviewDecision === 'APPROVED' || !reviewDecision) {
             fs.appendFileSync(process.env.GITHUB_OUTPUT, `reviewDecision=APPROVED${os.EOL}`, { encoding: 'utf8' });
           }
-    - name: Comparison
-      id: comparison
-      if: steps.check.outputs.reviewDecision == 'APPROVED'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          const os = require('os');
-          const { repos } = github.rest;
 
-          const { data: comparison } = await repos.compareCommitsWithBasehead({
-            ...context.repo,
-            basehead: `${{ github.event.pull_request.base.label }}...${{ github.event.pull_request.head.label }}`,
-          });
+  call_classify_commits:
+    needs: get_decision
+    if: needs.get_decision.outputs.reviewDecision == 'APPROVED'
+    uses: ./.github/workflows/reuse_classify_commits.yml
+    with:
+      pull_request_number: ${{ github.event.pull_request.number }}
 
-          console.log(`behind_by=${comparison.behind_by}, ahead_by=${comparison.ahead_by}`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `ahead_by=${comparison.ahead_by}${os.EOL}`, { encoding: 'utf8' });
+  auto_merge:
+    needs: call_classify_commits
+    if: needs.call_classify_commits.outputs.normal_commits_count == 1
+    runs-on: ubuntu-latest
+    steps:
     - name: Auto
-      if: fromJSON(steps.comparison.outputs.ahead_by) == 1
       uses: actions/github-script@v6
       with:
         script: |
@@ -62,12 +59,17 @@ jobs:
             issue_number: ${{ github.event.pull_request.number }},
             labels: [ 'action(rebase-merge)2' ]
           });
+
+  manual_merge:
+    needs: call_classify_commits
+    if: needs.call_classify_commits.outputs.normal_commits_count > 1
+    runs-on: ubuntu-latest
+    steps:
     - name: Manual
-      if: fromJSON(steps.comparison.outputs.ahead_by) > 1
       uses: actions/github-script@v6
       env:
         MESSAGE: |
-          [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull requests meet merge condition.
+          [#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }}) pull request is met merge requirements.
           > ${{ github.event.pull_request.title }}
           > <font color="warning">%s</font> commits ahead 
       with:

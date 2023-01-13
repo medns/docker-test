@@ -47,7 +47,7 @@ jobs:
             basehead: `${{ github.event.pull_request.base.label }}...${{ github.event.pull_request.base.label }}`,
           });
 
-          console.log(ahead_by=${comparison.ahead_by});
+          console.log(`ahead_by=${comparison.ahead_by}`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `ahead_by=${comparison.ahead_by}${os.EOL}`, { encoding: 'utf8' });
     - name: Auto
       if: fromJSON(steps.comparison.outputs.ahead_by) == 1

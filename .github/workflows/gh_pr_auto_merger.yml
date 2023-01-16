@@ -1,4 +1,4 @@
-name: '[gh] pull review decision'
+name: '[gh] pull request auto merger'
 
 on:
   workflow_run:
@@ -24,6 +24,8 @@ jobs:
     outputs:
       review_decision: ${{ steps.decision.outputs.review_decision }}
       pull_request_number: ${{ steps.parse_workflow_output.outputs.pull_request_number }}
+      pull_request_title: ${{ steps.parse_workflow_output.outputs.pull_request_title }}
+      pull_request_url: ${{ steps.parse_workflow_output.outputs.pull_request_url }}
     steps:
     - name: Parse
       id: parse_workflow_output
@@ -74,7 +76,7 @@ jobs:
       pull_request_number: ${{ fromJSON(needs.get_decision.outputs.pull_request_number) }}
 
   auto_merge:
-    needs: call_classify_commits
+    needs: [ get_decision, call_classify_commits ]
     if: needs.call_classify_commits.outputs.normal_commits_count == 1
     runs-on: ubuntu-latest
     steps:
@@ -95,20 +97,20 @@ jobs:
 
           p.push(issues.addLabels({
             ...context.repo,
-            issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
+            issue_number: ${{ needs.get_decision.outputs.pull_request_number }},
             labels: [ 'action(rebase-merge)2' ]
           }));
 
           p.push(issues.createComment({
             ...context.repo,
-            issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
+            issue_number: ${{ needs.get_decision.outputs.pull_request_number }},
             body: process.env.GREETINGS_MESSAGE + " " + process.env.AUTO_MERGE_MESSAGE,
           }));
 
           await Promise.all(p);
 
   manual_merge:
-    needs: call_classify_commits
+    needs: [ get_decision, call_classify_commits ]
     if: needs.call_classify_commits.outputs.normal_commits_count > 1 || !needs.call_classify_commits.outputs.normal_commits_count
     runs-on: ubuntu-latest
     steps:
@@ -122,9 +124,9 @@ jobs:
       uses: actions/github-script@v6
       env:
         WECHAT_WORK_MESSAGE: |
-          [#${{ needs.call_classify_commits.outputs.pull_request_number }}](${{ needs.call_classify_commits.outputs.pull_request_url }}) pull request is met merge requirements.
-          > ${{ needs.call_classify_commits.outputs.pull_request_title }}
-          > <font color="warning">%s</font> normal commits ahead of base branch.
+          [#${{ needs.get_decision.outputs.pull_request_number }}](${{ needs.get_decision.outputs.pull_request_url }}) pull request is met merge requirements.
+          > ${{ needs.get_decision.outputs.pull_request_title }}
+          > <font color="warning">%s</font> normal commits ahead
       with:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |
@@ -135,7 +137,7 @@ jobs:
 
           p.push(issues.createComment({
             ...context.repo,
-            issue_number: ${{ needs.call_classify_commits.outputs.pull_request_number }},
+            issue_number: ${{ needs.get_decision.outputs.pull_request_number }},
             body: process.env.GREETINGS_MESSAGE + " " + process.env.MANUAL_MERGE_MESSAGE
           }));
 

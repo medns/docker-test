@@ -6,8 +6,7 @@ on:
     # Run every 12th hour.
     - cron: '0 */12 * * *'
 
-permissions:
-  actions: read
+permissions: read-all
 
 jobs:
   runners_monitor:

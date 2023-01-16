@@ -1,0 +1,24 @@
+name: '[gh] self-hosted runners monitor'
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every 12th hour.
+    - cron: '0 */12 * * *'
+
+jobs:
+  runners_monitor:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Monitor
+      uses: actions/github-script@v6.3.3
+      with:
+        script: |
+          const { actions } = github.rest;
+
+          const x = await github.paginate(actions.listSelfHostedRunnersForRepo, {
+            per_page: 100,
+            ...context.repo
+          });
+
+          console.log(x);

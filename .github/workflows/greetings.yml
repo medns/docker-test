@@ -1,8 +1,7 @@
 name: 'greetings'
 
 on:
-  pull_request:
-    types: [ opened, synchronize, reopened ]
+  workflow_dispatch:
 
 jobs:
   greetings:
@@ -10,3 +9,8 @@ jobs:
     steps:
     - run: |
         echo "hello world"
+    - if: 1 == 2
+      run: |
+        echo "never executed"
+    - run: |
+        echo "step 3"

@@ -24,14 +24,15 @@ jobs:
           const { actions } = github.rest;
           const os = require('os');
 
-          const offline_runners = await github.paginate(actions.listSelfHostedRunnersForRepo, {
+          const runners = await github.paginate(actions.listSelfHostedRunnersForRepo, {
             per_page: 100,
             ...context.repo
-          }).filter(runner => runner.status === 'offline');
+          });
+          const offline_runners = runners.filter(runner => runner.status === 'offline');
 
           if (offline_runners.length > 0) {
             const content = [];
-            content.push(`<font color="warning">${offline_runners.length}</font> self-hosted runners are offline.`);
+            content.push(`<font color="warning">${offline_runners.length}/${runners.length}</font> self-hosted runners are offline.`);
             content.push(...offline_runners.map(runner => `> ${runner.name}`));
 
             await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {

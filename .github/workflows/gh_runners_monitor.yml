@@ -6,16 +6,20 @@ on:
     # Run every 12th hour.
     - cron: '0 */12 * * *'
 
-permissions: write-all
-
 jobs:
   runners_monitor:
     runs-on: ubuntu-latest
     steps:
+    - name: Token
+      uses: navikt/github-app-token-generator@v1
+      id: get-token
+      with:
+        private-key: ${{ secrets.BOT_APP_KEY }}
+        app-id: ${{ secrets.BOT_APP_ID }}
     - name: Monitor
       uses: actions/github-script@v6.3.3
       with:
-        github-token: ${{ secrets.ALL_PAT }}
+        github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const { actions } = github.rest;
 

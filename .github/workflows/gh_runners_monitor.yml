@@ -15,6 +15,7 @@ jobs:
     - name: Monitor
       uses: actions/github-script@v6.3.3
       with:
+        github-token: ${{ secrets.ALL_PAT }}
         script: |
           const { actions } = github.rest;
 

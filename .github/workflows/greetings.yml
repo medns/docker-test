@@ -12,5 +12,6 @@ jobs:
     - if: 1 == 2
       run: |
         echo "never executed"
-    - run: |
+    - if: success()
+      run: |
         echo "step 3"

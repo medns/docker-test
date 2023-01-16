@@ -14,18 +14,36 @@ jobs:
       uses: navikt/github-app-token-generator@v1
       id: get-token
       with:
-        private-key: ${{ secrets.ALL_APP_KEY }}
-        app-id: ${{ secrets.ALL_APP_ID }}
+        private-key: ${{ secrets.BOT_APP_KEY }}
+        app-id: ${{ secrets.BOT_APP_ID }}
     - name: Monitor
       uses: actions/github-script@v6.3.3
       with:
         github-token: ${{ steps.get-token.outputs.token }}
         script: |
           const { actions } = github.rest;
+          const os = require('os');
 
-          const x = await github.paginate(actions.listSelfHostedRunnersForRepo, {
+          const offline_runners = await github.paginate(actions.listSelfHostedRunnersForRepo, {
             per_page: 100,
             ...context.repo
-          });
+          }).filter(runner => runner.status === 'offline');
 
-          console.log(x);
+          if (offline_runners.length > 0) {
+            const content = [];
+            content.push(`<font color="warning">${offline_runners.length}</font> self-hosted runners are offline.`);
+            content.push(...offline_runners.map(runner => `> ${runner.name}`));
+
+            await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
+              headers: {
+                "content-type": "application/json"
+              },
+              data: {
+                chatid: "${{ secrets.WECHAT_WORK_ADMIN_CHAT_ID }}",
+                msgtype: "markdown",
+                markdown: {
+                  content: content.join(os.EOL)
+                }
+              }
+            });
+          }

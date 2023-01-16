@@ -13,6 +13,10 @@ jobs:
     - name: Updater
       uses: actions/github-script@v6.3.3
       with:
+        # Because the Github App Token, Github Token, and Fine-grained PAT
+        # cannot obtain the permission to update the workflow files in the head branch,
+        # so use classic PAT to avoid failures caused by modification of workflow files.
+        # TODO: use Github App Token or Github Token if permission is granted in the future. 
         github-token: ${{ secrets.BOT_PAT }}
         script: |
           const { pulls, repos } = github.rest;

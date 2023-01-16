@@ -12,6 +12,6 @@ jobs:
     - if: 1 == 2
       run: |
         echo "never executed"
-    - if: ${{ !cancelled() }}
+    - if: ${{ failure() }}
       run: |
         echo "step 3"

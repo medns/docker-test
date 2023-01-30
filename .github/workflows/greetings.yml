@@ -7,6 +7,13 @@ env:
   BUILD_SCRIPT: |
     xcodebuild -workspace '{0}' -list | \
     sed -n '/Schemes/,/^$/p' | \
+    grep -v "Schemes:" | \
+    grep -v '^\s*$' | \
+    while read scheme; do
+      echo "Building ${scheme}…"
+      xcodebuild build \
+        -destination "generic/platform=iOS" \
+        -workspace "{0}" \
 
 jobs:
   greetings:

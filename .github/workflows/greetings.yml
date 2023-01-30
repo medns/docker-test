@@ -13,7 +13,7 @@ env:
       echo "Building ${scheme}…"
       xcodebuild build \
         -destination "generic/platform=iOS" \
-        -workspace "{0}" \
+        -workspace {0} \
 
 jobs:
   greetings:

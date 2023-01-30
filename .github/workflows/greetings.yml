@@ -26,4 +26,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo "${{ format(env.TEST, 'HippyDemo.xcworkspace', 'release') }}"
+        echo "${{ format(env.BUILD_SCRIPT, 'HippyDemo.xcworkspace', 'release') }}"

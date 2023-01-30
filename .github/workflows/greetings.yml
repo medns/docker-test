@@ -4,12 +4,26 @@ on:
   workflow_dispatch:
 
 env:
-  TEST: |
-    Hello {0} World {0}
+  BUILD_SCRIPT: |
+    xcodebuild -workspace '{0}' -list | \
+    sed -n '/Schemes/,/^$/p' | \
+    grep -v "Schemes:" | \
+    grep -v '^\s*$' | \
+    while read scheme; do
+      echo "Building ${scheme}…"
+      xcodebuild build \
+        -destination "generic/platform=iOS" \
+        -workspace "{0}" \
+        -scheme "${scheme}" \
+        -configuration "{1}" \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO
+    done
 
 jobs:
   greetings:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo "${{ format(env.TEST, 'a') }}"
+        echo "${{ format(env.TEST, 'HippyDemo.xcworkspace', 'release') }}"

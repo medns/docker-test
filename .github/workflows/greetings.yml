@@ -6,3 +6,8 @@ on:
 jobs:
   a:
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/github-script@v6.3.3
+      with:
+        script: |
+          console.log(github.workflow);

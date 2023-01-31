@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo a
+        exit -1
   b:
     needs: z
     if: 1 == 2
@@ -27,6 +27,7 @@ jobs:
   
   c:
     needs: [ a, b ]
+    if: always() && (needs.a.result == 'success' || needs.b.result == 'suucess')
     runs-on: ubuntu-latest
     steps:
     - run: |

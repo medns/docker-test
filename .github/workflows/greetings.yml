@@ -3,12 +3,23 @@ name: 'greetings'
 on:
   workflow_dispatch:
 
-concurrency:
-  group: a
 
 jobs:
   a:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        sleep 10
+        echo a
+  b:
+    if: 1 == 2
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo b
+  
+  c:
+    needs: [ a, b ]
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo c

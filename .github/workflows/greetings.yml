@@ -14,12 +14,16 @@ jobs:
   a:
     needs: z
     if: 1 == 2
+    outputs:
+      run: 'true'
     runs-on: ubuntu-latest
     steps:
     - run: |
         exit -1
   b:
     needs: z
+    outputs:
+      run: 'true'
     runs-on: ubuntu-latest
     steps:
     - run: |
@@ -27,7 +31,7 @@ jobs:
   
   c:
     needs: [ a, b ]
-    if: always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure'))
+    if: always() && contains(needs.*.outputs.run, 'true')
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'success')

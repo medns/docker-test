@@ -28,7 +28,7 @@ jobs:
   
   c:
     needs: [ a, b ]
-    if: always() && 1 == 2
+    if: always() && contains(needs.*.result, 'success')
     runs-on: ubuntu-latest
     steps:
     - run: |

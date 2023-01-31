@@ -31,7 +31,7 @@ jobs:
   
   c:
     needs: [ a, b ]
-    if: always() && contains(needs.*.outputs.run, 'true')
+    if: always() && (needs.a.result == 'success' || needs.b.result == 'success') && contains(needs.*.outputs.run, 'true')
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'success')

@@ -28,7 +28,7 @@ jobs:
   
   c:
     needs: [ a, b ]
-    if: always() && contains(needs.*.result, 'success')
+    if: always() && (needs.a.result == 'success' || needs.b.result == 'suucess')
     runs-on: ubuntu-latest
     steps:
     - run: |

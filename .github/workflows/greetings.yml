@@ -13,17 +13,17 @@ jobs:
 
   a:
     needs: z
+    if: 1 == 2
     runs-on: ubuntu-latest
     steps:
     - run: |
         exit -1
   b:
     needs: z
-    if: 1 == 2
     runs-on: ubuntu-latest
     steps:
     - run: |
-        sleep 10
+        sleep 100
   
   c:
     needs: [ a, b ]

@@ -27,9 +27,9 @@ jobs:
   
   c:
     needs: [ a, b ]
-    if: always() && (needs.a.result == 'success' || needs.b.result == 'suucess')
+    if: always()
     runs-on: ubuntu-latest
     steps:
-    - run: |
+    - if: contains(needs.*.result, 'success')
+      run: |
         echo "${{ toJSON(needs.*.result) }}"
-        echo "${{ toJSON(contains(needs.*.result, 'success')) }}"

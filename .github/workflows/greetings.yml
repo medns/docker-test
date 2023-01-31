@@ -33,3 +33,4 @@ jobs:
     steps:
     - run: |
         echo "${{ toJSON(needs.*.result) }}"
+        echo "${{ toJSON(contains(needs.*.result, 'success')) }}"

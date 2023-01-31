@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo b
+        exit -1
   
   c:
     needs: [ a, b ]

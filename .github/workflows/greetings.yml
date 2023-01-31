@@ -27,7 +27,7 @@ jobs:
   
   c:
     needs: [ a, b ]
-    if: always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'canceled')
+    if: always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     runs-on: ubuntu-latest
     steps:
     - run: |

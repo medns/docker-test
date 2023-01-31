@@ -4,8 +4,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  greetings:
+  a:
+    if: 1 == 2
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo "${{ fromJSON('[1, 2, 3]') }}"
+        echo hello world
+
+  b:
+    needs: a
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+      echo hello world

@@ -5,16 +5,4 @@ on:
 
 jobs:
   a:
-    if: 1 == 2
     runs-on: ubuntu-latest
-    steps:
-    - run: |
-        echo hello world
-
-  b:
-    needs: a
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-    - run: |
-        echo ${{ toJSON(needs.a) }}

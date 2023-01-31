@@ -23,11 +23,11 @@ jobs:
   b:
     needs: z
     outputs:
-      run: 'true'
+      run: ''
     runs-on: ubuntu-latest
     steps:
     - run: |
-        sleep 100
+        sleep 1
   
   c:
     needs: [ a, b ]

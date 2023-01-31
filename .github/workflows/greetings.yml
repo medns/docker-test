@@ -32,4 +32,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo c
+        echo "${{ toJSON(needs) }}"

@@ -70,7 +70,7 @@ jobs:
             if (stored_data.message === message && Date.now() - stored_data.timestamp < 6_60_60_000 /* every 6th hour */) {
               return;
             }
-          } catch {}
+          } catch(e) { console.error(e);}
 
           await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
             headers: {

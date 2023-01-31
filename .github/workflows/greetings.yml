@@ -10,4 +10,4 @@ jobs:
     - uses: actions/github-script@v6.3.3
       with:
         script: |
-          console.log(github.workflow);
+          console.log(JSON.stringify(context));

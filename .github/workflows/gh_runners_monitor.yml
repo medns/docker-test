@@ -39,9 +39,9 @@ jobs:
             fs.appendFileSync(process.env.GITHUB_OUTPUT, `total_runners=${runners.length}${os.EOL}`, { encoding: 'utf8' });
             fs.appendFileSync(process.env.GITHUB_OUTPUT, `offline_runners=${JSON.stringify(offline_runners)}${os.EOL}`, { encoding: 'utf8' });
           }
-    - name: Restore
+    - name: Cache
       if: steps.check.outputs.offline_runners
-      uses: actions/cache/restore@v3
+      uses: actions/cache@v3
       with:
         path: ${{ env.cache_file }}
         key: ${{ env.cache_key }}
@@ -70,7 +70,7 @@ jobs:
             if (stored_data.message === message && Date.now() - stored_data.timestamp < 6_60_60_000 /* every 6th hour */) {
               return;
             }
-          } catch(e) { console.error(e);}
+          } catch(e) {}
 
           await github.request("POST ${{ secrets.WECHAT_WORK_BOT_WEBHOOK }}", {
             headers: {
@@ -89,9 +89,3 @@ jobs:
             message,
             timestamp: Date.now()
           }), { encoding: 'utf8' });
-    - name: Save
-      if: steps.check.outputs.offline_runners
-      uses: actions/cache/save@v3
-      with:
-        path: ${{ env.cache_file }}
-        key: ${{ env.cache_key }}

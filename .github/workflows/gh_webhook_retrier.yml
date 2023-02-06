@@ -64,7 +64,7 @@ jobs:
               summary.push('| ---- | ----- | ------ | ------ |');
               results.forEach((result, deliveriesIndex) => {
                 const delivery = retriedDeliveries[hooksIndex][deliveriesIndex];
-                summary.push(`| ${delivery.guid} | ${delivery.event} | ${delivery.action} | ${result.status} |`);
+                summary.push(`| ${delivery.guid} | ${delivery.event} | ${delivery.action || ''} | ${result.status === 'fulfilled' ? ':white_check_mark:' : ':x:'} |`);
               });
               summary.push('');
 

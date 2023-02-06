@@ -21,7 +21,7 @@ jobs:
 
           const per_page = 100;
 
-          const hooks = await (github.paginate(repos.listWebhooks, {
+          const hooks = (await github.paginate(repos.listWebhooks, {
             per_page,
             ...context.repo
           })).filter((hook) => hook.last_response && hook.active);

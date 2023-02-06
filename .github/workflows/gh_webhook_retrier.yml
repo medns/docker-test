@@ -26,45 +26,45 @@ jobs:
             ...context.repo
           })).filter((hook) => hook.last_response && hook.active);
 
-          const retried_deliveries = (await Promise.all(hooks.map((hook) => repos.listWebhookDeliveries({
+          const retriedDeliveries = (await Promise.all(hooks.map((hook) => repos.listWebhookDeliveries({
             per_page,
             ...context.repo,
             hook_id: hook.id
           })))).map(({ data: deliveries }) => {
-            const guid_indexed = {};
-            const retried_deliveries = [];
+            const indexed = {};
+            const failedList = new Set();
             deliveries.forEach((delivery) => {
-              (guid_indexed[delivery.guid] ||= []).push(delivery);
-              if (delivery.status_code >= 400) {
-                retried_deliveries.push(delivery);
+              (indexed[delivery.guid] ||= []).push(delivery);
+              if (delivery.status != 'OK') {
+                failedList.add(delivery.guid);
               }
             });
 
-            return retried_deliveries.filter(({ guid }) => {
-              const all_deliveries = guid_indexed[guid];
-              return all_deliveries.every((delivery) => delivery.status_code >= 400) && all_deliveries.length <= 4; // maximum attempts(origin included)
+            return Array.from(failedList).filter((guid) => {
+              const failedGroup = indexed[guid];
+              return failedGroup.every((delivery) => delivery.status != 'OK') && failedGroup.length <= 4; // maximum attempts(origin included)
             });
           });
 
 
-          (await retried_deliveries.map((deliveries, hooks_index) =>
+          (await retriedDeliveries.map((deliveries, hooksIndex) =>
             Promise.allSettled(deliveries.map((delivery) =>
               repos.redeliverWebhookDelivery({
                 ...context.repo,
-                hook_id: hooks[hooks_index].id,
+                hook_id: hooks[hooksIndex].id,
                 delivery_id: delivery.id
               })
             ))
-          )).forEach((results, hooks_index) => {
+          )).forEach((results, hooksIndex) => {
             if (results.length > 0) {
               const summary = [];
 
-              const hook = hooks[hooks_index];
+              const hook = hooks[hooksIndex];
               summary.push(`## ${hook.config.url} (#${hook.id})`);
               summary.push('| guid | event | action | result |');
               summary.push('| ---- | ----- | ------ | ------ |');
-              results.forEach((result, deliveries_index) => {
-                const delivery = retried_deliveries[hooks_index][deliveries_index];
+              results.forEach((result, deliveriesIndex) => {
+                const delivery = retriedDeliveries[hooksIndex][deliveriesIndex];
                 summary.push(`| ${delivery.guid} | ${delivery.event} | ${delivery.action} | ${result.status} |`);
               });
               summary.push('');

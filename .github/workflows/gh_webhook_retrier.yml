@@ -60,8 +60,8 @@ jobs:
 
               const hook = hooks[hooksIndex];
               summary.push(`## ${hook.config.url} (#${hook.id})`);
-              summary.push('| guid | event | action | result |');
-              summary.push('| ---- | ----- | ------ | ------ |');
+              summary.push('| guid | event | action | redelivery |');
+              summary.push('| ---- | ----- | ------ | ---------- |');
               results.forEach((result, deliveriesIndex) => {
                 const delivery = retriedDeliveries[hooksIndex][deliveriesIndex];
                 summary.push(`| ${delivery.guid} | ${delivery.event} | ${delivery.action || ''} | ${result.status === 'fulfilled' ? ':white_check_mark:' : ':x:'} |`);

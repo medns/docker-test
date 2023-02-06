@@ -19,14 +19,16 @@ jobs:
           const os = require('os');
           const fs = require('fs');
 
-          const hooks = await github.paginate(repos.listWebhooks, {
-            ...context.repo,
-            per_page: 100
-          }).filter((hook) => hook.last_response && hook.active);
+          const per_page = 100;
+
+          const hooks = await (github.paginate(repos.listWebhooks, {
+            per_page,
+            ...context.repo
+          })).filter((hook) => hook.last_response && hook.active);
 
           const retried_deliveries = (await Promise.all(hooks.map((hook) => repos.listWebhookDeliveries({
+            per_page,
             ...context.repo,
-            per_page: 100,
             hook_id: hook.id
           })))).map((deliveries) => {
             const guid_indexed = {};

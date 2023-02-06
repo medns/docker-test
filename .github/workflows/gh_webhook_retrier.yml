@@ -45,10 +45,8 @@ jobs:
               return failedGroup.every((delivery) => delivery.status != 'OK') && failedGroup.length <= 4; // maximum attempts(origin included)
             });
           });
-          console.log(retriedDeliveries)
 
-
-          (await retriedDeliveries.map((deliveries, hooksIndex) =>
+          (await Promise.all(retriedDeliveries.map((deliveries, hooksIndex) =>
             Promise.allSettled(deliveries.map((delivery) =>
               repos.redeliverWebhookDelivery({
                 ...context.repo,
@@ -56,7 +54,7 @@ jobs:
                 delivery_id: delivery.id
               })
             ))
-          )).forEach((results, hooksIndex) => {
+          ))).forEach((results, hooksIndex) => {
             if (results.length > 0) {
               const summary = [];
 

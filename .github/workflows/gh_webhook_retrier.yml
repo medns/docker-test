@@ -45,6 +45,7 @@ jobs:
               return failedGroup.every((delivery) => delivery.status != 'OK') && failedGroup.length <= 4; // maximum attempts(origin included)
             });
           });
+          console.log(retriedDeliveries)
 
 
           (await retriedDeliveries.map((deliveries, hooksIndex) =>

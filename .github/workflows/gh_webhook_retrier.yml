@@ -30,7 +30,7 @@ jobs:
             per_page,
             ...context.repo,
             hook_id: hook.id
-          })))).map((deliveries) => {
+          })))).map(({ data: deliveries }) => {
             const guid_indexed = {};
             const retried_deliveries = [];
             deliveries.forEach((delivery) => {

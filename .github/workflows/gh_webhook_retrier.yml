@@ -43,7 +43,7 @@ jobs:
             return Array.from(failedList).filter((guid) => {
               const failedGroup = indexed[guid];
               return failedGroup.every((delivery) => delivery.status != 'OK') && failedGroup.length <= 4; // maximum attempts(origin included)
-            });
+            }).map((guid) => indexed[guid][0]);
           });
 
           (await Promise.all(retriedDeliveries.map((deliveries, hooksIndex) =>

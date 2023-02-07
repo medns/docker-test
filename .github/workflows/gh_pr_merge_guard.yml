@@ -10,7 +10,7 @@ on:
 jobs:
   merge_guard:
     runs-on: ubuntu-latest
-    steps:  
+    steps:
     - name: Enabled
       if: github.event.action == 'auto_merge_enabled'
       run: |
@@ -21,7 +21,8 @@ jobs:
       run: |
         exit -1
     - name: Synchronize # Update Branch
-      if: github.event.action == 'synchronize' && github.event.pull_request.auto_merge
+      if: github.event.action == 'synchronize'
       run: |
+        ${{ github.event.pull_request.auto_merge && '' || 'exit -1' }}
         echo "Auto-merge is enabled by a ${{ github.event.pull_request.auto_merge.enabled_by.login }}. ${{ github.event.pull_request.auto_merge.enabled_by.type == 'Bot' && 'Passing' || 'Blocking' }}."
         exit ${{ github.event.pull_request.auto_merge.enabled_by.type == 'Bot' && '0' || '-1' }}

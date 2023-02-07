@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Goalkeeper
       env:
-        AUTO_MERGE_ENABLED: ${{ github.event.pull_request.auto_merge }}
+        AUTO_MERGE_ENABLED: ${{ !!github.event.pull_request.auto_merge }}
         AUTO_MERGE_USER: ${{ github.event.pull_request.auto_merge.enabled_by.login }}
         AUTO_MERGE_TYPE: ${{ github.event.pull_request.auto_merge.enabled_by.type }}
       run: |

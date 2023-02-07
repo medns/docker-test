@@ -17,7 +17,7 @@ jobs:
         AUTO_MERGE_USER: ${{ github.event.pull_request.auto_merge.enabled_by.login }}
         AUTO_MERGE_TYPE: ${{ github.event.pull_request.auto_merge.enabled_by.type }}
       run: |
-        if [[ -z "$AUTO_MERGE_ENABLED" ]]; then
+        if [[ "$AUTO_MERGE_ENABLED" == "false" ]]; then
           echo "Auto-merge is disabled."
           echo "> Blocking ..."
           exit -1

@@ -31,7 +31,7 @@ jobs:
         echo "comment_message<<EOF" >> $GITHUB_OUTPUT
         echo "$message" >> $GITHUB_OUTPUT
         echo "$details_message" >> $GITHUB_OUTPUT
-        if [[ "${{ github.event.action }}" == *"opened"* ]]; then
+        if [[ "opened" == *"opened"* ]]; then
           echo >> $GITHUB_OUTPUT
           echo "$tips_message" >> $GITHUB_OUTPUT
         fi

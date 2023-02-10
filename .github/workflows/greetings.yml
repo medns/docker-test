@@ -19,9 +19,8 @@ jobs:
 
         </details>
       tips_message: |
-        :label: **New commits in this PR would not be tested automatically** until our collaborators do something verified for them. After that, collaborators would either approve this PR or apply the action(approve-checks) label to this PR.
+        :label: **New commits in this PR would not be tested automatically** until this pull request reviewed by our collaborators.
         :label: **No need to worry about the status of `merge_guard ` and `[gh] pull request merge guard / merge_guard (pull_request_target)` checks**, once this pull request is met merge requirements, it will be automatically converted to successful status.
-
     steps:
     - name: Message
       id: generate_message

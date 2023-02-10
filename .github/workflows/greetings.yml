@@ -7,9 +7,39 @@ on:
 jobs:
   z:
     runs-on: ubuntu-latest
+    env:
+      safety_changes_message: |
+        After a quick scan, I have approved workflow to run.
+      risky_changes_message: |
+        Sorry, due to risky changes, I can\'t approve workflow to run, our collaborators will handle it asap.
+      details_message: |
+        <details>
+
+        * SHA: 123
+
+        </details>
+      tips_message: |
+        :label: **New commits in this PR would not be tested automatically** until this pull request reviewed by our collaborators.
+        :label: **No need to worry about the status of `merge_guard ` and `[gh] pull request merge guard / merge_guard (pull_request_target)` checks**, once this pull request is met merge requirements, it will be automatically converted to successful status.
     steps:
-    - run: |
-        echo z
+    - name: Message
+      id: generate_message
+      run: |
+        message="$${{ 'true' == 'true' && 'risky_changes_message' || 'safety_changes_message' }}"
+
+        echo "comment_message<<EOF" >> $GITHUB_OUTPUT
+        echo "$message" >> $GITHUB_OUTPUT
+        echo "$details_message" >> $GITHUB_OUTPUT
+        if [[ "opened" == *"opened"* ]]; then
+          echo >> $GITHUB_OUTPUT
+          echo "$tips_message" >> $GITHUB_OUTPUT
+        fi
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        echo "search_message<<EOF" >> $GITHUB_OUTPUT
+        echo "$message" >> $GITHUB_OUTPUT
+        echo "$details_message" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
 
   a:
     needs: z
